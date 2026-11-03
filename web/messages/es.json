@@ -1,0 +1,89 @@
+{
+  "common": {
+    "appName": "MasterCoffe",
+    "loading": "Cargando…",
+    "signOut": "Salir",
+    "switchLanguage": "Cambiar idioma",
+    "switchTheme": "Cambiar tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "description": "Entrá para preguntarle al barista.",
+      "emailLabel": "Email",
+      "passwordLabel": "Contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Ingresando…",
+      "forgotPassword": "Olvidé mi contraseña",
+      "createAccount": "Crear cuenta",
+      "errorFallback": "No pudimos iniciar sesión. Revisá tu conexión."
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "description": "Te vamos a mandar un mail para confirmar tu email.",
+      "haveAccount": "Ya tengo cuenta",
+      "nameLabel": "Nombre",
+      "emailLabel": "Email",
+      "passwordLabel": "Contraseña",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta…",
+      "resendPrompt": "¿No llegó? Revisá la carpeta de spam o pedí otro mail.",
+      "resend": "Reenviar mail de confirmación",
+      "resending": "Enviando…",
+      "goToLogin": "Ir a iniciar sesión",
+      "errorFallback": "No pudimos crear tu cuenta. Probá de nuevo.",
+      "resendErrorFallback": "No pudimos reenviar el mail. Probá más tarde."
+    },
+    "forgotPassword": {
+      "title": "Recuperar contraseña",
+      "description": "Te enviamos un link para cambiarla.",
+      "backToLogin": "Volver a iniciar sesión",
+      "emailLabel": "Email",
+      "submit": "Enviar link",
+      "submitting": "Enviando…",
+      "errorFallback": "No pudimos procesar el pedido. Probá más tarde."
+    },
+    "resetPassword": {
+      "title": "Nueva contraseña",
+      "goToLogin": "Ir a iniciar sesión",
+      "passwordLabel": "Nueva contraseña",
+      "confirmPasswordLabel": "Repetí la contraseña",
+      "submit": "Guardar contraseña",
+      "submitting": "Guardando…",
+      "invalidToken": "El link no tiene un token válido.",
+      "errorFallback": "No pudimos cambiar la contraseña. Probá de nuevo."
+    },
+    "confirmEmail": {
+      "title": "Confirmación de email",
+      "goToLogin": "Ir a iniciar sesión",
+      "pending": "Confirmando tu cuenta…",
+      "invalidToken": "El link no tiene un token válido.",
+      "errorFallback": "No pudimos confirmar tu cuenta."
+    }
+  },
+  "chat": {
+    "greeting": "Hola, {name}. ¿Qué querés preparar hoy?",
+    "thinking": "Pensando…",
+    "placeholder": "Escribí tu pregunta de café…",
+    "questionLabel": "Pregunta",
+    "send": "Enviar",
+    "errorFallback": "No pudimos responder. Revisá que el servidor esté corriendo.",
+    "suggestion1": "Si tengo 30 g de café de Colombia y 20 g de agua, ¿cómo me va a quedar?",
+    "suggestion2": "¿Cómo hago un cappuccino paso a paso?",
+    "suggestion3": "Mi espresso sale muy amargo, ¿qué ajusto?"
+  },
+  "validation": {
+    "emailRequired": "Ingresá tu email",
+    "emailInvalid": "El email no es válido",
+    "passwordRequired": "Ingresá tu contraseña",
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+    "passwordMax": "La contraseña es demasiado larga",
+    "nameRequired": "Ingresá tu nombre",
+    "nameMax": "El nombre es demasiado largo",
+    "confirmPasswordRequired": "Repetí la contraseña",
+    "passwordsMismatch": "Las contraseñas no coinciden"
+  }
+}

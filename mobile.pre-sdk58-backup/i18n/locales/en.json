@@ -1,0 +1,38 @@
+{
+  "common": {
+    "appTitle": "MasterCoffe",
+    "appSubtitle": "Recipes, ratios, and coffee troubleshooting.",
+    "signOut": "Sign out",
+    "loading": "Loading…",
+    "switchLanguage": "Switch language",
+    "switchTheme": "Switch theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "auth": {
+    "login": {
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "hint": "Don't have an account? Register from the web app to confirm your email.",
+      "genericError": "We couldn't sign you in. Please try again."
+    }
+  },
+  "chat": {
+    "suggestions": {
+      "ratio": "If I have 30 g of Colombian coffee and 20 g of water, how will it turn out?",
+      "cappuccino": "How do I make a cappuccino step by step?",
+      "bitterEspresso": "My espresso is too bitter, what should I adjust?"
+    },
+    "placeholder": "Type your coffee question…",
+    "send": "Send",
+    "genericError": "We couldn't get a reply. Check that the server is running."
+  },
+  "validation": {
+    "emailRequired": "Enter your email",
+    "emailInvalid": "Email is not valid",
+    "passwordRequired": "Enter your password"
+  }
+}

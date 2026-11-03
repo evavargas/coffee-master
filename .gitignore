@@ -1,0 +1,14 @@
+*.db
+*.log
+*.sqlite3
+.DS_Store
+.claude/settings.local.json
+.env
+.env.local
+.expo/
+.next/
+.pytest_cache/
+.venv/
+__pycache__/
+next-env.d.ts
+node_modules/

@@ -1,0 +1,89 @@
+{
+  "common": {
+    "appName": "MasterCoffe",
+    "loading": "Loading…",
+    "signOut": "Sign out",
+    "switchLanguage": "Switch language",
+    "switchTheme": "Switch theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "description": "Sign in to ask the barista.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgotPassword": "Forgot my password",
+      "createAccount": "Create account",
+      "errorFallback": "We couldn't sign you in. Check your connection."
+    },
+    "register": {
+      "title": "Create account",
+      "description": "We'll send you an email to confirm your address.",
+      "haveAccount": "I already have an account",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "resendPrompt": "Didn't get it? Check your spam folder or ask for another email.",
+      "resend": "Resend confirmation email",
+      "resending": "Sending…",
+      "goToLogin": "Go to sign in",
+      "errorFallback": "We couldn't create your account. Try again.",
+      "resendErrorFallback": "We couldn't resend the email. Try again later."
+    },
+    "forgotPassword": {
+      "title": "Recover password",
+      "description": "We'll send you a link to change it.",
+      "backToLogin": "Back to sign in",
+      "emailLabel": "Email",
+      "submit": "Send link",
+      "submitting": "Sending…",
+      "errorFallback": "We couldn't process the request. Try again later."
+    },
+    "resetPassword": {
+      "title": "New password",
+      "goToLogin": "Go to sign in",
+      "passwordLabel": "New password",
+      "confirmPasswordLabel": "Repeat the password",
+      "submit": "Save password",
+      "submitting": "Saving…",
+      "invalidToken": "The link doesn't have a valid token.",
+      "errorFallback": "We couldn't change your password. Try again."
+    },
+    "confirmEmail": {
+      "title": "Email confirmation",
+      "goToLogin": "Go to sign in",
+      "pending": "Confirming your account…",
+      "invalidToken": "The link doesn't have a valid token.",
+      "errorFallback": "We couldn't confirm your account."
+    }
+  },
+  "chat": {
+    "greeting": "Hi, {name}. What do you want to brew today?",
+    "thinking": "Thinking…",
+    "placeholder": "Type your coffee question…",
+    "questionLabel": "Question",
+    "send": "Send",
+    "errorFallback": "We couldn't reply. Check that the server is running.",
+    "suggestion1": "If I have 30 g of Colombian coffee and 20 g of water, how will it turn out?",
+    "suggestion2": "How do I make a cappuccino step by step?",
+    "suggestion3": "My espresso comes out too bitter, what should I adjust?"
+  },
+  "validation": {
+    "emailRequired": "Enter your email",
+    "emailInvalid": "The email is not valid",
+    "passwordRequired": "Enter your password",
+    "passwordMin": "The password must be at least 8 characters",
+    "passwordMax": "The password is too long",
+    "nameRequired": "Enter your name",
+    "nameMax": "The name is too long",
+    "confirmPasswordRequired": "Repeat the password",
+    "passwordsMismatch": "Passwords don't match"
+  }
+}

@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* Theme tokens used by the shadcn-style components in components/ui. */
+:root {
+  --background: #faf6f1;
+  --foreground: #2b1d14;
+  --card: #ffffff;
+  --card-foreground: #2b1d14;
+  --primary: #6f4e37;
+  --primary-foreground: #ffffff;
+  --muted: #f1e9df;
+  --muted-foreground: #7a6558;
+  --border: #e5d9cc;
+  --input: #e5d9cc;
+  --ring: #6f4e37;
+  --destructive: #b3261e;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: #1b140f;
+  --foreground: #f3e8dc;
+  --card: #2a2019;
+  --card-foreground: #f3e8dc;
+  --primary: #c89b6f;
+  --primary-foreground: #1b140f;
+  --muted: #352a21;
+  --muted-foreground: #c6b6a6;
+  --border: #4a3b2e;
+  --input: #4a3b2e;
+  --ring: #c89b6f;
+  --destructive: #e37c73;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --radius-lg: var(--radius);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}

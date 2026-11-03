@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "MasterCoffe",
+    "slug": "mastercoffe",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#faf6f1",
+    "splash": {
+      "backgroundColor": "#faf6f1"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.mastercoffe.app"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
