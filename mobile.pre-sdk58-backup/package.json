@@ -14,7 +14,7 @@
     "@hookform/resolvers": "^5.0.0",
     "@react-native-async-storage/async-storage": "^2.1.0",
     "axios": "^1.12.0",
-    "expo": "~54.0.0",
+    "expo": "~58.0.23",
     "expo-secure-store": "~15.0.0",
     "expo-status-bar": "~3.0.0",
     "i18next": "^25.0.0",
