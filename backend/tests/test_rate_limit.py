@@ -44,5 +44,5 @@ def test_chat_has_its_own_limit_separate_from_auth(client):
     body = {"email": "nobody@example.com", "password": "wrong-password"}
     for _ in range(11):
         client.post("/api/auth/login", json=body)
-    response = client.post("/api/chat", json={"messages": [{"role": "user", "content": "hola"}]})
+    response = client.post("/api/chat", json={"conversation_id": None, "message": "hola"})
     assert response.status_code == 401

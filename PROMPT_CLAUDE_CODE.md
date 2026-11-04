@@ -23,10 +23,11 @@ Estás continuando el proyecto **MasterCoffee**: un chat de café con cuentas de
 
 ## Estado actual
 
-- Backend: 36 tests con pytest, todos en verde. Flujo de auth con código de 6 dígitos verificado contra Resend real (mail recibido, código correcto, login con la nueva contraseña).
-- Web: `npm run typecheck`, `npm run build` y `npm run test` (35 tests) pasan.
-- Mobile: `npm run typecheck` y `npm run test` (22 tests) pasan. La app base (login + chat) se probó en un dispositivo Android real y funciona. Las pantallas nuevas de registro/recuperación de contraseña (recién agregadas) **todavía no se probaron en el dispositivo**, solo por tests automatizados y lectura de código.
-- Scroll del chat: tenía un bug real (los mensajes nuevos no hacían auto-scroll) en web y mobile, corregido. Verificado por typecheck/tests; no se verificó visualmente en navegador ni dispositivo en esta sesión.
+- Backend: tests con pytest, todos en verde. Flujo de auth con código de 6 dígitos verificado de punta a punta con envío real de mail.
+- Email: se manda por Gmail SMTP (cuenta propia + app password), no por Resend — decisión explícita para una app de pocos usuarios, sin necesidad de verificar un dominio propio. Límite práctico: ~500 mails/día (el límite normal de una cuenta de Gmail).
+- Web: `npm run typecheck`, `npm run build` y `npm run test` pasan.
+- Mobile: `npm run typecheck` y `npm run test` pasan. La app base (login + chat) se probó en un dispositivo Android real y funciona. Las pantallas de registro/recuperación de contraseña **todavía no se probaron en el dispositivo**, solo por tests automatizados.
+- **Deploy**: backend y web ya están en producción en Vercel (proyectos `coffee-api` y `web`, dominio del front: `coffeemasteruy.vercel.app`). CORS y el modelo de Claude (`ANTHROPIC_MODEL`) están seteados correctamente en las env vars de producción. El proyecto `web` quedó conectado a GitHub (push a `main` dispara un build automático); `coffee-api` se deployea solo manualmente por CLI (`vercel --prod` desde la raíz del repo, no desde `backend/`, porque el Root Directory del proyecto ya apunta a `backend`).
 - Knowledge: `backend/knowledge/cafe/` está consolidado y ordenado. Hay contradicciones de contenido sin resolver (ver abajo). No se tocó esta sesión.
 
 ## Cómo verificar
@@ -51,7 +52,7 @@ cd mobile && npm start      # Expo Go
 
 1. **Probar las pantallas nuevas de mobile en el dispositivo**: registro → confirmar con el código del mail → login; "olvidé mi contraseña" → código → nueva contraseña. Es el único hueco de verificación real que queda del trabajo reciente.
 2. **Migraciones**: hoy las tablas se crean con `create_all` al arrancar. Antes de producción, pasar a Alembic.
-3. **Deploy**: backend y web por separado (mobile sigue siendo solo para desarrollo). Configurar `FRONTEND_URL`, `CORS_ORIGINS`, `JWT_SECRET` y `RESEND_API_KEY` en el hosting. Para el rate limit detrás de proxy, configurar la confianza en `X-Forwarded-For`; sin eso, todos los usuarios comparten el mismo límite.
+3. **Rate limit detrás de proxy**: en Vercel, configurar la confianza en `X-Forwarded-For` para que el rate limit por IP use la IP real del cliente y no la del proxy; sin eso, todos los usuarios comparten el mismo límite.
 4. **Rate limit en producción**: los contadores están en memoria. Con varias instancias, moverlos a Redis.
 5. **Seguridad a revisar**: el token de la web está en `localStorage`. Evaluar cookies httpOnly si el riesgo crece. Ejecutar los casos de inyección de `backend/evals/casos.json` (categoría `injection`) cuando decida hacer llamadas al modelo.
 6. **Evals del chat**: correr la skill `evaluar-respuestas-cafe` contra `backend/evals/casos.json` (16 casos, 4 de inyección).

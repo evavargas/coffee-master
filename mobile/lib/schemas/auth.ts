@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { exactSchema, type ApiSchemas } from "@/lib/api/contract";
+
 // Validation for the auth forms. Messages are user-facing and come from i18n,
 // so each schema is built with the current translator function.
 
@@ -53,16 +55,22 @@ export type CodeFormValues = z.infer<ReturnType<typeof buildCodeSchema>>;
 export type ResetPasswordFormValues = z.infer<ReturnType<typeof buildResetPasswordSchema>>;
 
 // Response shape returned by POST /api/auth/login, validated at the API boundary.
-export const tokenResponseSchema = z.object({
-  access_token: z.string(),
-  token_type: z.literal("bearer"),
-  expires_in: z.number(),
-});
+export const tokenResponseSchema = exactSchema<ApiSchemas["TokenResponse"]>()(
+  z.object({
+    access_token: z.string(),
+    token_type: z.string(),
+    expires_in: z.number(),
+  }),
+);
 
 // Generic `{message}` response shared by register, resend-confirmation,
 // confirm-email, forgot-password, and reset-password.
-export const messageResponseSchema = z.object({ message: z.string() });
+export const messageResponseSchema = exactSchema<ApiSchemas["MessageResponse"]>()(
+  z.object({ message: z.string() }),
+);
 
 // Returned by verify-reset-code: a short-lived, opaque session token the
 // client holds and sends back unchanged to reset-password.
-export const resetTokenResponseSchema = z.object({ reset_token: z.string() });
+export const resetTokenResponseSchema = exactSchema<ApiSchemas["ResetTokenResponse"]>()(
+  z.object({ reset_token: z.string() }),
+);

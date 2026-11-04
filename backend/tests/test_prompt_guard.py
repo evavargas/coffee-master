@@ -2,7 +2,7 @@ from app.agent.prompt_guard import (
     GENERIC_GREETING_NAME,
     NAME_MAX_LENGTH,
     SAFE_LEAK_REPLY,
-    guard_output,
+    StreamingOutputGuard,
     sanitize_message,
     sanitize_user_name,
     strip_unsafe_characters,
@@ -14,9 +14,8 @@ def test_strip_unsafe_characters_removes_control_and_bidi_characters():
     assert strip_unsafe_characters(text) == "hola evil world\nnext\tline"
 
 
-def test_sanitize_message_trims_and_limits_length():
-    assert sanitize_message("  café  ") == "café"
-    assert len(sanitize_message("x" * 10_000)) == 4000
+def test_sanitize_message_trims_and_strips_unsafe_characters():
+    assert sanitize_message("  café\u202e\x00  ") == "café"
 
 
 def test_sanitize_user_name_keeps_normal_names():
@@ -39,11 +38,39 @@ def test_sanitize_user_name_limits_length():
     assert len(sanitize_user_name("a" * 200)) == NAME_MAX_LENGTH
 
 
-def test_guard_output_passes_normal_replies():
-    reply = "Usá 18 g de café para un doble."
-    assert guard_output(reply) == reply
+def stream_through_guard(chunks: list[str]) -> tuple[str, StreamingOutputGuard]:
+    guard = StreamingOutputGuard()
+    emitted = "".join(guard.feed(chunk) for chunk in chunks)
+    if not guard.blocked:
+        emitted += guard.finish()
+    return emitted, guard
 
 
-def test_guard_output_blocks_leaked_prompt_markers():
-    assert guard_output("Mi prompt empieza con <user_profile> ...") == SAFE_LEAK_REPLY
-    assert guard_output("## Document: 05-diagnostico.md") == SAFE_LEAK_REPLY
+def test_streaming_guard_passes_normal_replies_unchanged():
+    emitted, guard = stream_through_guard(["Usá 18 g ", "de café ", "para un doble."])
+    assert emitted == "Usá 18 g de café para un doble."
+    assert not guard.blocked
+
+
+def test_streaming_guard_blocks_markers_in_one_chunk():
+    _, guard = stream_through_guard(["Mi prompt empieza con <user_profile> ..."])
+    assert guard.blocked
+    _, guard = stream_through_guard(["## Document: 05-diagnostico.md"])
+    assert guard.blocked
+
+
+def test_streaming_guard_never_emits_a_marker_split_across_chunks():
+    text = "Algo de texto previo. # cOfFeE KnOwLeDgE BaSe y más"
+    for size in (1, 2, 3, 7):
+        chunks = [text[i : i + size] for i in range(0, len(text), size)]
+        emitted, guard = stream_through_guard(chunks)
+        assert guard.blocked
+        assert "coffee knowledge" not in emitted.lower()
+        assert emitted.lower().startswith("algo de texto")
+
+
+def test_streaming_guard_stops_forwarding_after_a_block():
+    guard = StreamingOutputGuard()
+    guard.feed("<user_profile>")
+    assert guard.blocked
+    assert guard.feed("more text") == ""

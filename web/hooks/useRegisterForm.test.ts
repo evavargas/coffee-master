@@ -51,8 +51,27 @@ describe("useRegisterForm", () => {
     expect(result.current.serverError).toBeNull();
   });
 
+  it("advances with the backend's message whatever it says (the response never reveals if the email exists)", async () => {
+    vi.mocked(registerAccount).mockResolvedValueOnce({ message: "Si el email es válido, te enviamos un código." });
+
+    const { result } = renderHookWithIntl(() => useRegisterForm());
+
+    act(() => {
+      result.current.form.setValue("name", "Ana");
+      result.current.form.setValue("email", "taken@example.com");
+      result.current.form.setValue("password", "supersecret");
+    });
+
+    await act(async () => {
+      await result.current.onSubmit();
+    });
+
+    expect(result.current.successMessage).toBe("Si el email es válido, te enviamos un código.");
+    expect(result.current.serverError).toBeNull();
+  });
+
   it("surfaces the backend's error message", async () => {
-    vi.mocked(registerAccount).mockRejectedValueOnce(backendError({ detail: "Ese email ya tiene una cuenta." }));
+    vi.mocked(registerAccount).mockRejectedValueOnce(backendError({ detail: "Demasiados intentos. Probá más tarde." }));
 
     const { result } = renderHookWithIntl(() => useRegisterForm());
 
@@ -66,7 +85,7 @@ describe("useRegisterForm", () => {
       await result.current.onSubmit();
     });
 
-    expect(result.current.serverError).toBe("Ese email ya tiene una cuenta.");
+    expect(result.current.serverError).toBe("Demasiados intentos. Probá más tarde.");
     expect(result.current.successMessage).toBeNull();
   });
 

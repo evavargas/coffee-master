@@ -26,13 +26,16 @@ Además de los textos, revisar a mano:
 
 ## Cómo correrla
 1. Tener el backend levantado en `http://localhost:8000` (ver `.claude/launch.json`).
-2. Para cada caso, pedir la respuesta:
+2. Para cada caso, pedir la respuesta con el token de una cuenta de prueba confirmada. `conversation_id: null` empieza una conversación nueva, así un caso no contamina al siguiente. Cada caso cuenta para la cuota diaria de esa cuenta (`CHAT_DAILY_MESSAGE_LIMIT`):
 
 ```bash
-curl -s -X POST http://localhost:8000/api/chat \
+curl -sN -X POST http://localhost:8000/api/chat \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"messages":[{"role":"user","content":"PREGUNTA"}]}'
+  -d '{"conversation_id":null,"message":"PREGUNTA"}'
 ```
+
+La respuesta llega como Server-Sent Events. El texto es la unión de todos los eventos `delta`; si llega `replace`, ese texto reemplaza a todo lo anterior. Un evento `error` significa que no hubo respuesta: reintentar y no contarlo como fallo del agente.
 
 3. Revisar `debe_incluir` y `no_debe_incluir` (sin distinguir mayúsculas).
 4. Revisar `criterio` y los puntos de la sección "Qué evalúa".
@@ -47,7 +50,7 @@ Terminar con: total de casos, cuántos pasan, y los fallos con la respuesta exac
 
 ## Qué hacer con un fallo
 - **Fallo de dato** (número o receta incorrecta): corregir en `backend/knowledge/cafe/` con el subagente `coffee-expert`, no en el prompt.
-- **Fallo de comportamiento** (inventa, no advierte contradicciones, no sigue el estilo): ajustar `INSTRUCTIONS` en `backend/app/agent.py`.
+- **Fallo de comportamiento** (inventa, no advierte contradicciones, no sigue el estilo): ajustar `INSTRUCTIONS` en `backend/app/agent/prompt.py`.
 - **Caso mal planteado** (el criterio no coincide con el conocimiento): corregir el caso, no la respuesta.
 - No cambiar el conocimiento para que pase un caso sin antes verificar la fuente.
 

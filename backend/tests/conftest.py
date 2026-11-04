@@ -4,12 +4,12 @@ Environment variables are set before the app is imported, so Settings and the
 database engine are created with test values. No test touches the network.
 """
 
+import json
 import os
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock
 
 os.environ.setdefault("JWT_SECRET", "test-secret-do-not-use-in-production")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 
-from app.api.deps import get_anthropic_client, get_email_sender  # noqa: E402
+from app.api.deps import get_anthropic_client, get_email_sender, get_session_factory  # noqa: E402
 from app.core.rate_limit import rate_limiter  # noqa: E402
 from app.db.session import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
@@ -44,15 +44,49 @@ class FakeEmailSender:
         return match.group(1)
 
 
-def fake_anthropic_client(reply: str = "test reply") -> MagicMock:
-    client = MagicMock()
-    client.messages.create = AsyncMock(
-        return_value=SimpleNamespace(
-            stop_reason="end_turn",
-            content=[SimpleNamespace(type="text", text=reply)],
+class FakeModel:
+    """Stands in for AsyncAnthropic: `messages.stream(...)` replays scripted text chunks.
+
+    After the chunks it raises `error` if one is set. `on_call` runs when the model is
+    called, which lets a test inspect the database state at that exact moment.
+    """
+
+    def __init__(self, chunks: tuple[str, ...] = ("test reply",)) -> None:
+        self.chunks = chunks
+        self.error: Exception | None = None
+        self.on_call: Callable[[], None] | None = None
+        self.calls: list[dict] = []
+        self.messages = SimpleNamespace(stream=self._stream)
+
+    def _stream(self, **kwargs) -> "FakeStreamManager":
+        self.calls.append(kwargs)
+        if self.on_call is not None:
+            self.on_call()
+        return FakeStreamManager(self)
+
+
+class FakeStreamManager:
+    def __init__(self, model: FakeModel) -> None:
+        self._model = model
+
+    async def __aenter__(self) -> "FakeStreamManager":
+        return self
+
+    async def __aexit__(self, *exc_info) -> None:
+        return None
+
+    @property
+    async def text_stream(self):
+        for chunk in self._model.chunks:
+            yield chunk
+        if self._model.error is not None:
+            raise self._model.error
+
+    async def get_final_message(self) -> SimpleNamespace:
+        usage = SimpleNamespace(
+            input_tokens=10, output_tokens=5, cache_read_input_tokens=0, cache_creation_input_tokens=0
         )
-    )
-    return client
+        return SimpleNamespace(stop_reason="end_turn", usage=usage)
 
 
 @pytest.fixture(autouse=True)
@@ -77,8 +111,8 @@ def email_sender() -> FakeEmailSender:
 
 
 @pytest.fixture
-def anthropic_client() -> MagicMock:
-    return fake_anthropic_client()
+def anthropic_client() -> FakeModel:
+    return FakeModel()
 
 
 @pytest.fixture
@@ -93,6 +127,7 @@ def client(db_engine, email_sender, anthropic_client) -> Iterator[TestClient]:
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_session_factory] = lambda: session_factory
     app.dependency_overrides[get_email_sender] = lambda: email_sender
     app.dependency_overrides[get_anthropic_client] = lambda: anthropic_client
     with TestClient(app) as test_client:
@@ -106,3 +141,16 @@ def register_and_confirm(client: TestClient, email_sender: FakeEmailSender, name
     client.post("/api/auth/confirm-email", json={"email": email, "code": email_sender.code_from_last_email()})
     response = client.post("/api/auth/login", json={"email": email, "password": password})
     return response.json()["access_token"]
+
+
+def auth_headers(token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {token}"}
+
+
+def parse_sse(body: str) -> list[tuple[str, dict]]:
+    """Parse a text/event-stream body into (event, data) pairs."""
+    events = []
+    for block in body.strip().split("\n\n"):
+        lines = dict(line.split(": ", 1) for line in block.split("\n"))
+        events.append((lines["event"], json.loads(lines["data"])))
+    return events

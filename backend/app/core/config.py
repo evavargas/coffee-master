@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     # Anthropic (chat agent)
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-5"
+    anthropic_timeout_seconds: float = 120
+
+    # Chat limits
+    chat_daily_message_limit: int = 50
+    chat_context_messages: int = 40
 
     # Database
     database_url: str = "sqlite:///./mastercoffee.db"
@@ -21,12 +26,21 @@ class Settings(BaseSettings):
     access_token_days: int = 7
     verification_code_minutes: int = 15
     verification_code_max_attempts: int = 5
+    # Per (user, purpose): minimum gap between codes and a rolling one-hour cap.
+    # The hourly cap also bounds how many codes an attacker can try to guess.
+    verification_code_cooldown_seconds: int = 60
+    verification_code_max_per_hour: int = 5
     reset_session_token_minutes: int = 10
 
-    # Email (Resend)
-    # Set RESEND_API_KEY in backend/.env. Never put real keys in source code.
-    resend_api_key: str = ""
-    email_from: str = "MasterCoffe <onboarding@resend.dev>"
+    # Email (Gmail SMTP, sent from the owner's own Gmail account)
+    # Set GMAIL_ADDRESS and GMAIL_APP_PASSWORD in backend/.env. Never put real
+    # credentials in source code. GMAIL_APP_PASSWORD is a Google "app password"
+    # (myaccount.google.com/apppasswords), not the account's real password.
+    gmail_address: str = ""
+    gmail_app_password: str = ""
+    email_from_name: str = "MasterCoffe"
+    # Send emails after responding. Set to false if the host stops the function once it responds.
+    email_send_in_background: bool = True
     frontend_url: str = "http://localhost:3000"
 
     # CORS
@@ -35,6 +49,7 @@ class Settings(BaseSettings):
     # Rate limits, requests per minute per client IP
     rate_limit_auth_per_minute: int = 10
     rate_limit_chat_per_minute: int = 20
+    rate_limit_conversations_per_minute: int = 60
 
     @property
     def cors_origin_list(self) -> list[str]:

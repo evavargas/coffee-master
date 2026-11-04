@@ -74,7 +74,13 @@
     },
     "placeholder": "Type your coffee question…",
     "send": "Send",
-    "genericError": "Oops, we couldn't reply right now. Try again in a moment."
+    "newConversation": "New conversation",
+    "errors": {
+      "modelBusy": "We're very busy right now. Try again in a while.",
+      "modelUnavailable": "The assistant isn't available right now. Try again in a moment.",
+      "connection": "The connection dropped. Check your internet and try again.",
+      "history": "We couldn't load your previous conversation. You can keep chatting anyway."
+    }
   },
   "validation": {
     "emailRequired": "Enter your email",

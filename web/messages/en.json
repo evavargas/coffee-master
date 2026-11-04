@@ -85,6 +85,14 @@
     "questionLabel": "Question",
     "send": "Send",
     "errorFallback": "Oops, we couldn't reply right now. Try again in a moment.",
+    "historyError": "We couldn't load your previous conversation. You can start a new one.",
+    "loadingHistory": "Loading your conversation…",
+    "newConversation": "New conversation",
+    "errors": {
+      "modelBusy": "We're getting a lot of traffic right now. Try again in a few seconds.",
+      "modelUnavailable": "The assistant isn't available right now. Try again later.",
+      "connection": "The connection dropped before the answer finished. Check your internet and try again."
+    },
     "suggestion1": "If I have 30 g of Colombian coffee and 20 g of water, how will it turn out?",
     "suggestion2": "How do I make a cappuccino step by step?",
     "suggestion3": "My espresso comes out too bitter, what should I adjust?"

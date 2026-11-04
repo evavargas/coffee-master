@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { components } from "@/lib/api/schema.gen";
+
 // Validation schemas for the auth forms. Messages are user-facing, so they come from a
 // translate function (the `validation` namespace) instead of being hardcoded.
 // Types are inferred from the factories' return types: there is one source of truth for each shape.
@@ -48,23 +50,29 @@ export type ResetPasswordFormValues = z.infer<ReturnType<typeof buildResetPasswo
 export type CodeFormValues = z.infer<ReturnType<typeof buildCodeSchema>>;
 
 // Response shapes returned by the backend. Validated at the API boundary.
+// Each `satisfies` ties the schema to the types generated from backend/openapi.json
+// (`npm run gen:api`), so a contract change fails `npm run typecheck`.
+type Schemas = components["schemas"];
+
 export const tokenResponseSchema = z.object({
   access_token: z.string(),
   token_type: z.literal("bearer"),
   expires_in: z.number(),
-});
+}) satisfies z.ZodType<Schemas["TokenResponse"]>;
 
-export const messageResponseSchema = z.object({ message: z.string() });
+export const messageResponseSchema = z.object({ message: z.string() }) satisfies z.ZodType<Schemas["MessageResponse"]>;
 
 // Short-lived JWT returned by verify-reset-code, exchanged for a new password at reset-password.
 // Held only in memory (component/hook state) - never shown to the user.
-export const resetTokenResponseSchema = z.object({ reset_token: z.string() });
+export const resetTokenResponseSchema = z.object({ reset_token: z.string() }) satisfies z.ZodType<
+  Schemas["ResetTokenResponse"]
+>;
 
 export const userPublicSchema = z.object({
   id: z.number(),
   name: z.string(),
   email: z.string(),
-});
+}) satisfies z.ZodType<Schemas["UserPublic"]>;
 
 export type TokenResponse = z.infer<typeof tokenResponseSchema>;
 export type MessageResponse = z.infer<typeof messageResponseSchema>;

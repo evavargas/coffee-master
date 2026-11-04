@@ -1,12 +1,12 @@
 """Authentication endpoints: register, confirm email, login, password recovery."""
 
-import logging
+from collections.abc import Callable
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_email_sender
+from app.api.deps import get_current_user, get_email_sender, get_session_factory
 from app.core.config import get_settings
 from app.core.rate_limit import auth_rate_limit
 from app.core.security import PURPOSE_CONFIRM_EMAIL, PURPOSE_RESET_PASSWORD
@@ -27,14 +27,34 @@ from app.schemas.auth import (
 from app.services import auth as auth_service
 from app.services.email import EmailSender
 
-logger = logging.getLogger(__name__)
-
 # Every auth endpoint is rate limited per IP. /me is included, which is harmless at this volume.
 router = APIRouter(prefix="/api/auth", tags=["auth"], dependencies=[auth_rate_limit])
 
 # Same message for "unknown email" and "known email" so the API does not reveal which accounts exist.
 FORGOT_PASSWORD_MESSAGE = "Si el email está registrado, te enviamos un código para cambiar la contraseña."
 CONFIRMATION_SENT_MESSAGE = "Te enviamos un mail para confirmar tu cuenta."
+REGISTER_MESSAGE = (
+    "Si el email se puede registrar, te enviamos un código para confirmar tu cuenta. "
+    "Si ya tenés cuenta, iniciá sesión."
+)
+
+
+def schedule_code_email(
+    background_tasks: BackgroundTasks,
+    session_factory: Callable[[], Session],
+    sender: EmailSender,
+    user_id: int,
+    purpose: str,
+) -> None:
+    """Send after the response, so response time does not reveal whether an email was sent.
+
+    EMAIL_SEND_IN_BACKGROUND=false sends before responding, for hosts that stop the function
+    as soon as the response is out.
+    """
+    if get_settings().email_send_in_background:
+        background_tasks.add_task(auth_service.deliver_code_email, session_factory, sender, user_id, purpose)
+    else:
+        auth_service.deliver_code_email(session_factory, sender, user_id, purpose)
 
 
 @router.post(
@@ -42,31 +62,25 @@ CONFIRMATION_SENT_MESSAGE = "Te enviamos un mail para confirmar tu cuenta."
     response_model=MessageResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new account",
-    description="Creates an unconfirmed account and sends a confirmation email. The user cannot log in until confirmed.",
-    responses={
-        409: {"description": "Email already registered"},
-        422: {"description": "Invalid input"},
-        503: {"description": "Confirmation email could not be sent; the account was created, use resend-confirmation"},
-    },
+    description=(
+        "Always answers 201 with the same message, so it cannot be used to discover registered emails. "
+        "A new email creates an unconfirmed account and sends a 6-digit code. An existing unconfirmed "
+        "account takes the new name and password and gets a new code (subject to the per-email "
+        "cooldown and hourly cap). A confirmed account gets nothing. Email failures are logged only."
+    ),
+    responses={422: {"description": "Invalid input"}, 429: {"description": "Too many attempts from this IP"}},
 )
 def register(
     body: RegisterRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     sender: EmailSender = Depends(get_email_sender),
+    session_factory: Callable[[], Session] = Depends(get_session_factory),
 ) -> MessageResponse:
-    try:
-        user = auth_service.register_user(db, body.name, body.email, body.password)
-    except auth_service.EmailAlreadyRegisteredError as exc:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Ese email ya tiene una cuenta.") from exc
-    try:
-        code = auth_service.create_verification_code(db, user, PURPOSE_CONFIRM_EMAIL)
-        auth_service.send_confirmation_email(sender, user, code)
-    except Exception as exc:
-        raise HTTPException(
-            status.HTTP_503_SERVICE_UNAVAILABLE,
-            "La cuenta se creó pero no pudimos enviar el mail. Pedí un nuevo mail de confirmación.",
-        ) from exc
-    return MessageResponse(message=CONFIRMATION_SENT_MESSAGE)
+    user_id = auth_service.register_or_reissue(db, body.name, body.email, body.password)
+    if user_id is not None:
+        schedule_code_email(background_tasks, session_factory, sender, user_id, PURPOSE_CONFIRM_EMAIL)
+    return MessageResponse(message=REGISTER_MESSAGE)
 
 
 @router.post(
@@ -74,20 +88,21 @@ def register(
     response_model=MessageResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Resend the confirmation email",
-    description="Always returns the same message, whether or not the email exists or is already confirmed.",
+    description=(
+        "Always returns the same message, whether or not the email exists, is already confirmed, "
+        "or the per-email cooldown and hourly cap prevented a new code."
+    ),
 )
 def resend_confirmation(
     body: EmailRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     sender: EmailSender = Depends(get_email_sender),
+    session_factory: Callable[[], Session] = Depends(get_session_factory),
 ) -> MessageResponse:
     user = auth_service.get_user_by_email(db, body.email)
     if user is not None and not user.email_confirmed:
-        try:
-            code = auth_service.create_verification_code(db, user, PURPOSE_CONFIRM_EMAIL)
-            auth_service.send_confirmation_email(sender, user, code)
-        except Exception:
-            logger.exception("Could not resend confirmation email")
+        schedule_code_email(background_tasks, session_factory, sender, user.id, PURPOSE_CONFIRM_EMAIL)
     return MessageResponse(message=CONFIRMATION_SENT_MESSAGE)
 
 
@@ -136,20 +151,21 @@ def login(body: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     response_model=MessageResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Request a password reset email",
-    description="Always returns the same message, so it cannot be used to discover registered emails.",
+    description=(
+        "Always returns the same message, so it cannot be used to discover registered emails "
+        "(also when the per-email cooldown or hourly cap prevented a new code)."
+    ),
 )
 def forgot_password(
     body: EmailRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     sender: EmailSender = Depends(get_email_sender),
+    session_factory: Callable[[], Session] = Depends(get_session_factory),
 ) -> MessageResponse:
     user = auth_service.get_user_by_email(db, body.email)
     if user is not None and user.email_confirmed:
-        try:
-            code = auth_service.create_verification_code(db, user, PURPOSE_RESET_PASSWORD)
-            auth_service.send_reset_email(sender, user, code)
-        except Exception:
-            logger.exception("Could not send password reset email")
+        schedule_code_email(background_tasks, session_factory, sender, user.id, PURPOSE_RESET_PASSWORD)
     return MessageResponse(message=FORGOT_PASSWORD_MESSAGE)
 
 

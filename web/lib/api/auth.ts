@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import type { components } from "@/lib/api/schema.gen";
 import {
   messageResponseSchema,
   resetTokenResponseSchema,
@@ -11,9 +12,11 @@ import {
 } from "@/lib/schemas/auth";
 
 // Thin functions over the backend auth endpoints (see backend/README.md).
+type Schemas = components["schemas"];
+
 // Each one validates the response with zod so a contract change fails loudly.
 
-export async function registerAccount(input: { name: string; email: string; password: string }): Promise<MessageResponse> {
+export async function registerAccount(input: Schemas["RegisterRequest"]): Promise<MessageResponse> {
   const { data } = await apiClient.post("/api/auth/register", input);
   return messageResponseSchema.parse(data);
 }
@@ -23,12 +26,12 @@ export async function resendConfirmation(email: string): Promise<MessageResponse
   return messageResponseSchema.parse(data);
 }
 
-export async function confirmEmail(input: { email: string; code: string }): Promise<MessageResponse> {
+export async function confirmEmail(input: Schemas["ConfirmEmailRequest"]): Promise<MessageResponse> {
   const { data } = await apiClient.post("/api/auth/confirm-email", input);
   return messageResponseSchema.parse(data);
 }
 
-export async function login(input: { email: string; password: string }): Promise<TokenResponse> {
+export async function login(input: Schemas["LoginRequest"]): Promise<TokenResponse> {
   const { data } = await apiClient.post("/api/auth/login", input);
   return tokenResponseSchema.parse(data);
 }
@@ -38,7 +41,7 @@ export async function requestPasswordReset(email: string): Promise<MessageRespon
   return messageResponseSchema.parse(data);
 }
 
-export async function verifyResetCode(input: { email: string; code: string }): Promise<ResetTokenResponse> {
+export async function verifyResetCode(input: Schemas["VerifyResetCodeRequest"]): Promise<ResetTokenResponse> {
   const { data } = await apiClient.post("/api/auth/verify-reset-code", input);
   return resetTokenResponseSchema.parse(data);
 }

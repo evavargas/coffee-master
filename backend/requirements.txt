@@ -7,7 +7,6 @@ sqlalchemy>=2.0
 psycopg[binary]>=3.2
 pyjwt>=2.9
 pwdlib[argon2]>=0.2
-resend>=2.0
 email-validator>=2.1
 python-dotenv>=1.0
 pytest>=8

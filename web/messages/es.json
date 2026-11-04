@@ -85,6 +85,14 @@
     "questionLabel": "Pregunta",
     "send": "Enviar",
     "errorFallback": "Uy, no pudimos responder ahora. Probá de nuevo en un momento.",
+    "historyError": "No pudimos cargar tu conversación anterior. Podés empezar una nueva.",
+    "loadingHistory": "Cargando tu conversación…",
+    "newConversation": "Nueva conversación",
+    "errors": {
+      "modelBusy": "Estamos con mucha demanda en este momento. Probá de nuevo en unos segundos.",
+      "modelUnavailable": "El asistente no está disponible ahora. Probá de nuevo más tarde.",
+      "connection": "Se cortó la conexión antes de terminar la respuesta. Revisá tu internet y probá de nuevo."
+    },
     "suggestion1": "Si tengo 30 g de café de Colombia y 20 g de agua, ¿cómo me va a quedar?",
     "suggestion2": "¿Cómo hago un cappuccino paso a paso?",
     "suggestion3": "Mi espresso sale muy amargo, ¿qué ajusto?"

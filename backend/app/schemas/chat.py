@@ -1,20 +1,32 @@
+"""Request and response models for the chat endpoints."""
+
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-MAX_MESSAGES = 40
-MAX_MESSAGE_LENGTH = 4000
-
-
-class ChatMessage(BaseModel):
-    # "system" is deliberately not allowed: clients cannot inject system instructions.
-    role: Literal["user", "assistant"]
-    content: str = Field(min_length=1, max_length=MAX_MESSAGE_LENGTH)
+from app.agent.prompt_guard import MESSAGE_MAX_LENGTH, sanitize_message
 
 
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage] = Field(min_length=1, max_length=MAX_MESSAGES)
+    conversation_id: int | None = Field(
+        default=None, description="Existing conversation to continue, or null to start a new one."
+    )
+    message: str = Field(min_length=1, max_length=MESSAGE_MAX_LENGTH)
+
+    @field_validator("message")
+    @classmethod
+    def clean_message(cls, value: str) -> str:
+        cleaned = sanitize_message(value)
+        if not cleaned:
+            raise ValueError("The message is empty after removing unsafe characters.")
+        return cleaned
 
 
-class ChatResponse(BaseModel):
-    reply: str
+class StoredMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class LatestConversationResponse(BaseModel):
+    conversation_id: int | None
+    messages: list[StoredMessage]

@@ -1,6 +1,6 @@
 ---
 name: python-fastapi-backend
-description: Buenas prácticas para el backend Python de MasterCoffe (FastAPI, Pydantic v2, SQLAlchemy, JWT, Resend, agente Claude). Usala al crear o modificar endpoints, servicios, modelos, el agente o los tests en backend/. Incluye la documentación obligatoria de endpoints.
+description: Buenas prácticas para el backend Python de MasterCoffe (FastAPI, Pydantic v2, SQLAlchemy, JWT, Gmail SMTP, agente Claude). Usala al crear o modificar endpoints, servicios, modelos, el agente o los tests en backend/. Incluye la documentación obligatoria de endpoints.
 ---
 
 # Backend Python (FastAPI)
@@ -19,8 +19,10 @@ backend/app/
   models/              modelos SQLAlchemy
   schemas/             modelos Pydantic de entrada y salida
   services/            lógica de negocio y servicios externos (email, agente)
-  api/routes/          routers por dominio: auth.py, chat.py, health.py
+  api/routes/          routers por dominio: auth.py, chat.py, conversations.py, health.py
   agent/               prompt, conocimiento y guard del agente
+backend/scripts/       export_openapi.py: genera backend/openapi.json
+backend/openapi.json   contrato del que web y mobile generan sus tipos (`npm run gen:api`)
 backend/tests/         pytest, TestClient, base SQLite temporal
 backend/evals/         casos de prueba del chat
 ```
@@ -31,9 +33,9 @@ backend/evals/         casos de prueba del chat
 3. **Dependencias inyectadas** con `Depends` (sesión de DB, cliente de Claude, sender de email). Así los tests reemplazan lo externo con `app.dependency_overrides`.
 4. **Secretos** solo desde el entorno (`Settings`). Nunca loguear ni devolver claves, tokens ni contraseñas.
 5. **Contraseñas** con un hash fuerte (argon2 vía `pwdlib`). Nunca guardarlas en texto plano.
-6. **Errores**: `HTTPException` con mensajes claros en español (son contenido visible) y códigos HTTP correctos (401 credenciales o token, 403 email no confirmado, 404, 409 email duplicado, 422 validación, 429 límite).
-7. **No revelar existencia de cuentas**: en forgot-password, la respuesta es siempre la misma.
-8. **Async** en rutas que llaman al SDK de Anthropic o a Resend.
+6. **Errores**: `HTTPException` con mensajes claros en español (son contenido visible) y códigos HTTP correctos (401 credenciales o token, 403 email no confirmado, 404, 422 validación, 429 límite). Una vez iniciado el stream del chat, los fallos se informan con el evento `error` y un código, nunca con el detalle interno.
+7. **No revelar existencia de cuentas**: en register, resend-confirmation y forgot-password, la respuesta es siempre la misma.
+8. **Async** en rutas que llaman al SDK de Anthropic. No retener una conexión a la base durante la llamada al modelo. El envío por SMTP es bloqueante: va en `BackgroundTasks`, con su propia sesión, para que el tiempo de respuesta no revele si se envió un mail.
 9. **CORS** desde `CORS_ORIGINS`. Nunca `*` en producción.
 10. **Tests**: un test por comportamiento. Base SQLite temporal, sender de email falso, cliente de Claude falso. Ningún test llama a la red.
 

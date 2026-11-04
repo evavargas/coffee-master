@@ -74,7 +74,13 @@
     },
     "placeholder": "Escribí tu pregunta de café…",
     "send": "Enviar",
-    "genericError": "Uy, no pudimos responder ahora. Probá de nuevo en un momento."
+    "newConversation": "Nueva conversación",
+    "errors": {
+      "modelBusy": "Estamos con mucha demanda en este momento. Probá de nuevo en un rato.",
+      "modelUnavailable": "El asistente no está disponible ahora. Probá de nuevo en un momento.",
+      "connection": "Se cortó la conexión. Revisá tu internet y probá de nuevo.",
+      "history": "No pudimos cargar tu conversación anterior. Podés seguir chateando igual."
+    }
   },
   "validation": {
     "emailRequired": "Ingresá tu email",

@@ -7,7 +7,10 @@ import { registerAccount } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { buildRegisterSchema, type RegisterFormValues } from "@/lib/schemas/auth";
 
-/** Registration form state. `successMessage` holds the backend's confirmation hint on success. */
+/**
+ * Registration form state. The backend answers 201 whether or not the email exists, so a
+ * non-null `successMessage` always moves the user on to the confirm-code step.
+ */
 export function useRegisterForm() {
   const { t } = useTranslation();
   const [serverError, setServerError] = useState<string | null>(null);

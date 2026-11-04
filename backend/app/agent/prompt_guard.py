@@ -43,7 +43,8 @@ def strip_unsafe_characters(text: str) -> str:
 
 
 def sanitize_message(text: str) -> str:
-    return strip_unsafe_characters(text).strip()[:MESSAGE_MAX_LENGTH]
+    """Strip unsafe characters and surrounding whitespace. Length is validated by the schema."""
+    return strip_unsafe_characters(text).strip()
 
 
 def sanitize_user_name(raw_name: str) -> str:
@@ -54,10 +55,37 @@ def sanitize_user_name(raw_name: str) -> str:
     return name or GENERIC_GREETING_NAME
 
 
-def guard_output(reply: str) -> str:
-    """Replace the reply if it leaks internal prompt markers."""
-    lowered = reply.lower()
-    if any(marker.lower() in lowered for marker in _INTERNAL_MARKERS):
-        logger.warning("Blocked a model reply that contained internal prompt markers")
-        return SAFE_LEAK_REPLY
-    return reply
+class StreamingOutputGuard:
+    """Incremental leak filter for a streamed reply.
+
+    Text is released only once it is at least (longest marker length - 1) characters
+    behind the newest chunk, so a marker split across chunks is always seen whole
+    before any of it is emitted. Matching is case-insensitive.
+    """
+
+    def __init__(self) -> None:
+        self._hold = max(len(marker) for marker in _INTERNAL_MARKERS) - 1
+        self._buffer = ""
+        self.blocked = False
+
+    def feed(self, chunk: str) -> str:
+        """Return the part of the stream that is safe to forward now (possibly empty)."""
+        if self.blocked:
+            return ""
+        self._buffer += chunk
+        lowered = self._buffer.lower()
+        if any(marker.lower() in lowered for marker in _INTERNAL_MARKERS):
+            logger.warning("Blocked a model reply that contained internal prompt markers")
+            self.blocked = True
+            self._buffer = ""
+            return ""
+        releasable = len(self._buffer) - self._hold
+        if releasable <= 0:
+            return ""
+        safe, self._buffer = self._buffer[:releasable], self._buffer[releasable:]
+        return safe
+
+    def finish(self) -> str:
+        """Flush the held-back tail at the end of the stream (already checked by feed)."""
+        tail, self._buffer = self._buffer, ""
+        return tail

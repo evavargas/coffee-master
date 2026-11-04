@@ -20,8 +20,15 @@ export function RegisterForm({ onConfirmed, onBackToLogin }: RegisterFormProps) 
   const { colors } = useAppTheme();
   const { t } = useTranslation();
 
-  if (successMessage) {
-    return <ConfirmEmailStep email={getValues("email")} onConfirmed={onConfirmed} onBackToLogin={onBackToLogin} />;
+  if (successMessage !== null) {
+    return (
+      <ConfirmEmailStep
+        email={getValues("email")}
+        registerMessage={successMessage}
+        onConfirmed={onConfirmed}
+        onBackToLogin={onBackToLogin}
+      />
+    );
   }
 
   return (
@@ -73,12 +80,13 @@ export function RegisterForm({ onConfirmed, onBackToLogin }: RegisterFormProps) 
 
 interface ConfirmEmailStepProps {
   email: string;
+  registerMessage: string;
   onConfirmed: () => void;
   onBackToLogin: () => void;
 }
 
 /** Inline email + 6-digit code step shown right after registration succeeds. */
-function ConfirmEmailStep({ email, onConfirmed, onBackToLogin }: ConfirmEmailStepProps) {
+function ConfirmEmailStep({ email, registerMessage, onConfirmed, onBackToLogin }: ConfirmEmailStepProps) {
   const { form, onSubmit, serverError, successMessage, isSubmitting } = useConfirmEmailForm(email);
   const { control, formState } = form;
   const resend = useResendConfirmation(email);
@@ -108,6 +116,9 @@ function ConfirmEmailStep({ email, onConfirmed, onBackToLogin }: ConfirmEmailSte
 
   return (
     <View style={styles.container}>
+      <Text style={[styles.status, { color: colors.foreground }]} accessibilityLiveRegion="polite">
+        {registerMessage}
+      </Text>
       <FormField
         control={control}
         name="email"

@@ -60,3 +60,4 @@ def rate_limit(scope: str, get_limit: Callable[[Settings], int]) -> Callable:
 
 auth_rate_limit = Depends(rate_limit("auth", lambda s: s.rate_limit_auth_per_minute))
 chat_rate_limit = Depends(rate_limit("chat", lambda s: s.rate_limit_chat_per_minute))
+conversations_rate_limit = Depends(rate_limit("conversations", lambda s: s.rate_limit_conversations_per_minute))

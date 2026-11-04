@@ -40,16 +40,26 @@ describe("useRegisterForm", () => {
     expect(result.current.serverError).toBeNull();
   });
 
-  it("sets serverError to the backend detail message on a 400 response", async () => {
-    const backendMessage = "Ese email ya está registrado.";
+  it("moves on with the backend message for any 201, even an empty one", async () => {
+    mockedRegisterAccount.mockResolvedValue("");
+    const { result } = await renderHook(() => useRegisterForm());
+
+    await submit(result, { name: "Carlos", email: "carlos@example.com", password: "secret123" });
+
+    await waitFor(() => expect(result.current.successMessage).toBe(""));
+    expect(result.current.serverError).toBeNull();
+  });
+
+  it("sets serverError to the backend detail message on a 429 response", async () => {
+    const backendMessage = "Demasiados intentos. Probá más tarde.";
     const axiosError = new AxiosError(
-      "Request failed with status code 400",
+      "Request failed with status code 429",
       "ERR_BAD_REQUEST",
       undefined,
       undefined,
       {
-        status: 400,
-        statusText: "Bad Request",
+        status: 429,
+        statusText: "Too Many Requests",
         data: { detail: backendMessage },
         headers: {},
         config: {} as never,
