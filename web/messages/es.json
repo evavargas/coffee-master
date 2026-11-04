@@ -23,7 +23,7 @@
     },
     "register": {
       "title": "Crear cuenta",
-      "description": "Te vamos a mandar un mail para confirmar tu cuenta.",
+      "description": "Te enviaremos un mail para validar tu cuenta.",
       "haveAccount": "Ya tengo cuenta",
       "nameLabel": "Nombre",
       "emailLabel": "Email",
