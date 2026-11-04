@@ -21,7 +21,7 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, RESEND_A
 | `DATABASE_URL` | no | Defaults to `sqlite:///./mastercoffee.db`. |
 | `RESEND_API_KEY` | for email | Resend API key. Without it, registration returns 503. |
 | `EMAIL_FROM` | no | Sender shown in emails. Use a domain verified in Resend in production. |
-| `FRONTEND_URL` | yes | Base URL for links in emails (`/confirm-email`, `/reset-password`). |
+| `FRONTEND_URL` | yes | Base URL of the frontend app. Not used to build email links anymore (confirmation and reset now use 6-digit codes), kept for other frontend-facing uses. |
 | `CORS_ORIGINS` | no | Comma-separated allowed origins. |
 | `RATE_LIMIT_AUTH_PER_MINUTE` | no | Requests per minute per IP on `/api/auth/*`. Default 10. |
 | `RATE_LIMIT_CHAT_PER_MINUTE` | no | Requests per minute per IP on `/api/chat`. Default 20. |
@@ -38,17 +38,18 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, RESEND_A
 | GET | `/api/health` | none | — | 200 `{"status":"ok"}` | — |
 | POST | `/api/auth/register` | none | `{name, email, password}` | 201 `{message}` | 409 email taken · 422 invalid · 503 mail not sent (account created) |
 | POST | `/api/auth/resend-confirmation` | none | `{email}` | 202 `{message}` | 422 invalid email |
-| POST | `/api/auth/confirm-email` | none | `{token}` | 200 `{message}` | 400 invalid or expired token |
+| POST | `/api/auth/confirm-email` | none | `{email, code}` (code: 6-digit string) | 200 `{message}` | 400 invalid, expired or attempts-exhausted code |
 | POST | `/api/auth/login` | none | `{email, password}` | 200 `{access_token, token_type, expires_in}` | 401 bad credentials · 403 email not confirmed |
 | POST | `/api/auth/forgot-password` | none | `{email}` | 202 `{message}` (same for any email) | 422 invalid email |
-| POST | `/api/auth/reset-password` | none | `{token, new_password}` | 200 `{message}` | 400 invalid, expired or used token · 422 invalid password |
+| POST | `/api/auth/verify-reset-code` | none | `{email, code}` (code: 6-digit string) | 200 `{reset_token}` | 400 invalid, expired or attempts-exhausted code |
+| POST | `/api/auth/reset-password` | none | `{reset_token, new_password}` | 200 `{message}` | 400 invalid, expired or used token · 422 invalid password |
 | GET | `/api/auth/me` | bearer | — | 200 `{id, name, email}` | 401 missing or invalid session |
 | POST | `/api/chat` | bearer | `{messages: [{role: "user"\|"assistant", content}]}` (max 40 messages, 4000 chars each) | 200 `{reply}` | 401 session · 422 invalid messages or last message not from user |
 
-## Token rules
+## Token and code rules
 - Access tokens: `purpose=access`, 7 days.
-- Confirmation tokens: `purpose=confirm_email`, 24 hours.
-- Reset tokens: `purpose=reset_password`, 30 minutes. They include a fingerprint of the current password hash, so they work only once.
+- Email confirmation and password reset use a 6-digit code (not a JWT), stored server-side with an expiry and an attempt counter. A code expires after 15 minutes or after 5 wrong guesses, whichever comes first.
+- Password reset is two steps: `verify-reset-code` consumes the code and returns a short-lived JWT (`purpose=reset_password_verified`, 10 minutes) that the client holds in memory; `reset-password` consumes that JWT. It includes a fingerprint of the current password hash, so it works only once.
 - A token of one purpose is rejected by endpoints that expect another.
 
 ## Security notes

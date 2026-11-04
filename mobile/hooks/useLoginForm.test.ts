@@ -1,5 +1,6 @@
 import { AxiosError } from "axios";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 
 // Side-effect import: initializes the i18next singleton so `t()` resolves
 // real translations instead of echoing the raw key.
@@ -34,7 +35,7 @@ describe("useLoginForm", () => {
 
   it("calls onAuthenticated with the token and keeps serverError null on success", async () => {
     mockedLogin.mockResolvedValue("fake-jwt-token");
-    const onAuthenticated = jest.fn().mockResolvedValue(undefined);
+    const onAuthenticated = jest.fn<(token: string) => Promise<void>>().mockResolvedValue(undefined);
     const { result } = await renderHook(() => useLoginForm(onAuthenticated));
 
     await submit(result, { email: "carlos@example.com", password: "secret123" });
@@ -59,7 +60,7 @@ describe("useLoginForm", () => {
       },
     );
     mockedLogin.mockRejectedValue(axiosError);
-    const onAuthenticated = jest.fn().mockResolvedValue(undefined);
+    const onAuthenticated = jest.fn<(token: string) => Promise<void>>().mockResolvedValue(undefined);
     const { result } = await renderHook(() => useLoginForm(onAuthenticated));
 
     await submit(result, { email: "carlos@example.com", password: "wrong-password" });
@@ -71,7 +72,7 @@ describe("useLoginForm", () => {
   it("falls back to the translated generic error when there is no usable detail", async () => {
     const networkError = new AxiosError("Network Error", "ERR_NETWORK");
     mockedLogin.mockRejectedValue(networkError);
-    const onAuthenticated = jest.fn().mockResolvedValue(undefined);
+    const onAuthenticated = jest.fn<(token: string) => Promise<void>>().mockResolvedValue(undefined);
     const { result } = await renderHook(() => useLoginForm(onAuthenticated));
 
     await submit(result, { email: "carlos@example.com", password: "secret123" });

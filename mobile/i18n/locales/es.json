@@ -1,7 +1,7 @@
 {
   "common": {
-    "appTitle": "MasterCoffe",
-    "appSubtitle": "Recetas, ratios y diagnóstico de café.",
+    "appTitle": "Coffee Master",
+    "appSubtitle": "Café de especialidad y barismo",
     "signOut": "Salir",
     "loading": "Cargando…",
     "switchLanguage": "Cambiar idioma",
@@ -16,8 +16,54 @@
       "passwordLabel": "Contraseña",
       "submit": "Iniciar sesión",
       "submitting": "Ingresando…",
-      "hint": "¿No tenés cuenta? Registrate desde la versión web para confirmar tu email.",
+      "createAccount": "Crear cuenta",
+      "forgotPassword": "Olvidé mi contraseña",
       "genericError": "No pudimos iniciar sesión. Probá de nuevo."
+    },
+    "register": {
+      "nameLabel": "Nombre",
+      "emailLabel": "Email",
+      "passwordLabel": "Contraseña",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta…",
+      "backToLogin": "Volver a iniciar sesión",
+      "errorFallback": "No pudimos crear tu cuenta. Probá de nuevo."
+    },
+    "confirmEmail": {
+      "emailLabel": "Email",
+      "submit": "Confirmar",
+      "submitting": "Confirmando…",
+      "backToLogin": "Volver a iniciar sesión",
+      "errorFallback": "No pudimos confirmar tu cuenta. Probá de nuevo."
+    },
+    "forgotPassword": {
+      "emailLabel": "Email",
+      "submit": "Enviar código",
+      "submitting": "Enviando…",
+      "backToLogin": "Volver a iniciar sesión",
+      "errorFallback": "No pudimos procesar el pedido. Probá más tarde."
+    },
+    "verifyResetCode": {
+      "submit": "Verificar código",
+      "submitting": "Verificando…",
+      "errorFallback": "No pudimos verificar el código. Probá de nuevo."
+    },
+    "resetPassword": {
+      "passwordLabel": "Nueva contraseña",
+      "confirmPasswordLabel": "Repetí la contraseña",
+      "submit": "Guardar contraseña",
+      "submitting": "Guardando…",
+      "backToLogin": "Volver a iniciar sesión",
+      "errorFallback": "No pudimos cambiar la contraseña. Probá de nuevo."
+    },
+    "code": {
+      "codeLabel": "Código de verificación",
+      "expiresIn": "Vence en {{time}}",
+      "expired": "El código venció. Pedí uno nuevo.",
+      "resendCode": "Reenviar código",
+      "resending": "Enviando…",
+      "resendHint": "¿No te llegó? Revisá la carpeta de spam.",
+      "resendErrorFallback": "No pudimos reenviar el código. Probá más tarde."
     }
   },
   "chat": {
@@ -28,11 +74,19 @@
     },
     "placeholder": "Escribí tu pregunta de café…",
     "send": "Enviar",
-    "genericError": "No pudimos responder. Revisá que el servidor esté corriendo."
+    "genericError": "Uy, no pudimos responder ahora. Probá de nuevo en un momento."
   },
   "validation": {
     "emailRequired": "Ingresá tu email",
     "emailInvalid": "El email no es válido",
-    "passwordRequired": "Ingresá tu contraseña"
+    "passwordRequired": "Ingresá tu contraseña",
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+    "passwordMax": "La contraseña es demasiado larga",
+    "nameRequired": "Ingresá tu nombre",
+    "nameMax": "El nombre es demasiado largo",
+    "confirmPasswordRequired": "Repetí la contraseña",
+    "passwordsMismatch": "Las contraseñas no coinciden",
+    "codeRequired": "Ingresá el código",
+    "codeInvalid": "El código debe tener 6 dígitos"
   }
 }

@@ -16,8 +16,54 @@
       "passwordLabel": "Password",
       "submit": "Sign in",
       "submitting": "Signing in…",
-      "hint": "Don't have an account? Register from the web app to confirm your email.",
+      "createAccount": "Create account",
+      "forgotPassword": "Forgot my password",
       "genericError": "We couldn't sign you in. Please try again."
+    },
+    "register": {
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "backToLogin": "Back to sign in",
+      "errorFallback": "We couldn't create your account. Try again."
+    },
+    "confirmEmail": {
+      "emailLabel": "Email",
+      "submit": "Confirm",
+      "submitting": "Confirming…",
+      "backToLogin": "Back to sign in",
+      "errorFallback": "We couldn't confirm your account. Try again."
+    },
+    "forgotPassword": {
+      "emailLabel": "Email",
+      "submit": "Send code",
+      "submitting": "Sending…",
+      "backToLogin": "Back to sign in",
+      "errorFallback": "We couldn't process the request. Try again later."
+    },
+    "verifyResetCode": {
+      "submit": "Verify code",
+      "submitting": "Verifying…",
+      "errorFallback": "We couldn't verify the code. Try again."
+    },
+    "resetPassword": {
+      "passwordLabel": "New password",
+      "confirmPasswordLabel": "Repeat the password",
+      "submit": "Save password",
+      "submitting": "Saving…",
+      "backToLogin": "Back to sign in",
+      "errorFallback": "We couldn't change your password. Try again."
+    },
+    "code": {
+      "codeLabel": "Verification code",
+      "expiresIn": "Expires in {{time}}",
+      "expired": "The code expired. Ask for a new one.",
+      "resendCode": "Resend code",
+      "resending": "Sending…",
+      "resendHint": "Didn't get it? Check your spam folder.",
+      "resendErrorFallback": "We couldn't resend the code. Try again later."
     }
   },
   "chat": {
@@ -28,11 +74,19 @@
     },
     "placeholder": "Type your coffee question…",
     "send": "Send",
-    "genericError": "We couldn't get a reply. Check that the server is running."
+    "genericError": "Oops, we couldn't reply right now. Try again in a moment."
   },
   "validation": {
     "emailRequired": "Enter your email",
     "emailInvalid": "Email is not valid",
-    "passwordRequired": "Enter your password"
+    "passwordRequired": "Enter your password",
+    "passwordMin": "The password must be at least 8 characters",
+    "passwordMax": "The password is too long",
+    "nameRequired": "Enter your name",
+    "nameMax": "The name is too long",
+    "confirmPasswordRequired": "Repeat the password",
+    "passwordsMismatch": "Passwords don't match",
+    "codeRequired": "Enter the code",
+    "codeInvalid": "The code must have 6 digits"
   }
 }

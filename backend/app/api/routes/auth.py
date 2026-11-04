@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_email_sender
 from app.core.config import get_settings
 from app.core.rate_limit import auth_rate_limit
+from app.core.security import PURPOSE_CONFIRM_EMAIL, PURPOSE_RESET_PASSWORD
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -18,8 +19,10 @@ from app.schemas.auth import (
     MessageResponse,
     RegisterRequest,
     ResetPasswordRequest,
+    ResetTokenResponse,
     TokenResponse,
     UserPublic,
+    VerifyResetCodeRequest,
 )
 from app.services import auth as auth_service
 from app.services.email import EmailSender
@@ -30,7 +33,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["auth"], dependencies=[auth_rate_limit])
 
 # Same message for "unknown email" and "known email" so the API does not reveal which accounts exist.
-FORGOT_PASSWORD_MESSAGE = "Si el email está registrado, te enviamos un link para cambiar la contraseña."
+FORGOT_PASSWORD_MESSAGE = "Si el email está registrado, te enviamos un código para cambiar la contraseña."
 CONFIRMATION_SENT_MESSAGE = "Te enviamos un mail para confirmar tu cuenta."
 
 
@@ -56,7 +59,8 @@ def register(
     except auth_service.EmailAlreadyRegisteredError as exc:
         raise HTTPException(status.HTTP_409_CONFLICT, "Ese email ya tiene una cuenta.") from exc
     try:
-        auth_service.send_confirmation_email(sender, user)
+        code = auth_service.create_verification_code(db, user, PURPOSE_CONFIRM_EMAIL)
+        auth_service.send_confirmation_email(sender, user, code)
     except Exception as exc:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -80,7 +84,8 @@ def resend_confirmation(
     user = auth_service.get_user_by_email(db, body.email)
     if user is not None and not user.email_confirmed:
         try:
-            auth_service.send_confirmation_email(sender, user)
+            code = auth_service.create_verification_code(db, user, PURPOSE_CONFIRM_EMAIL)
+            auth_service.send_confirmation_email(sender, user, code)
         except Exception:
             logger.exception("Could not resend confirmation email")
     return MessageResponse(message=CONFIRMATION_SENT_MESSAGE)
@@ -90,14 +95,14 @@ def resend_confirmation(
     "/confirm-email",
     response_model=MessageResponse,
     summary="Confirm an email address",
-    description="Consumes the token received by email and marks the account as confirmed.",
-    responses={400: {"description": "Invalid or expired token"}},
+    description="Consumes the 6-digit code received by email and marks the account as confirmed.",
+    responses={400: {"description": "Invalid, expired or attempts-exhausted code"}},
 )
 def confirm_email(body: ConfirmEmailRequest, db: Session = Depends(get_db)) -> MessageResponse:
     try:
-        auth_service.confirm_email(db, body.token)
-    except auth_service.InvalidTokenError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "El link de confirmación no es válido o venció.") from exc
+        auth_service.confirm_email(db, body.email, body.code)
+    except auth_service.InvalidCodeError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "El código de confirmación no es válido o venció.") from exc
     return MessageResponse(message="Tu cuenta está confirmada. Ya podés iniciar sesión.")
 
 
@@ -141,24 +146,47 @@ def forgot_password(
     user = auth_service.get_user_by_email(db, body.email)
     if user is not None and user.email_confirmed:
         try:
-            auth_service.send_reset_email(sender, user)
+            code = auth_service.create_verification_code(db, user, PURPOSE_RESET_PASSWORD)
+            auth_service.send_reset_email(sender, user, code)
         except Exception:
             logger.exception("Could not send password reset email")
     return MessageResponse(message=FORGOT_PASSWORD_MESSAGE)
 
 
 @router.post(
+    "/verify-reset-code",
+    response_model=ResetTokenResponse,
+    summary="Verify a password reset code",
+    description=(
+        "Consumes the 6-digit code received by email and returns a short-lived session token "
+        "(10 minutes) to use in the next call to reset-password. The client holds it in memory; "
+        "the user never sees or types it."
+    ),
+    responses={400: {"description": "Invalid, expired or attempts-exhausted code"}},
+)
+def verify_reset_code(body: VerifyResetCodeRequest, db: Session = Depends(get_db)) -> ResetTokenResponse:
+    try:
+        reset_token = auth_service.verify_reset_code(db, body.email, body.code)
+    except auth_service.InvalidCodeError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "El código para cambiar la contraseña no es válido o venció.") from exc
+    return ResetTokenResponse(reset_token=reset_token)
+
+
+@router.post(
     "/reset-password",
     response_model=MessageResponse,
-    summary="Set a new password with a reset token",
-    description="The token expires after 30 minutes and can be used only once: changing the password invalidates it.",
+    summary="Set a new password with a reset session token",
+    description=(
+        "The reset_token comes from verify-reset-code, expires after 10 minutes and can be used "
+        "only once: changing the password invalidates it."
+    ),
     responses={400: {"description": "Invalid, expired or already used token"}},
 )
 def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)) -> MessageResponse:
     try:
-        auth_service.reset_password(db, body.token, body.new_password)
+        auth_service.reset_password(db, body.reset_token, body.new_password)
     except auth_service.InvalidTokenError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "El link para cambiar la contraseña no es válido o venció.") from exc
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "El token para cambiar la contraseña no es válido o venció.") from exc
     return MessageResponse(message="Contraseña actualizada. Ya podés iniciar sesión.")
 
 

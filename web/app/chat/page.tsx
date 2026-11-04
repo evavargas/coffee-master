@@ -26,8 +26,8 @@ export default function ChatPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-4">
-      <header className="flex items-center justify-between">
+    <main className="mx-auto flex h-dvh max-w-2xl flex-col gap-4 overflow-hidden p-4">
+      <header className="flex shrink-0 items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-primary">{t("appName")}</h1>
           <p className="text-sm text-muted-foreground">{tChat("greeting", { name: user.name })}</p>

@@ -1,13 +1,14 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Phone, Moon, Sun, type LucideIcon } from "lucide-react-native";
 
 import { useAppTheme } from "@/context/ThemeContext";
 
-const ICON_BY_PREFERENCE = {
-  system: "🖥️",
-  light: "☀️",
-  dark: "🌙",
-} as const;
+const ICON_BY_PREFERENCE: Record<"system" | "light" | "dark", LucideIcon> = {
+  system: Phone,
+  light: Sun,
+  dark: Moon,
+};
 
 const LABEL_KEY_BY_PREFERENCE = {
   system: "common.themeSystem",
@@ -18,8 +19,8 @@ const LABEL_KEY_BY_PREFERENCE = {
 /** Shows the current theme preference (system/light/dark) and cycles to the next one on press. */
 export function ThemeToggle() {
   const { t } = useTranslation();
-  const { preference, cyclePreference } = useAppTheme();
-  const icon = ICON_BY_PREFERENCE[preference];
+  const { preference, cyclePreference, colors } = useAppTheme();
+  const Icon = ICON_BY_PREFERENCE[preference];
 
   return (
     <Pressable
@@ -28,12 +29,11 @@ export function ThemeToggle() {
       accessibilityRole="button"
       accessibilityLabel={`${t("common.switchTheme")}: ${t(LABEL_KEY_BY_PREFERENCE[preference])}`}
     >
-      <Text style={styles.text}>{icon}</Text>
+      <Icon size={18} color={colors.foreground} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { paddingHorizontal: 6, paddingVertical: 4 },
-  text: { fontSize: 16 },
+  button: { padding: 6 },
 });

@@ -6,9 +6,6 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#faf6f1",
-    "splash": {
-      "backgroundColor": "#faf6f1"
-    },
     "ios": {
       "supportsTablet": false
     },
@@ -16,7 +13,14 @@
       "package": "com.mastercoffe.app"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#faf6f1"
+        }
+      ]
     ]
   }
 }

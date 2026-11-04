@@ -33,10 +33,14 @@ class FakeEmailSender:
     def send(self, to: str, subject: str, html: str) -> None:
         self.sent.append({"to": to, "subject": subject, "html": html})
 
-    def token_from_last_email(self) -> str:
-        """Extract the token from the link in the most recent email."""
-        match = re.search(r"token=([^\"&\s]+)", self.sent[-1]["html"])
-        assert match, "No token link found in the email"
+    def code_from_last_email(self) -> str:
+        """Extract the 6-digit code from the most recent email.
+
+        The template marks the code with a distinct `id="verification-code"` tag,
+        so this regex cannot accidentally match some other digit run in the HTML.
+        """
+        match = re.search(r'id="verification-code">(\d{6})<', self.sent[-1]["html"])
+        assert match, "No verification code found in the email"
         return match.group(1)
 
 
@@ -97,8 +101,8 @@ def client(db_engine, email_sender, anthropic_client) -> Iterator[TestClient]:
 
 
 def register_and_confirm(client: TestClient, email_sender: FakeEmailSender, name="Ana", email="ana@example.com", password="correct-horse") -> str:
-    """Register, confirm through the emailed link, and return an access token."""
+    """Register, confirm through the emailed code, and return an access token."""
     client.post("/api/auth/register", json={"name": name, "email": email, "password": password})
-    client.post("/api/auth/confirm-email", json={"token": email_sender.token_from_last_email()})
+    client.post("/api/auth/confirm-email", json={"email": email, "code": email_sender.code_from_last_email()})
     response = client.post("/api/auth/login", json={"email": email, "password": password})
     return response.json()["access_token"]

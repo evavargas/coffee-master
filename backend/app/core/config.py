@@ -19,8 +19,9 @@ class Settings(BaseSettings):
     jwt_secret: str
     jwt_algorithm: str = "HS256"
     access_token_days: int = 7
-    confirm_token_hours: int = 24
-    reset_token_minutes: int = 30
+    verification_code_minutes: int = 15
+    verification_code_max_attempts: int = 5
+    reset_session_token_minutes: int = 10
 
     # Email (Resend)
     # Set RESEND_API_KEY in backend/.env. Never put real keys in source code.

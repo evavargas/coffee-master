@@ -5,6 +5,7 @@ Access tokens and email tokens share the same signing key but carry a
 """
 
 import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -14,8 +15,12 @@ from pwdlib import PasswordHash
 from app.core.config import get_settings
 
 PURPOSE_ACCESS = "access"
+# PURPOSE_CONFIRM_EMAIL and PURPOSE_RESET_PASSWORD label rows of the VerificationCode
+# table (the `purpose` column), not JWT purposes anymore.
 PURPOSE_CONFIRM_EMAIL = "confirm_email"
 PURPOSE_RESET_PASSWORD = "reset_password"
+# JWT purpose for the short-lived session token issued after a reset code is verified.
+PURPOSE_RESET_PASSWORD_VERIFIED = "reset_password_verified"
 
 _password_hasher = PasswordHash.recommended()
 
@@ -26,6 +31,11 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, password_hash: str) -> bool:
     return _password_hasher.verify(password, password_hash)
+
+
+def generate_verification_code() -> str:
+    """Cryptographically unpredictable 6-digit numeric code, zero-padded."""
+    return f"{secrets.randbelow(1_000_000):06d}"
 
 
 def password_fingerprint(password_hash: str) -> str:

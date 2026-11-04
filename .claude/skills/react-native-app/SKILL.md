@@ -13,23 +13,30 @@ La app móvil no se publica en tiendas por ahora; sirve para desarrollo y prueba
 - Las reglas de hooks, axios y zod son las mismas que en la web (ver `frontend-react-nextjs`).
 
 ## Stack
-- **Expo SDK 54**, React Native 0.81, TypeScript estricto.
+- **Expo SDK 58**, React Native 0.88, TypeScript estricto.
 - **axios** para HTTP, solo a través de `lib/api/client.ts`.
 - **zod** para validar formularios y respuestas de la API.
 - **react-hook-form** + `@hookform/resolvers/zod` para formularios.
-- **expo-secure-store** para guardar el JWT (Keychain en iOS, Keystore en Android). Nunca usar AsyncStorage para tokens.
+- **expo-secure-store** para guardar el JWT (Keychain en iOS, Keystore en Android). Nunca usar AsyncStorage para tokens (sí se usa AsyncStorage para preferencias no sensibles: idioma y tema).
+- **react-i18next** para i18n: `i18n/locales/{es,en}.json`, `useTranslation()` en cada componente/hook. Las claves de `es`/`en` siempre tienen que coincidir.
+- Theming propio (`context/ThemeContext.tsx`, `useAppTheme()`): sistema/claro/oscuro. Nunca colores hardcodeados en los estilos; siempre `colors.*` del contexto.
 
 ## Estructura
 ```
 mobile/
-  App.tsx                    raíz: decide entre login y chat según la sesión
-  components/auth/           LoginForm (solo markup y hooks)
-  components/chat/           ChatScreen (solo markup y hooks)
-  hooks/                     useSession, useLoginForm, useChat
-  lib/api/client.ts          instancia de axios, token y manejo de 401
-  lib/api/auth.ts, chat.ts   funciones tipadas de la API
-  lib/schemas/auth.ts        esquemas zod
-  lib/session.ts             acceso a SecureStore
+  App.tsx                      raíz: elige pantalla (login/register/forgotPassword) o chat según la sesión
+  context/ThemeContext.tsx     ThemeProvider + useAppTheme()
+  i18n/                        instancia de i18next + locales/{es,en}.json
+  components/auth/             FormField (compartido), LoginForm, RegisterForm, ForgotPasswordForm
+  components/chat/             ChatScreen (solo markup y hooks)
+  components/layout/           LanguageSwitcher, ThemeToggle
+  hooks/                       useSession, useLocale, useCountdown, useLoginForm, useRegisterForm,
+                                useForgotPasswordForm, useConfirmEmailForm, useVerifyResetCode,
+                                useResetPasswordForm, useResendConfirmation, useChat
+  lib/api/client.ts            instancia de axios, token y manejo de 401
+  lib/api/auth.ts, chat.ts     funciones tipadas de la API
+  lib/schemas/auth.ts          esquemas zod
+  lib/session.ts               acceso a SecureStore
 ```
 
 ## Reglas
@@ -45,12 +52,10 @@ mobile/
 - Simulador iOS: `http://localhost:8000`.
 - Teléfono físico: IP de tu máquina en la red local, en `EXPO_PUBLIC_API_URL` (en `mobile/.env`).
 
-## Pendiente
-- Registro y recuperación de contraseña: hoy se hacen en la web. Agregar pantallas si la app móvil debe crear cuentas.
-
 ## Comandos
 ```bash
 cd mobile && npm install
 npm run typecheck
+npm run test
 npm start            # escanear el QR con Expo Go
 ```

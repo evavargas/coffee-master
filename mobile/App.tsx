@@ -1,31 +1,72 @@
 import "@/i18n";
 
+import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context"; // <-- 1. Importar SafeAreaProvider
 
 import { ChatScreen } from "@/components/chat/ChatScreen";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { ThemeProvider, useAppTheme } from "@/context/ThemeContext";
 import { useSession } from "@/hooks/useSession";
 
+type AuthScreen = "login" | "register" | "forgotPassword";
+
 function AppContent() {
   const { token, isReady, signIn, signOut } = useSession();
   const { colors, scheme } = useAppTheme();
   const { t } = useTranslation();
+  const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
+
+  const insets = useSafeAreaInsets();
 
   if (!isReady) {
     return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+      <View style={[styles.safe, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <ActivityIndicator style={styles.loader} color={colors.primary} />
-      </SafeAreaView>
+      </View>
     );
   }
 
+  let authContent;
+  switch (authScreen) {
+    case "register":
+      authContent = (
+        <RegisterForm onConfirmed={() => setAuthScreen("login")} onBackToLogin={() => setAuthScreen("login")} />
+      );
+      break;
+    case "forgotPassword":
+      authContent = (
+        <ForgotPasswordForm onDone={() => setAuthScreen("login")} onBackToLogin={() => setAuthScreen("login")} />
+      );
+      break;
+    case "login":
+    default:
+      authContent = (
+        <LoginForm
+          onAuthenticated={signIn}
+          onRequestRegister={() => setAuthScreen("register")}
+          onRequestForgotPassword={() => setAuthScreen("forgotPassword")}
+        />
+      );
+  }
+
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+    <View
+      style={[
+        styles.safe,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom
+        }
+      ]}
+    >
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
       <View style={styles.header}>
         <View>
@@ -42,16 +83,18 @@ function AppContent() {
           )}
         </View>
       </View>
-      <View style={styles.body}>{token ? <ChatScreen /> : <LoginForm onAuthenticated={signIn} />}</View>
-    </SafeAreaView>
+      <View style={styles.body}>{token ? <ChatScreen /> : authContent}</View>
+    </View>
   );
 }
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

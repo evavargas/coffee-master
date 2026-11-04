@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "MasterCoffe",
+    "appName": "Coffee Master",
     "loading": "Cargando…",
     "signOut": "Salir",
     "switchLanguage": "Cambiar idioma",
@@ -12,7 +12,7 @@
   "auth": {
     "login": {
       "title": "Iniciar sesión",
-      "description": "Entrá para preguntarle al barista.",
+      "description": "Café de especialidad y barismo",
       "emailLabel": "Email",
       "passwordLabel": "Contraseña",
       "submit": "Iniciar sesión",
@@ -39,28 +39,42 @@
     },
     "forgotPassword": {
       "title": "Recuperar contraseña",
-      "description": "Te enviamos un link para cambiarla.",
+      "description": "Te enviamos un código para cambiarla.",
       "backToLogin": "Volver a iniciar sesión",
       "emailLabel": "Email",
-      "submit": "Enviar link",
+      "submit": "Enviar código",
       "submitting": "Enviando…",
       "errorFallback": "No pudimos procesar el pedido. Probá más tarde."
     },
     "resetPassword": {
       "title": "Nueva contraseña",
+      "verifyTitle": "Verificá el código",
       "goToLogin": "Ir a iniciar sesión",
+      "codeSentTo": "Te enviamos un código a {email}.",
+      "codeLabel": "Código",
+      "verifySubmit": "Verificar código",
+      "verifySubmitting": "Verificando…",
+      "expiresIn": "Vence en {time}",
+      "codeExpired": "El código venció. Pedí uno nuevo.",
+      "resendCode": "Reenviar código",
+      "resendHint": "¿No te llegó? Revisá la carpeta de spam.",
+      "resending": "Enviando…",
       "passwordLabel": "Nueva contraseña",
       "confirmPasswordLabel": "Repetí la contraseña",
       "submit": "Guardar contraseña",
       "submitting": "Guardando…",
-      "invalidToken": "El link no tiene un token válido.",
+      "verifyErrorFallback": "No pudimos verificar el código. Probá de nuevo.",
+      "resendErrorFallback": "No pudimos reenviar el código. Probá más tarde.",
       "errorFallback": "No pudimos cambiar la contraseña. Probá de nuevo."
     },
     "confirmEmail": {
-      "title": "Confirmación de email",
-      "goToLogin": "Ir a iniciar sesión",
-      "pending": "Confirmando tu cuenta…",
-      "invalidToken": "El link no tiene un token válido.",
+      "codeLabel": "Código",
+      "submit": "Confirmar email",
+      "submitting": "Confirmando…",
+      "expiresIn": "Vence en {time}",
+      "codeExpired": "El código venció. Pedí uno nuevo.",
+      "resendCode": "Reenviar código",
+      "resendHint": "¿No te llegó? Revisá la carpeta de spam.",
       "errorFallback": "No pudimos confirmar tu cuenta."
     }
   },
@@ -70,7 +84,7 @@
     "placeholder": "Escribí tu pregunta de café…",
     "questionLabel": "Pregunta",
     "send": "Enviar",
-    "errorFallback": "No pudimos responder. Revisá que el servidor esté corriendo.",
+    "errorFallback": "Uy, no pudimos responder ahora. Probá de nuevo en un momento.",
     "suggestion1": "Si tengo 30 g de café de Colombia y 20 g de agua, ¿cómo me va a quedar?",
     "suggestion2": "¿Cómo hago un cappuccino paso a paso?",
     "suggestion3": "Mi espresso sale muy amargo, ¿qué ajusto?"
@@ -84,6 +98,8 @@
     "nameRequired": "Ingresá tu nombre",
     "nameMax": "El nombre es demasiado largo",
     "confirmPasswordRequired": "Repetí la contraseña",
-    "passwordsMismatch": "Las contraseñas no coinciden"
+    "passwordsMismatch": "Las contraseñas no coinciden",
+    "codeRequired": "Ingresá el código",
+    "codeInvalid": "El código debe tener 6 números"
   }
 }

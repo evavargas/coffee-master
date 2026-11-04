@@ -35,10 +35,17 @@ export const buildResetPasswordSchema = (t: Translate) =>
       path: ["confirmPassword"],
     });
 
+// Shared by the confirm-email and verify-reset-code steps: a 6-digit numeric code.
+export const buildCodeSchema = (t: Translate) =>
+  z.object({
+    code: z.string().trim().min(1, t("codeRequired")).length(6, t("codeInvalid")).regex(/^\d+$/, t("codeInvalid")),
+  });
+
 export type LoginFormValues = z.infer<ReturnType<typeof buildLoginSchema>>;
 export type RegisterFormValues = z.infer<ReturnType<typeof buildRegisterSchema>>;
 export type ForgotPasswordFormValues = z.infer<ReturnType<typeof buildForgotPasswordSchema>>;
 export type ResetPasswordFormValues = z.infer<ReturnType<typeof buildResetPasswordSchema>>;
+export type CodeFormValues = z.infer<ReturnType<typeof buildCodeSchema>>;
 
 // Response shapes returned by the backend. Validated at the API boundary.
 export const tokenResponseSchema = z.object({
@@ -49,6 +56,10 @@ export const tokenResponseSchema = z.object({
 
 export const messageResponseSchema = z.object({ message: z.string() });
 
+// Short-lived JWT returned by verify-reset-code, exchanged for a new password at reset-password.
+// Held only in memory (component/hook state) - never shown to the user.
+export const resetTokenResponseSchema = z.object({ reset_token: z.string() });
+
 export const userPublicSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -57,4 +68,5 @@ export const userPublicSchema = z.object({
 
 export type TokenResponse = z.infer<typeof tokenResponseSchema>;
 export type MessageResponse = z.infer<typeof messageResponseSchema>;
+export type ResetTokenResponse = z.infer<typeof resetTokenResponseSchema>;
 export type UserPublic = z.infer<typeof userPublicSchema>;

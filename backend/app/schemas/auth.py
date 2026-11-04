@@ -18,8 +18,17 @@ class EmailRequest(BaseModel):
     email: EmailStr
 
 
+CODE_PATTERN = r"^\d{6}$"
+
+
 class ConfirmEmailRequest(BaseModel):
-    token: str = Field(min_length=1, max_length=2048)
+    email: EmailStr
+    code: str = Field(pattern=CODE_PATTERN, examples=["123456"])
+
+
+class VerifyResetCodeRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(pattern=CODE_PATTERN, examples=["123456"])
 
 
 class LoginRequest(BaseModel):
@@ -28,8 +37,12 @@ class LoginRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    token: str = Field(min_length=1, max_length=2048)
+    reset_token: str = Field(min_length=1, max_length=2048)
     new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+
+
+class ResetTokenResponse(BaseModel):
+    reset_token: str
 
 
 class TokenResponse(BaseModel):

@@ -16,13 +16,16 @@ Para código y comentarios, aplicar `coding-standards` (inglés siempre).
 - **zod** para esquemas de formularios y de respuestas de la API. Los tipos se infieren de los esquemas (`z.infer`).
 - **react-hook-form** + `@hookform/resolvers/zod` para formularios. Un formulario = un esquema zod.
 - **yup**: no se usa en este proyecto. Zod ya cubre la validación; tener dos librerías de validación genera dos fuentes de verdad.
+- **next-intl** para i18n: mensajes en `messages/{es,en}.json`, `useTranslations()` en componentes y hooks. Las claves de `es`/`en` siempre tienen que coincidir. Español por defecto (cookie `NEXT_LOCALE`), sin prefijo de idioma en la URL.
+- **next-themes** para el tema (sistema/claro/oscuro): variables CSS en `app/globals.css` (`:root` + `.dark`), nunca colores hardcodeados.
 
 ## Hooks para reutilizar lógica
 La lógica de estado y de efectos vive en hooks de `hooks/`, no en componentes:
-- `useAuth`: sesión actual, login, logout, usuario logueado. Lee y escribe el token.
-- `useLoginForm`, `useRegisterForm`, `useForgotPasswordForm`, `useResetPasswordForm`: formulario + llamada + estado de error y de éxito.
+- `useCurrentUser`, `useRequireAuth`: sesión actual y redirect a `/login` si no hay sesión.
+- `useLoginForm`, `useRegisterForm`, `useForgotPasswordForm`: formulario + llamada + estado de error y de éxito.
+- `useConfirmEmailCode`, `useVerifyResetCode`, `useResetPasswordForm`: confirmación de email y recuperación de contraseña por código de 6 dígitos (ver `CLAUDE.md`, sección Auth). `useCountdown`: cuenta regresiva de vencimiento del código.
+- `useResendConfirmation`: reenvío del código de confirmación.
 - `useChat`: mensajes, envío, estado de carga y error.
-- `useRequireAuth`: redirige a `/login` si no hay sesión.
 
 Reglas:
 1. Un componente de página solo compone hooks y markup. Sin `axios` ni `localStorage` directo.
@@ -62,5 +65,5 @@ web/
 
 ## Verificación
 ```bash
-cd web && npm run typecheck && npm run build
+cd web && npm run typecheck && npm run build && npm run test
 ```

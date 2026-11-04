@@ -39,28 +39,42 @@
     },
     "forgotPassword": {
       "title": "Recover password",
-      "description": "We'll send you a link to change it.",
+      "description": "We'll send you a code to change it.",
       "backToLogin": "Back to sign in",
       "emailLabel": "Email",
-      "submit": "Send link",
+      "submit": "Send code",
       "submitting": "Sending…",
       "errorFallback": "We couldn't process the request. Try again later."
     },
     "resetPassword": {
       "title": "New password",
+      "verifyTitle": "Verify the code",
       "goToLogin": "Go to sign in",
+      "codeSentTo": "We sent a code to {email}.",
+      "codeLabel": "Code",
+      "verifySubmit": "Verify code",
+      "verifySubmitting": "Verifying…",
+      "expiresIn": "Expires in {time}",
+      "codeExpired": "The code expired. Ask for a new one.",
+      "resendCode": "Resend code",
+      "resendHint": "Didn't get it? Check your spam folder.",
+      "resending": "Sending…",
       "passwordLabel": "New password",
       "confirmPasswordLabel": "Repeat the password",
       "submit": "Save password",
       "submitting": "Saving…",
-      "invalidToken": "The link doesn't have a valid token.",
+      "verifyErrorFallback": "We couldn't verify the code. Try again.",
+      "resendErrorFallback": "We couldn't resend the code. Try again later.",
       "errorFallback": "We couldn't change your password. Try again."
     },
     "confirmEmail": {
-      "title": "Email confirmation",
-      "goToLogin": "Go to sign in",
-      "pending": "Confirming your account…",
-      "invalidToken": "The link doesn't have a valid token.",
+      "codeLabel": "Code",
+      "submit": "Confirm email",
+      "submitting": "Confirming…",
+      "expiresIn": "Expires in {time}",
+      "codeExpired": "The code expired. Ask for a new one.",
+      "resendCode": "Resend code",
+      "resendHint": "Didn't get it? Check your spam folder.",
       "errorFallback": "We couldn't confirm your account."
     }
   },
@@ -70,7 +84,7 @@
     "placeholder": "Type your coffee question…",
     "questionLabel": "Question",
     "send": "Send",
-    "errorFallback": "We couldn't reply. Check that the server is running.",
+    "errorFallback": "Oops, we couldn't reply right now. Try again in a moment.",
     "suggestion1": "If I have 30 g of Colombian coffee and 20 g of water, how will it turn out?",
     "suggestion2": "How do I make a cappuccino step by step?",
     "suggestion3": "My espresso comes out too bitter, what should I adjust?"
@@ -84,6 +98,8 @@
     "nameRequired": "Enter your name",
     "nameMax": "The name is too long",
     "confirmPasswordRequired": "Repeat the password",
-    "passwordsMismatch": "Passwords don't match"
+    "passwordsMismatch": "Passwords don't match",
+    "codeRequired": "Enter the code",
+    "codeInvalid": "The code must have 6 digits"
   }
 }
