@@ -1,6 +1,6 @@
 ---
 name: coding-standards
-description: Reglas generales de código para todo el proyecto MasterCoffe (inglés en código y comentarios, buenas prácticas, cambios pequeños y verificados). Usala en cualquier tarea que escriba o modifique código, en backend, web o mobile.
+description: Reglas generales de código para todo el proyecto Coffee Master (inglés en código y comentarios, buenas prácticas, cambios pequeños y verificados). Usala en cualquier tarea que escriba o modifique código, en backend, web o mobile.
 ---
 
 # Estándares de código (todo el proyecto)

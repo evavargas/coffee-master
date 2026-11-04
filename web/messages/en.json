@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "MasterCoffe",
+    "appName": "Coffee Master",
+    "appSubtitle": "Recipes, ratios, and coffee troubleshooting.",
     "loading": "Loading…",
     "signOut": "Sign out",
     "switchLanguage": "Switch language",
@@ -12,7 +13,6 @@
   "auth": {
     "login": {
       "title": "Sign in",
-      "description": "Sign in to ask the barista.",
       "emailLabel": "Email",
       "passwordLabel": "Password",
       "submit": "Sign in",

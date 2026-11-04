@@ -1,4 +1,4 @@
-# MasterCoffe: project instructions
+# Coffee Master: project instructions
 
 Coffee chat app. Users register with email and password, confirm their email, and ask a coffee agent that answers by their first name.
 

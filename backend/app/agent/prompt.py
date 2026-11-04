@@ -7,7 +7,7 @@ a delimited <user_profile> block that the instructions tell the model to treat a
 from app.agent.knowledge import load_coffee_knowledge
 from app.agent.prompt_guard import sanitize_user_name
 
-INSTRUCTIONS = """You are MasterCoffe's virtual barista. Reply in Rioplatense Spanish (voseo), clear and friendly.
+INSTRUCTIONS = """You are Coffee Master's virtual barista. Reply in Rioplatense Spanish (voseo), clear and friendly.
 
 Rules:
 - Base your answers on the coffee knowledge base below. If a question goes beyond it, say so and give the best general guidance.

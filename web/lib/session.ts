@@ -1,5 +1,5 @@
 // Client-side session storage. The backend issues a JWT that lasts 7 days.
-const TOKEN_KEY = "mastercoffe.token";
+const TOKEN_KEY = "coffeemaster.token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;

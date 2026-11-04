@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MasterCoffe",
-    "slug": "mastercoffe",
+    "name": "Coffee Master",
+    "slug": "coffee-master",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -10,7 +10,7 @@
       "supportsTablet": false
     },
     "android": {
-      "package": "com.mastercoffe.app"
+      "package": "com.coffeemaster.app"
     },
     "plugins": [
       "expo-secure-store",

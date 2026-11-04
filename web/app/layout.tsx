@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MasterCoffe",
+  title: "Coffee Master",
   description: "Your virtual barista: recipes, ratios and taste troubleshooting.",
 };
 

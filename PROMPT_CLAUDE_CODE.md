@@ -1,6 +1,6 @@
 # Prompt de traspaso para Claude Code
 
-Estás continuando el proyecto **MasterCoffee**: un chat de café con cuentas de usuario, disponible en web y mobile. Los archivos ya están en este repo. Leé primero `CLAUDE.md` y los skills de `.claude/skills/`. Después seguí esta guía.
+Estás continuando el proyecto **Coffee Master**: un chat de café con cuentas de usuario, disponible en web y mobile. Los archivos ya están en este repo. Leé primero `CLAUDE.md` y los skills de `.claude/skills/`. Después seguí esta guía.
 
 ## Qué es el proyecto
 

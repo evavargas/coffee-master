@@ -9,7 +9,7 @@ export default function LoginPage() {
   const t = useTranslations("auth.login");
 
   return (
-    <AuthShell title={t("title")} description={t("description")}>
+    <AuthShell title={t("title")}>
       <LoginForm />
     </AuthShell>
   );

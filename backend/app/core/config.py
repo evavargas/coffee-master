@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     chat_context_messages: int = 40
 
     # Database
-    database_url: str = "sqlite:///./mastercoffee.db"
+    database_url: str = "sqlite:///./coffeemaster.db"
 
     # JWT
     jwt_secret: str
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # (myaccount.google.com/apppasswords), not the account's real password.
     gmail_address: str = ""
     gmail_app_password: str = ""
-    email_from_name: str = "MasterCoffe"
+    email_from_name: str = "Coffee Master"
     # Send emails after responding. Set to false if the host stops the function once it responds.
     email_send_in_background: bool = True
     frontend_url: str = "http://localhost:3000"

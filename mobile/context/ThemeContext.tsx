@@ -44,7 +44,7 @@ export const darkColors: ThemeColors = {
   destructive: "#ff6b60",
 };
 
-const THEME_STORAGE_KEY = "mastercoffe.theme";
+const THEME_STORAGE_KEY = "coffeemaster.theme";
 
 // Cycle order for the toggle button: system -> light -> dark -> system ...
 const PREFERENCE_CYCLE: Record<ThemePreference, ThemePreference> = {

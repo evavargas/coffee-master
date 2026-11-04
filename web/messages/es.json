@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Coffee Master",
+    "appSubtitle": "Café de especialidad y barismo",
     "loading": "Cargando…",
     "signOut": "Salir",
     "switchLanguage": "Cambiar idioma",
@@ -12,7 +13,6 @@
   "auth": {
     "login": {
       "title": "Iniciar sesión",
-      "description": "Café de especialidad y barismo",
       "emailLabel": "Email",
       "passwordLabel": "Contraseña",
       "submit": "Iniciar sesión",

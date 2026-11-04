@@ -34,7 +34,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
-        title="MasterCoffe API",
+        title="Coffee Master API",
         version="0.3.0",
         description="Coffee agent API with email-confirmed accounts. Full endpoint reference: backend/README.md.",
         lifespan=lifespan,

@@ -1,6 +1,6 @@
 ---
 name: python-fastapi-backend
-description: Buenas prácticas para el backend Python de MasterCoffe (FastAPI, Pydantic v2, SQLAlchemy, JWT, Gmail SMTP, agente Claude). Usala al crear o modificar endpoints, servicios, modelos, el agente o los tests en backend/. Incluye la documentación obligatoria de endpoints.
+description: Buenas prácticas para el backend Python de Coffee Master (FastAPI, Pydantic v2, SQLAlchemy, JWT, Gmail SMTP, agente Claude). Usala al crear o modificar endpoints, servicios, modelos, el agente o los tests en backend/. Incluye la documentación obligatoria de endpoints.
 ---
 
 # Backend Python (FastAPI)

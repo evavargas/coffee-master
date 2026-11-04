@@ -1,4 +1,4 @@
-# MasterCoffe backend
+# Coffee Master backend
 
 FastAPI service: email-confirmed accounts (JWT sessions of 7 days) and the coffee agent.
 Interactive docs with the same information: `http://localhost:8000/docs`.
@@ -24,10 +24,10 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, GMAIL_AD
 | `CHAT_CONTEXT_MESSAGES` | no | Last N stored messages sent to the model each turn. Default 40. |
 | `VERIFICATION_CODE_COOLDOWN_SECONDS` | no | Minimum gap between codes for one (user, purpose). Default 60. |
 | `VERIFICATION_CODE_MAX_PER_HOUR` | no | Max codes per (user, purpose) per rolling hour. Default 5. |
-| `DATABASE_URL` | no | Defaults to `sqlite:///./mastercoffee.db`. |
+| `DATABASE_URL` | no | Defaults to `sqlite:///./coffeemaster.db`. |
 | `GMAIL_ADDRESS` | for email | The Gmail account codes are sent from. Without it, codes are not delivered (failures are logged; endpoints still answer as usual). |
 | `GMAIL_APP_PASSWORD` | for email | A Google "app password" for `GMAIL_ADDRESS` (myaccount.google.com/apppasswords), not the account's real password. Requires 2-Step Verification on that Google account. |
-| `EMAIL_FROM_NAME` | no | Display name shown in emails. Defaults to `MasterCoffe`. The `From` address itself is always `GMAIL_ADDRESS` — Gmail's SMTP relay rejects sending as a different address. |
+| `EMAIL_FROM_NAME` | no | Display name shown in emails. Defaults to `Coffee Master`. The `From` address itself is always `GMAIL_ADDRESS` — Gmail's SMTP relay rejects sending as a different address. |
 | `EMAIL_SEND_IN_BACKGROUND` | no | Defaults to `true`: emails go out after the response. Set to `false` if codes stop arriving in production. |
 | `FRONTEND_URL` | yes | Base URL of the frontend app. Not used to build email links anymore (confirmation and reset now use 6-digit codes), kept for other frontend-facing uses. |
 | `CORS_ORIGINS` | no | Comma-separated allowed origins. |

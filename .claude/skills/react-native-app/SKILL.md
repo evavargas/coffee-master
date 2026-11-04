@@ -1,6 +1,6 @@
 ---
 name: react-native-app
-description: Reglas para la app móvil de MasterCoffe en mobile/ (Expo, React Native, TypeScript). Hooks para la lógica, axios para HTTP, zod y react-hook-form para formularios, sesión en SecureStore. Usala al crear o tocar pantallas, hooks o llamadas a la API en mobile/.
+description: Reglas para la app móvil de Coffee Master en mobile/ (Expo, React Native, TypeScript). Hooks para la lógica, axios para HTTP, zod y react-hook-form para formularios, sesión en SecureStore. Usala al crear o tocar pantallas, hooks o llamadas a la API en mobile/.
 ---
 
 # App móvil: React Native + Expo

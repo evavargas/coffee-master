@@ -1,6 +1,6 @@
 ---
 name: frontend-react-nextjs
-description: Reglas para el frontend de MasterCoffe en web/ (Next.js App Router, React, TypeScript). Hooks para reutilizar lógica, shadcn/ui para componentes, axios para HTTP, zod para validación. Usala al crear o modificar páginas, componentes, hooks o llamadas a la API.
+description: Reglas para el frontend de Coffee Master en web/ (Next.js App Router, React, TypeScript). Hooks para reutilizar lógica, shadcn/ui para componentes, axios para HTTP, zod para validación. Usala al crear o modificar páginas, componentes, hooks o llamadas a la API.
 ---
 
 # Frontend: React + Next.js + TypeScript

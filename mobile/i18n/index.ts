@@ -5,7 +5,7 @@ import { initReactI18next } from "react-i18next";
 import en from "@/i18n/locales/en.json";
 import es from "@/i18n/locales/es.json";
 
-export const LOCALE_STORAGE_KEY = "mastercoffe.locale";
+export const LOCALE_STORAGE_KEY = "coffeemaster.locale";
 export const DEFAULT_LOCALE = "es";
 export const SUPPORTED_LOCALES = ["es", "en"] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];

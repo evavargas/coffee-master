@@ -299,7 +299,7 @@ def send_confirmation_email(sender: EmailSender, user: User, code: str) -> None:
     settings = get_settings()
     sender.send(
         to=user.email,
-        subject="Confirmá tu cuenta de MasterCoffe",
+        subject="Confirmá tu cuenta de Coffee Master",
         html=(
             f"<p>Hola {escape(user.name)}, gracias por registrarte.</p>"
             f'<p>Tu código de confirmación es: <strong id="verification-code">{code}</strong></p>'
@@ -312,7 +312,7 @@ def send_reset_email(sender: EmailSender, user: User, code: str) -> None:
     settings = get_settings()
     sender.send(
         to=user.email,
-        subject="Recuperá tu contraseña de MasterCoffe",
+        subject="Recuperá tu contraseña de Coffee Master",
         html=(
             f"<p>Hola {escape(user.name)}, recibimos un pedido para cambiar tu contraseña.</p>"
             f'<p>Tu código para cambiar la contraseña es: <strong id="verification-code">{code}</strong></p>'

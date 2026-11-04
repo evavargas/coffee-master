@@ -1,6 +1,6 @@
-# MasterCoffe
+# Coffee Master
 
-MasterCoffe es un chat para aprender a preparar mejor café en casa. Le preguntás a un barista virtual y te responde por tu nombre, en español y con consejos concretos.
+Coffee Master es un chat para aprender a preparar mejor café en casa. Le preguntás a un barista virtual y te responde por tu nombre, en español y con consejos concretos.
 
 ## Qué podés hacer
 
