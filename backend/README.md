@@ -17,7 +17,7 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, RESEND_A
 |---|---|---|
 | `JWT_SECRET` | yes | Signs all tokens. Generate a long random value. |
 | `ANTHROPIC_API_KEY` | for chat | Key for the Claude API. |
-| `ANTHROPIC_MODEL` | no | Defaults to `claude-sonnet-5-5`. |
+| `ANTHROPIC_MODEL` | no | Defaults to `claude-sonnet-5`. |
 | `DATABASE_URL` | no | Defaults to `sqlite:///./mastercoffee.db`. |
 | `RESEND_API_KEY` | for email | Resend API key. Without it, registration returns 503. |
 | `EMAIL_FROM` | no | Sender shown in emails. Use a domain verified in Resend in production. |

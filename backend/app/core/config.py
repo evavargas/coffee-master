@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     # Anthropic (chat agent)
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-5-5"
+    anthropic_model: str = "claude-sonnet-5"
 
     # Database
     database_url: str = "sqlite:///./mastercoffee.db"

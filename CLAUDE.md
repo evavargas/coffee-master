@@ -3,7 +3,7 @@
 Coffee chat app. Users register with email and password, confirm their email, and ask a coffee agent that answers by their first name.
 
 ## Structure
-- `knowledge/cafe/`: agent memory (markdown, includes `recetario/`). The only knowledge the chat reads.
+- `backend/knowledge/cafe/`: agent memory (markdown, includes `recetario/`). The only knowledge the chat reads.
 - `knowledge/_fuentes/`: raw source notes. Never loaded by the backend.
 - `backend/`: FastAPI. Auth (JWT, 7-day sessions), email confirmation and password reset via a 6-digit code sent with Resend, and the chat endpoint. Endpoint reference in `backend/README.md`.
 - `backend/evals/casos.json`: chat test cases, including prompt-injection cases.
@@ -15,7 +15,7 @@ Coffee chat app. Users register with email and password, confirm their email, an
   - `python-fastapi-backend`: backend rules and endpoint documentation.
   - `frontend-react-nextjs`: frontend rules (hooks, shadcn, axios, zod). For visual design also use `anthropic-skills:frontend-design`.
   - `prompt-injection-guard`: security rules for the agent.
-  - `coffee-knowledge`: how to maintain `knowledge/cafe/`.
+  - `coffee-knowledge`: how to maintain `backend/knowledge/cafe/`.
   - `evaluar-respuestas-cafe`: evaluates the chat against `casos.json`.
   - `react-native-app`: mobile rules.
 

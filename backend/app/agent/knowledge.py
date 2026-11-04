@@ -1,4 +1,4 @@
-"""Loads the coffee knowledge base (the agent's memory) from knowledge/cafe/**/*.md.
+"""Loads the coffee knowledge base (the agent's memory) from backend/knowledge/cafe/**/*.md.
 
 Raw sources in knowledge/_fuentes/ are outside cafe/ and are never loaded.
 """
@@ -6,7 +6,7 @@ Raw sources in knowledge/_fuentes/ are outside cafe/ and are never loaded.
 from functools import lru_cache
 from pathlib import Path
 
-KNOWLEDGE_DIR = Path(__file__).resolve().parents[3] / "knowledge" / "cafe"
+KNOWLEDGE_DIR = Path(__file__).resolve().parents[2] / "knowledge" / "cafe"
 
 
 @lru_cache(maxsize=1)

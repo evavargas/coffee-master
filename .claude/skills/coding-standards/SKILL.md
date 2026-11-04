@@ -8,7 +8,7 @@ description: Reglas generales de código para todo el proyecto MasterCoffe (ingl
 ## Idioma
 - **Código y comentarios siempre en inglés**: nombres de variables, funciones, clases, archivos, tests, mensajes de commit y comentarios.
 - Las cadenas que ve el usuario final (textos del chat, mensajes de error de la UI, mails) van en **español rioplatense**. Eso es contenido, no código.
-- Los documentos de `knowledge/cafe/` van en español porque son contenido para el agente.
+- Los documentos de `backend/knowledge/cafe/` van en español porque son contenido para el agente.
 
 ## Calidad
 - Cambios pequeños y enfocados. Una tarea, un cambio revisable.

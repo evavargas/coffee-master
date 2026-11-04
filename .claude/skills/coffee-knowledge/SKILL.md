@@ -1,19 +1,19 @@
 ---
 name: coffee-knowledge
-description: Cómo mantener la base de conocimiento de café (knowledge/cafe/*.md), que es la memoria del agente. Usala al agregar, corregir o validar recetas, ratios, tiempos o temperaturas.
+description: Cómo mantener la base de conocimiento de café (backend/knowledge/cafe/*.md), que es la memoria del agente. Usala al agregar, corregir o validar recetas, ratios, tiempos o temperaturas.
 ---
 
 # Conocimiento de café (memoria del agente)
 
 ## Dónde vive
-- `knowledge/cafe/**/*.md`: lo que carga el chat. El backend lee todas las subcarpetas en orden alfabético por ruta (ver `backend/app/knowledge.py`).
+- `backend/knowledge/cafe/**/*.md`: lo que carga el chat. El backend lee todas las subcarpetas en orden alfabético por ruta (ver `backend/app/knowledge.py`).
   - `01` a `09`: conceptos generales (granos, molienda, ratios, espresso, bebidas, diagnóstico, cálculos).
   - `recetario/10` a `15`: equipo, recetas validadas por método, cafés de referencia y reglas aprendidas.
   - `recetario/en-prueba.md`: ideas sin validar. El chat las presenta como "en prueba".
 - `knowledge/_fuentes/`: copias crudas del proyecto de Claude. **No se cargan.** Ver su README.
 
 ## Cómo agregar un tema
-1. Crear el archivo en `knowledge/cafe/` (o en `recetario/`) con un título `#` y secciones `##`. Usar prefijo numérico para el orden.
+1. Crear el archivo en `backend/knowledge/cafe/` (o en `recetario/`) con un título `#` y secciones `##`. Usar prefijo numérico para el orden.
 2. Usar **números concretos**: gramos, ml, °C, segundos, rangos y ratio. Evitar frases vagas.
 3. Unidades siempre explícitas (g, ml, °C, s, bar).
 4. Si hay un cálculo, dejar la fórmula y un ejemplo resuelto.

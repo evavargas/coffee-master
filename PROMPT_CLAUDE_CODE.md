@@ -4,7 +4,7 @@ Estás continuando el proyecto **MasterCoffee**: un chat de café con cuentas de
 
 ## Qué es el proyecto
 
-- **Agente de café**: responde preguntas de recetas, ratios y diagnóstico de sabor. Su memoria son los markdown de `knowledge/cafe/` (la carpeta `_fuentes/` no se carga). Responde en español rioplatense (voseo) y llama al usuario por su nombre.
+- **Agente de café**: responde preguntas de recetas, ratios y diagnóstico de sabor. Su memoria son los markdown de `backend/knowledge/cafe/` (la carpeta `_fuentes/` no se carga). Responde en español rioplatense (voseo) y llama al usuario por su nombre.
 - **Backend** (`backend/`): FastAPI, SQLAlchemy con SQLite, JWT de 7 días, registro con confirmación de email por código de 6 dígitos, recuperación de contraseña en dos pasos (verificar código → cambiar contraseña), chat con Claude (SDK `anthropic`), rate limiting por IP y guard contra prompt injection. Endpoints documentados en `backend/README.md`.
 - **Web** (`web/`): Next.js App Router + React + TypeScript, shadcn/ui, axios, zod, react-hook-form. Login, registro, recuperación de contraseña y chat completos. i18n (next-intl, español por defecto + inglés) y tema claro/oscuro/sistema (next-themes).
 - **Mobile** (`mobile/`): Expo SDK 58 + React Native + TypeScript. Misma funcionalidad que la web: login, registro, recuperación de contraseña y chat, con el mismo flujo de código de 6 dígitos (sin deep linking: el usuario copia el código del mail y lo pega en la pantalla de la app, sea cual sea). i18n (react-i18next) y tema claro/oscuro/sistema (contexto propio). No se publica en tiendas, es para desarrollo y pruebas vía Expo Go.
@@ -27,7 +27,7 @@ Estás continuando el proyecto **MasterCoffee**: un chat de café con cuentas de
 - Web: `npm run typecheck`, `npm run build` y `npm run test` (35 tests) pasan.
 - Mobile: `npm run typecheck` y `npm run test` (22 tests) pasan. La app base (login + chat) se probó en un dispositivo Android real y funciona. Las pantallas nuevas de registro/recuperación de contraseña (recién agregadas) **todavía no se probaron en el dispositivo**, solo por tests automatizados y lectura de código.
 - Scroll del chat: tenía un bug real (los mensajes nuevos no hacían auto-scroll) en web y mobile, corregido. Verificado por typecheck/tests; no se verificó visualmente en navegador ni dispositivo en esta sesión.
-- Knowledge: `knowledge/cafe/` está consolidado y ordenado. Hay contradicciones de contenido sin resolver (ver abajo). No se tocó esta sesión.
+- Knowledge: `backend/knowledge/cafe/` está consolidado y ordenado. Hay contradicciones de contenido sin resolver (ver abajo). No se tocó esta sesión.
 
 ## Cómo verificar
 
@@ -60,5 +60,5 @@ cd mobile && npm start      # Expo Go
 ## Lo que NO hagas sin preguntarme
 
 - Llamar al modelo o enviar mails reales en bucle.
-- Cambiar `knowledge/cafe/` para resolver las contradicciones de arriba.
+- Cambiar `backend/knowledge/cafe/` para resolver las contradicciones de arriba.
 - Commit, push o cambios de deploy.

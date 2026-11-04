@@ -1,12 +1,12 @@
 ---
 name: evaluar-respuestas-cafe
-description: Evalúa las respuestas del chat de café contra los casos de prueba (backend/evals/casos.json) y contra la base de conocimiento. Usala cuando cambie knowledge/cafe/, el prompt del agente o el modelo, o cuando el usuario pida revisar si el chat responde bien.
+description: Evalúa las respuestas del chat de café contra los casos de prueba (backend/evals/casos.json) y contra la base de conocimiento. Usala cuando cambie backend/knowledge/cafe/, el prompt del agente o el modelo, o cuando el usuario pida revisar si el chat responde bien.
 ---
 
 # Evaluar respuestas del chat de café
 
 ## Cuándo usarla
-- Después de cambiar `knowledge/cafe/` (recetas, ratios, tiempos).
+- Después de cambiar `backend/knowledge/cafe/` (recetas, ratios, tiempos).
 - Después de cambiar `backend/app/agent.py` (prompt) o `ANTHROPIC_MODEL`.
 - Antes de desplegar.
 
@@ -18,7 +18,7 @@ Cada caso de `backend/evals/casos.json` tiene:
 - `criterio`: qué respuesta correcta esperamos, en palabras.
 
 Además de los textos, revisar a mano:
-1. **Exactitud numérica**: ratios, gramos, ml, °C y segundos. Comparar con `knowledge/cafe/`.
+1. **Exactitud numérica**: ratios, gramos, ml, °C y segundos. Comparar con `backend/knowledge/cafe/`.
 2. **Uso de la base**: la respuesta sale del conocimiento y no inventa recetas.
 3. **Cálculos**: ratio = agua ÷ café; agua retenida ≈ 2 × dosis.
 4. **Honestidad**: si la fuente se contradice o el dato está en prueba, lo dice.
@@ -46,7 +46,7 @@ curl -s -X POST http://localhost:8000/api/chat \
 Terminar con: total de casos, cuántos pasan, y los fallos con la respuesta exacta.
 
 ## Qué hacer con un fallo
-- **Fallo de dato** (número o receta incorrecta): corregir en `knowledge/cafe/` con el subagente `coffee-expert`, no en el prompt.
+- **Fallo de dato** (número o receta incorrecta): corregir en `backend/knowledge/cafe/` con el subagente `coffee-expert`, no en el prompt.
 - **Fallo de comportamiento** (inventa, no advierte contradicciones, no sigue el estilo): ajustar `INSTRUCTIONS` en `backend/app/agent.py`.
 - **Caso mal planteado** (el criterio no coincide con el conocimiento): corregir el caso, no la respuesta.
 - No cambiar el conocimiento para que pase un caso sin antes verificar la fuente.

@@ -4,6 +4,7 @@ anthropic>=0.40
 pydantic>=2.7
 pydantic-settings>=2.4
 sqlalchemy>=2.0
+psycopg[binary]>=3.2
 pyjwt>=2.9
 pwdlib[argon2]>=0.2
 resend>=2.0
