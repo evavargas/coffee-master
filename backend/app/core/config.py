@@ -10,7 +10,9 @@ class Settings(BaseSettings):
 
     # Anthropic (chat agent)
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-5"
+    # The cheapest current model, at low effort, to keep the cost per message down.
+    anthropic_model: str = "claude-haiku-5-5"
+    anthropic_effort: str = "low"
     anthropic_timeout_seconds: float = 120
 
     # Chat limits

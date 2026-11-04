@@ -174,10 +174,24 @@ def test_retry_after_an_error_does_not_burn_quota(client, token, anthropic_clien
     assert parse_sse(send(client, token).text)[-1] == ("done", {})
 
 
-def test_empty_model_reply_is_an_error(client, token, anthropic_client, db_engine):
+def test_a_reply_with_no_text_ends_with_a_message_and_counts_for_the_quota(client, token, anthropic_client, db_engine, monkeypatch):
+    # Reasoning can use up max_tokens before any text is written. That turn was billed.
+    monkeypatch.setattr(get_settings(), "chat_daily_message_limit", 1)
     anthropic_client.chunks = ("",)
-    assert parse_sse(send(client, token).text)[-1] == ("error", {"code": "model_unavailable"})
-    assert stored_messages(db_engine) == []
+
+    events = parse_sse(send(client, token).text)
+    assert events[-2:] == [("replace", {"text": chat_service.INCOMPLETE_REPLY}), ("done", {})]
+    assert [role for role, _ in stored_messages(db_engine)] == ["user", "assistant"]
+    assert stored_messages(db_engine)[-1] == ("assistant", chat_service.INCOMPLETE_REPLY)
+    assert send(client, token).status_code == 429
+
+
+def test_the_model_call_sets_the_cost_controls(client, token, anthropic_client):
+    send(client, token)
+    call = anthropic_client.calls[-1]
+    assert call["model"] == get_settings().anthropic_model
+    assert call["output_config"] == {"effort": get_settings().anthropic_effort}
+    assert call["max_tokens"] == chat_service.MAX_TOKENS
 
 
 def test_marker_split_across_deltas_is_never_emitted(client, token, anthropic_client, db_engine):

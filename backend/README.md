@@ -17,7 +17,8 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, GMAIL_AD
 |---|---|---|
 | `JWT_SECRET` | yes | Signs all tokens. Generate a long random value. |
 | `ANTHROPIC_API_KEY` | for chat | Key for the Claude API. |
-| `ANTHROPIC_MODEL` | no | Defaults to `claude-sonnet-5`. |
+| `ANTHROPIC_MODEL` | no | Defaults to `claude-haiku-5-5`, the cheapest current model. |
+| `ANTHROPIC_EFFORT` | no | Defaults to `low`. Higher effort reasons more and spends more tokens. |
 | `ANTHROPIC_TIMEOUT_SECONDS` | no | Request timeout for the Claude client. Default 120. |
 | `CHAT_DAILY_MESSAGE_LIMIT` | no | User messages per user per UTC day. Default 50. |
 | `CHAT_CONTEXT_MESSAGES` | no | Last N stored messages sent to the model each turn. Default 40. |
@@ -65,6 +66,8 @@ The server stores the history: the client sends only the new message. Before the
 | `replace` | `{"text": str}` | Replace the whole assistant bubble (the output guard blocked a leak). |
 | `done` | `{}` | Terminal, success. |
 | `error` | `{"code": "model_busy" \| "model_unavailable"}` | Terminal, failure. `model_busy` is Anthropic 429/529; everything else is `model_unavailable`. Details are only logged. |
+
+If the model finishes without writing any text (for example, reasoning used up `max_tokens`), the turn ends with `replace` and `done`: the reply is a short message, and the turn is stored and counts for the quota because it was billed.
 
 Persistence: the user message is committed before the model is called (so disconnecting cannot dodge the daily quota). On success the assistant's guarded text is saved. On a model error the user message is deleted (a retry does not duplicate it or burn quota). On client disconnect the user message stays and no partial reply is saved. No database connection is held while the model streams.
 

@@ -25,8 +25,10 @@ from app.models.user import utc_now
 
 logger = logging.getLogger(__name__)
 
-# Extra headroom: reasoning blocks also consume this budget, not only the visible text.
-MAX_TOKENS = 4096
+# Hidden reasoning also consumes this budget, so it has to leave room for the visible text.
+MAX_TOKENS = 8000
+
+INCOMPLETE_REPLY = "No pude completar la respuesta. Probá con una pregunta más concreta."
 
 ERROR_MODEL_BUSY = "model_busy"
 ERROR_MODEL_UNAVAILABLE = "model_unavailable"
@@ -45,10 +47,6 @@ class DailyLimitReachedError(Exception):
     def __init__(self, retry_after_seconds: int) -> None:
         super().__init__("Daily message limit reached")
         self.retry_after_seconds = retry_after_seconds
-
-
-class EmptyReplyError(Exception):
-    pass
 
 
 @dataclass(frozen=True)
@@ -195,6 +193,7 @@ async def stream_turn(
         async with client.messages.stream(
             model=get_settings().anthropic_model,
             max_tokens=MAX_TOKENS,
+            output_config={"effort": get_settings().anthropic_effort},
             system=build_system_blocks(user_name),
             messages=turn.context,
         ) as stream:
@@ -210,8 +209,11 @@ async def stream_turn(
 
         tail = guard.finish()
         reply = SAFE_LEAK_REPLY if guard.blocked else "".join(parts) + tail
-        if not reply.strip():
-            raise EmptyReplyError
+        # The model ran and was billed, so this is a real turn: it stays stored and counts for the quota.
+        incomplete = not reply.strip()
+        if incomplete:
+            logger.warning("The model produced no text; answering with the incomplete-reply message")
+            reply = INCOMPLETE_REPLY
         await run_in_threadpool(_save_assistant_message, session_factory, turn.conversation_id, reply)
     except Exception as exc:
         logger.exception("Chat turn failed (%s)", type(exc).__name__)
@@ -222,8 +224,8 @@ async def stream_turn(
         yield "error", {"code": error_code_for(exc)}
         return
 
-    if guard.blocked:
-        yield "replace", {"text": SAFE_LEAK_REPLY}
+    if guard.blocked or incomplete:
+        yield "replace", {"text": reply}
     elif tail:
         yield "delta", {"text": tail}
     yield "done", {}

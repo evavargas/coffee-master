@@ -36,7 +36,8 @@ Ese valor es `JWT_SECRET` en producción.
 | `DATABASE_URL` | la URL de Supabase del paso 1 |
 | `JWT_SECRET` | el secreto del paso 3 |
 | `ANTHROPIC_API_KEY` | tu clave de Anthropic |
-| `ANTHROPIC_MODEL` | `claude-sonnet-5-5` (opcional) |
+| `ANTHROPIC_MODEL` | `claude-haiku-5-5` (opcional). Es el valor por defecto y el más económico. Esta variable tiene prioridad sobre el código |
+| `ANTHROPIC_EFFORT` | `low` (opcional). Subirlo mejora el razonamiento, pero gasta más tokens |
 | `GMAIL_ADDRESS` | la cuenta de Gmail del paso 2 |
 | `GMAIL_APP_PASSWORD` | la contraseña de aplicación del paso 2 |
 | `FRONTEND_URL` | URL de la web de producción (paso 5) |
