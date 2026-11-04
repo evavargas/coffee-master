@@ -14,7 +14,7 @@ import {
 import { ArrowUp, SquarePen } from "lucide-react-native";
 
 import { useAppTheme } from "@/context/ThemeContext";
-import { MarkdownMessage } from "@/components/chat/MarkdownMessage";
+import { AssistantMessage } from "@/components/chat/AssistantMessage";
 import { useChat } from "@/hooks/useChat";
 import { chatMessageMaxLength } from "@/lib/api/chat";
 
@@ -91,10 +91,10 @@ export function ChatScreen() {
           keyExtractor={(_, index) => String(index)}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.listContent}
-          // Fires on every delta too, since the growing bubble changes the content
-          // height, so a streaming reply never ends up scrolled out of sight.
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
-          renderItem={({ item }) => (
+          // Fires as the reply is revealed too, since the growing bubble changes the content height,
+          // so it never ends up out of sight. Not animated: scroll animations this frequent fight each other.
+          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+          renderItem={({ item, index }) => (
             <View
               style={[
                 styles.bubble,
@@ -106,7 +106,7 @@ export function ChatScreen() {
               ) : item.content === "" ? (
                 <ActivityIndicator color={colors.primary} accessibilityLabel={t("common.loading")} />
               ) : (
-                <MarkdownMessage content={item.content} />
+                <AssistantMessage content={item.content} isStreaming={isLoading && index === messages.length - 1} />
               )}
             </View>
           )}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowUp, LoaderCircle, Plus } from "lucide-react";
 
-import { MarkdownMessage } from "@/components/chat/MarkdownMessage";
+import { AssistantMessage } from "@/components/chat/AssistantMessage";
 import { Button } from "@/components/ui/button";
 import { useAutoResizeTextarea } from "@/hooks/useAutoResizeTextarea";
 import { useChat } from "@/hooks/useChat";
@@ -32,6 +32,11 @@ export function ChatView() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: isLoading ? "auto" : "smooth" });
   }, [messages, isLoading]);
+
+  // The reply is revealed gradually, also after the stream ends, so the list follows the visible text.
+  const scrollToBottom = useCallback(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
+  }, []);
 
   // Clears the input right away; if the send fails the text is put back (unless the user already typed something new).
   async function sendAndRestore(text: string) {
@@ -67,7 +72,7 @@ export function ChatView() {
           {t("newConversation")}
         </Button>
       </div>
-      <div ref={scrollRef} aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+      <div ref={scrollRef} aria-live="polite" aria-busy={isLoading} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
         {isLoadingHistory && (
           <p role="status" className="self-start text-sm text-muted-foreground">
             {t("loadingHistory")}
@@ -99,7 +104,15 @@ export function ChatView() {
                 : "self-start bg-muted",
             )}
           >
-            {message.role === "user" ? message.content : <MarkdownMessage content={message.content} />}
+            {message.role === "user" ? (
+              message.content
+            ) : (
+              <AssistantMessage
+                content={message.content}
+                isStreaming={isLoading && index === messages.length - 1}
+                onGrow={scrollToBottom}
+              />
+            )}
           </div>
           ),
         )}

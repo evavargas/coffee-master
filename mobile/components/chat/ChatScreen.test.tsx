@@ -90,7 +90,8 @@ describe("ChatScreen", () => {
     );
     await rerender(<ChatScreen />);
     expect(spinners()).toBe(0);
-    expect(screen.getByText("Un cortado")).toBeTruthy();
+    // The reply is revealed gradually, so wait for it.
+    expect(await screen.findByText("Un cortado")).toBeTruthy();
   });
 
   it("disables the new conversation control while sending", async () => {
