@@ -20,14 +20,14 @@
     "expo-splash-screen": "~58.0.13",
     "expo-status-bar": "~58.0.4",
     "i18next": "^25.0.0",
-    "lucide-react-native": "^1.67.0",
+    "lucide-react-native": "^1.69.0",
     "react": "19.3.0",
     "react-hook-form": "^7.60.0",
     "react-i18next": "^15.0.0",
     "react-native": "0.88.1",
     "react-native-markdown-display": "^7.0.2",
     "react-native-safe-area-context": "^5.11.1",
-    "react-native-svg": "^15.16.0",
+    "react-native-svg": "15.16.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
