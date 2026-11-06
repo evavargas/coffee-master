@@ -53,6 +53,10 @@
     },
     "react-i18next": {
       "typescript": "$typescript"
-    }
+    },
+    "react-native-markdown-display": {
+      "markdown-it": "^14.3.3"
+    },
+    "linkify-it": "^5.0.2"
   }
 }
