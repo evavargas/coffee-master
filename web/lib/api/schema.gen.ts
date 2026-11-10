@@ -185,10 +185,35 @@ export interface paths {
          *     - `start` `{"conversation_id": int}`: always first.
          *     - `delta` `{"text": str}`: zero or more; append to the assistant bubble.
          *     - `replace` `{"text": str}`: replace the whole assistant bubble with this text (a guard blocked a leak).
+         *     - `recipe` `{"proposal_id": int, "recipe": RecipeData}`: at most one, after the last `delta` and before `done`. Sent only when the model proposed a recipe and it passed validation. Nothing is saved to the user's book: the client saves it with `POST /api/me/recipes {"proposal_id"}`.
          *     - `done` `{}`: terminal, success.
          *     - `error` `{"code": "model_busy" | "model_unavailable"}`: terminal, failure. The user message is not kept, so a retry does not duplicate it.
          */
         post: operations["chat_api_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the caller's conversations
+         * @description Only the caller's conversations, most recent activity first (last message, or creation time when empty; ties broken by newest id). `total` counts all of them. Invalid `limit` or `offset` give 422. Requires a bearer token.
+         */
+        get: operations["list_conversations_api_conversations_get"];
+        put?: never;
+        /**
+         * Start an empty conversation
+         * @description Creates a conversation, optionally about a recipe: `recipe_ref` is `{kind: "catalog", ref: slug}` (a validated recipe, or an archived one the caller saved, as in `GET /api/recipes/{slug}`) or `{kind: "user", ref: id}` (one of the caller's own recipes). Unknown, unavailable, foreign or mismatched-type refs (for example a number for a catalog ref, or a boolean) all answer the same 404. The new conversation is empty, so `/latest` does not return it: open it by id with `GET /{id}`. Extra body fields give 422. Requires a bearer token.
+         */
+        post: operations["create_conversation_api_conversations_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -204,9 +229,29 @@ export interface paths {
         };
         /**
          * Get the latest conversation
-         * @description Returns the conversation holding the user's most recent message, with its messages in chronological order. `conversation_id` is null and `messages` is empty when the user has none. Requires a bearer token.
+         * @description Returns the conversation holding the user's most recent message, with its messages in chronological order, plus its `recipe_ref` (same shape as `GET /{id}`, null when none). `conversation_id` and `recipe_ref` are null and `messages` is empty when the user has no conversation. Requires a bearer token.
          */
         get: operations["latest_conversation_api_conversations_latest_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one conversation
+         * @description The conversation's recipe ref and its messages in chronological order; assistant messages may carry a `proposal`. An unknown id and another user's id give the same 404. Requires a bearer token.
+         */
+        get: operations["get_conversation_api_conversations__conversation_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -235,10 +280,212 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/library/catalog/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save a catalog recipe to my book
+         * @description Idempotent: saving an already saved recipe is also 204 and keeps its favorite flag. An unknown slug, a recipe that is not validated, or an archived recipe the caller has not saved gives the same 404. Requires a bearer token.
+         */
+        put: operations["save_recipe_api_me_library_catalog__slug__put"];
+        post?: never;
+        /**
+         * Remove a catalog recipe from my book
+         * @description Idempotent for an active recipe: removing one that is not in the book is also 204. Works for an archived recipe the caller saved; an archived recipe the caller never saved, or an unknown slug, gives 404. Requires a bearer token.
+         */
+        delete: operations["remove_recipe_api_me_library_catalog__slug__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Favorite or unfavorite a catalog recipe
+         * @description `is_favorite: true` saves the recipe if needed and marks it favorite. `false` keeps a saved recipe saved and is a no-op for one that is not saved (`is_saved: false`). Same 404 rules as saving. Requires a bearer token.
+         */
+        patch: operations["favorite_recipe_api_me_library_catalog__slug__patch"];
+        trace?: never;
+    };
+    "/api/me/recipes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List my book
+         * @description The caller's created recipes and saved catalog recipes, most recent activity first. `filter`: `all` (default), `favorites` (both kinds), `created` (own recipes) or `saved` (catalog). Each item is `{kind, recipe}`. `total` counts every match, a page can hold fewer than `limit` items if a stored recipe is unreadable. Order uses `updated_at` for own recipes and `saved_at` for saved ones, so favoriting never reorders the list. Requires a bearer token.
+         */
+        get: operations["list_book_api_me_recipes_get"];
+        put?: never;
+        /**
+         * Create a recipe in my book
+         * @description Body is exactly one of `{recipe}` (a private recipe, `parent` null) or `{proposal_id, overrides?}` (copies the chat proposal, merges the partial `overrides` over it (shallow: a top-level key replaces the whole value, nested objects are not merged), validates the result, sets `parent` from the conversation's recipe and `conversation_id`, and marks the proposal saved). Saving the same proposal again answers 200 with the recipe saved the first time and ignores `overrides`. A proposal that is not the caller's, or unknown, is 404. Requires a bearer token.
+         */
+        post: operations["create_recipe_api_me_recipes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/recipes/{recipe_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read one of my recipes
+         * @description Another user's recipe, an unknown id and an unreadable stored recipe all give the same 404. Requires a bearer token.
+         */
+        get: operations["get_recipe_api_me_recipes__recipe_id__get"];
+        /**
+         * Replace one of my recipes
+         * @description Full replace of the recipe fields; `parent`, `conversation_id` and `is_favorite` are kept. Same 404 rules as reading. Requires a bearer token.
+         */
+        put: operations["replace_recipe_api_me_recipes__recipe_id__put"];
+        post?: never;
+        /**
+         * Delete one of my recipes
+         * @description Not idempotent: deleting a missing or foreign recipe is 404. An unreadable stored recipe can still be deleted (204). Conversations and proposals that pointed at it keep existing without the link. Requires a bearer token.
+         */
+        delete: operations["delete_recipe_api_me_recipes__recipe_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Favorite or unfavorite one of my recipes
+         * @description Body is exactly `{is_favorite: bool}`; does not change `updated_at`. Same 404 rules as reading, with no side effect on 404. Requires a bearer token.
+         */
+        patch: operations["favorite_user_recipe_api_me_recipes__recipe_id__patch"];
+        trace?: never;
+    };
+    "/api/recipes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List catalog recipes
+         * @description Validated, non-archived catalog recipes ordered by name. `q` is a case-insensitive substring search over recipe name, description and coffee name (trimmed, up to 100 characters, empty means no search). A `q` longer than 100 characters is rejected with 422, not truncated. `method` filters by brew method. `is_saved` and `is_favorite` reflect the caller's own library. `total` counts every match, but a page can hold fewer than `limit` items when a stored recipe is unreadable, so advance `offset` by `limit`, never by the number of items returned. Invalid `q`, `method`, `limit` or `offset` give 422. Requires a bearer token.
+         */
+        get: operations["list_recipes_api_recipes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recipes/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a catalog recipe
+         * @description One catalog recipe by slug. An archived recipe is returned (with `archived: true`) only to a user who has it saved; anyone else gets the same 404 as for an unknown slug. Requires a bearer token.
+         */
+        get: operations["get_recipe_api_recipes__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** BookCatalogItem */
+        BookCatalogItem: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "catalog";
+            recipe: components["schemas"]["CatalogRecipeOut"];
+        };
+        /**
+         * BookFilter
+         * @enum {string}
+         */
+        BookFilter: "all" | "favorites" | "created" | "saved";
+        /** BookListResponse */
+        BookListResponse: {
+            /** Items */
+            items: (components["schemas"]["BookCatalogItem"] | components["schemas"]["BookUserItem"])[];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
+        /** BookUserItem */
+        BookUserItem: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "user";
+            recipe: components["schemas"]["UserRecipeOut"];
+        };
+        /** CatalogRecipeOut */
+        CatalogRecipeOut: {
+            /**
+             * Archived
+             * @default false
+             */
+            archived: boolean;
+            brew_time_seconds?: components["schemas"]["Range"] | null;
+            coffee?: components["schemas"]["Coffee"] | null;
+            /** Description */
+            description?: string | null;
+            dose_g?: components["schemas"]["Range"] | null;
+            goal?: components["schemas"]["RecipeGoal"] | null;
+            grind?: components["schemas"]["Grind"] | null;
+            /**
+             * Is Favorite
+             * @default false
+             */
+            is_favorite: boolean;
+            /**
+             * Is Saved
+             * @default false
+             */
+            is_saved: boolean;
+            method: components["schemas"]["RecipeMethod"];
+            /** Name */
+            name: string;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Ratio
+             * @description Grams of water per gram of coffee (espresso: grams of drink per gram, with water_g null).
+             */
+            ratio?: number | null;
+            /** Slug */
+            slug: string;
+            source: components["schemas"]["RecipeSource"];
+            status: components["schemas"]["RecipeStatus"];
+            /** Steps */
+            steps?: components["schemas"]["Step"][];
+            temperature_c?: components["schemas"]["Range"] | null;
+            water_g?: components["schemas"]["Range"] | null;
+            yield_ml?: components["schemas"]["Range"] | null;
+        };
         /** ChatRequest */
         ChatRequest: {
             /**
@@ -248,6 +495,22 @@ export interface components {
             conversation_id?: number | null;
             /** Message */
             message: string;
+        };
+        /** Coffee */
+        Coffee: {
+            /** Name */
+            name?: string | null;
+            /** Origin */
+            origin?: string | null;
+            /** Process */
+            process?: string | null;
+            /** Roast */
+            roast?: string | null;
+            /**
+             * With Milk
+             * @description False means never with milk.
+             */
+            with_milk?: boolean | null;
         };
         /** ConfirmEmailRequest */
         ConfirmEmailRequest: {
@@ -262,6 +525,47 @@ export interface components {
              */
             email: string;
         };
+        /** ConversationCreate */
+        ConversationCreate: {
+            /** @description Catalog slug (string) or the caller's own recipe id (integer) to talk about. */
+            recipe_ref?: components["schemas"]["RecipeRef"] | null;
+        };
+        /** ConversationDetail */
+        ConversationDetail: {
+            /** Id */
+            id: number;
+            /** Messages */
+            messages: components["schemas"]["StoredMessage"][];
+            recipe_ref: components["schemas"]["RecipeRef"] | null;
+        };
+        /** ConversationListResponse */
+        ConversationListResponse: {
+            /** Items */
+            items: components["schemas"]["ConversationSummary"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
+        /** ConversationSummary */
+        ConversationSummary: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            recipe_ref: components["schemas"]["RecipeRef"] | null;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description Time of the last message, or creation time when empty.
+             */
+            updated_at: string;
+        };
         /** EmailRequest */
         EmailRequest: {
             /**
@@ -269,6 +573,19 @@ export interface components {
              * Format: email
              */
             email: string;
+        };
+        /** FavoriteUpdate */
+        FavoriteUpdate: {
+            /** Is Favorite */
+            is_favorite: boolean;
+        };
+        /** Grind */
+        Grind: {
+            clicks?: components["schemas"]["Range"] | null;
+            /** Description */
+            description?: string | null;
+            /** Grinder */
+            grinder?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -281,6 +598,16 @@ export interface components {
             conversation_id: number | null;
             /** Messages */
             messages: components["schemas"]["StoredMessage"][];
+            recipe_ref?: components["schemas"]["RecipeRef"] | null;
+        };
+        /** LibraryEntryOut */
+        LibraryEntryOut: {
+            /** Is Favorite */
+            is_favorite: boolean;
+            /** Is Saved */
+            is_saved: boolean;
+            /** Slug */
+            slug: string;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -297,6 +624,87 @@ export interface components {
             /** Message */
             message: string;
         };
+        /** Range */
+        Range: {
+            /** Max */
+            max?: number | null;
+            /** Min */
+            min: number;
+        };
+        /** RecipeData */
+        RecipeData: {
+            brew_time_seconds?: components["schemas"]["Range"] | null;
+            coffee?: components["schemas"]["Coffee"] | null;
+            /** Description */
+            description?: string | null;
+            dose_g?: components["schemas"]["Range"] | null;
+            goal?: components["schemas"]["RecipeGoal"] | null;
+            grind?: components["schemas"]["Grind"] | null;
+            method: components["schemas"]["RecipeMethod"];
+            /** Name */
+            name: string;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Ratio
+             * @description Grams of water per gram of coffee (espresso: grams of drink per gram, with water_g null).
+             */
+            ratio?: number | null;
+            /** Steps */
+            steps?: components["schemas"]["Step"][];
+            temperature_c?: components["schemas"]["Range"] | null;
+            water_g?: components["schemas"]["Range"] | null;
+            yield_ml?: components["schemas"]["Range"] | null;
+        };
+        /**
+         * RecipeGoal
+         * @enum {string}
+         */
+        RecipeGoal: "sweetness" | "balance" | "acidity";
+        /** RecipeListResponse */
+        RecipeListResponse: {
+            /** Items */
+            items: components["schemas"]["CatalogRecipeOut"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
+        /**
+         * RecipeMethod
+         * @enum {string}
+         */
+        RecipeMethod: "v60" | "french_press" | "moka" | "aeropress" | "espresso" | "cold_brew" | "other";
+        /** RecipeRef */
+        RecipeRef: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "catalog" | "user";
+            /**
+             * Ref
+             * @description Slug for catalog recipes, integer id for user recipes.
+             */
+            ref: string | number;
+        };
+        /** RecipeSource */
+        RecipeSource: {
+            /**
+             * Document
+             * @description Internal relative path of the source file. Clients must not display it, use the recipe name.
+             */
+            document: string;
+            /** Section */
+            section?: string | null;
+        };
+        /**
+         * RecipeStatus
+         * @enum {string}
+         */
+        RecipeStatus: "validated" | "testing" | "not_recommended";
         /** RegisterRequest */
         RegisterRequest: {
             /**
@@ -324,15 +732,40 @@ export interface components {
             /** Reset Token */
             reset_token: string;
         };
+        /** Step */
+        Step: {
+            /** Action */
+            action: string;
+            /** At Seconds */
+            at_seconds?: number | null;
+            /**
+             * Pour To G
+             * @description Cumulative water poured, in grams.
+             */
+            pour_to_g?: number | null;
+        };
         /** StoredMessage */
         StoredMessage: {
             /** Content */
             content: string;
+            /** @description Recipe proposed by this assistant message. */
+            proposal?: components["schemas"]["StoredProposal"] | null;
             /**
              * Role
              * @enum {string}
              */
             role: "user" | "assistant";
+        };
+        /** StoredProposal */
+        StoredProposal: {
+            /** Proposal Id */
+            proposal_id: number;
+            recipe: components["schemas"]["RecipeData"];
+            /**
+             * Saved Recipe Id
+             * @description The user recipe this proposal was saved as, or null.
+             */
+            saved_recipe_id: number | null;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -360,6 +793,67 @@ export interface components {
             id: number;
             /** Name */
             name: string;
+        };
+        /**
+         * UserRecipeCreate
+         * @description Exactly one of `recipe` (manual) or `proposal_id` (copy of a chat proposal, with optional overrides).
+         */
+        UserRecipeCreate: {
+            /**
+             * Overrides
+             * @description Partial RecipeData merged over the proposal, validated again.
+             */
+            overrides?: {
+                [key: string]: unknown;
+            } | null;
+            /** Proposal Id */
+            proposal_id?: number | null;
+            recipe?: components["schemas"]["RecipeData"] | null;
+        };
+        /** UserRecipeOut */
+        UserRecipeOut: {
+            brew_time_seconds?: components["schemas"]["Range"] | null;
+            coffee?: components["schemas"]["Coffee"] | null;
+            /** Conversation Id */
+            conversation_id?: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description?: string | null;
+            dose_g?: components["schemas"]["Range"] | null;
+            goal?: components["schemas"]["RecipeGoal"] | null;
+            grind?: components["schemas"]["Grind"] | null;
+            /** Id */
+            id: number;
+            /**
+             * Is Favorite
+             * @default false
+             */
+            is_favorite: boolean;
+            method: components["schemas"]["RecipeMethod"];
+            /** Name */
+            name: string;
+            /** Notes */
+            notes?: string | null;
+            parent?: components["schemas"]["RecipeRef"] | null;
+            /**
+             * Ratio
+             * @description Grams of water per gram of coffee (espresso: grams of drink per gram, with water_g null).
+             */
+            ratio?: number | null;
+            /** Steps */
+            steps?: components["schemas"]["Step"][];
+            temperature_c?: components["schemas"]["Range"] | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            water_g?: components["schemas"]["Range"] | null;
+            yield_ml?: components["schemas"]["Range"] | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -730,6 +1224,9 @@ export interface operations {
                      *     event: delta
                      *     data: {"text": "para un espresso..."}
                      *
+                     *     event: recipe
+                     *     data: {"proposal_id": 3, "recipe": {"name": "V60 más dulce", "method": "v60", "steps": []}}
+                     *
                      *     event: done
                      *     data: {}
                      */
@@ -758,6 +1255,102 @@ export interface operations {
                 content?: never;
             };
             /** @description IP rate limit or daily message quota reached; includes Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_conversations_api_conversations_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationListResponse"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid limit or offset */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_conversation_api_conversations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationSummary"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The recipe does not exist or is not available to the caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid body or extra fields */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -800,6 +1393,58 @@ export interface operations {
             };
         };
     };
+    get_conversation_api_conversations__conversation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetail"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The conversation does not exist or belongs to another user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;
@@ -819,6 +1464,572 @@ export interface operations {
                         [key: string]: string;
                     };
                 };
+            };
+        };
+    };
+    save_recipe_api_me_library_catalog__slug__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    remove_recipe_api_me_library_catalog__slug__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    favorite_recipe_api_me_library_catalog__slug__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FavoriteUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibraryEntryOut"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Body is not exactly `{is_favorite: bool}` */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_book_api_me_recipes_get: {
+        parameters: {
+            query?: {
+                filter?: components["schemas"]["BookFilter"];
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookListResponse"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid recipe or request body */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_recipe_api_me_recipes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserRecipeCreate"];
+            };
+        };
+        responses: {
+            /** @description The proposal was already saved; the existing recipe */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRecipeOut"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRecipeOut"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid recipe or request body */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_recipe_api_me_recipes__recipe_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recipe_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRecipeOut"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid recipe or request body */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    replace_recipe_api_me_recipes__recipe_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recipe_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecipeData"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRecipeOut"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid recipe or request body */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_recipe_api_me_recipes__recipe_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recipe_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid recipe or request body */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    favorite_user_recipe_api_me_recipes__recipe_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recipe_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FavoriteUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRecipeOut"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid recipe or request body */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_recipes_api_recipes_get: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                method?: components["schemas"]["RecipeMethod"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_recipe_api_recipes__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRecipeOut"];
+                };
+            };
+            /** @description Missing, invalid or expired session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recipe not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many requests from this IP */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

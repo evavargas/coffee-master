@@ -1,7 +1,7 @@
 import { AxiosError, type AxiosAdapter, type InternalAxiosRequestConfig } from "axios";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { chatStreamTimeoutMs, ChatStreamIncompleteError, streamChatMessage, type ChatStreamEvent } from "@/lib/api/chat";
+import { chatStreamTimeoutMs, ChatStreamIncompleteError, fetchConversations, fetchLatestConversation, streamChatMessage, type ChatStreamEvent } from "@/lib/api/chat";
 import { apiClient, getApiErrorMessage } from "@/lib/api/client";
 
 const originalAdapter = apiClient.defaults.adapter;
@@ -96,5 +96,36 @@ describe("streamChatMessage", () => {
 
     expect(error).toBeInstanceOf(AxiosError);
     expect(getApiErrorMessage(error, "fallback")).toBe("Mensaje del servidor");
+  });
+});
+
+describe("streamChatMessage recipe event", () => {
+  afterEach(() => {
+    apiClient.defaults.adapter = originalAdapter;
+  });
+
+  const recipe = { name: "V60 dulce", method: "v60", steps: [{ action: "Verter" }], extra_field: 1 };
+
+  it("delivers a valid recipe event between the last delta and done", async () => {
+    const { events, outcome } = await run([sse("start", { conversation_id: 1 }), sse("delta", { text: "x" }), sse("recipe", { proposal_id: 4, recipe }), sse("done", {})]);
+    expect(events.map((e) => e.event)).toEqual(["start", "delta", "recipe"]);
+    expect(events[2].data).toEqual({ proposal_id: 4, recipe });
+    expect(outcome).toEqual({ status: "done" });
+  });
+
+  it.each([
+    ["no proposal id", { recipe }],
+    ["a non-integer proposal id", { proposal_id: "4", recipe }],
+    ["a recipe without a name", { proposal_id: 4, recipe: { method: "v60" } }],
+  ])("ignores a malformed recipe event (%s) without breaking the stream", async (_label, payload) => {
+    const { events, outcome } = await run([sse("start", { conversation_id: 1 }), sse("recipe", payload), sse("delta", { text: "x" }), sse("done", {})]);
+    expect(events.map((e) => e.event)).toEqual(["start", "delta"]);
+    expect(outcome).toEqual({ status: "done" });
+  });
+
+  it("ignores a recipe event with invalid JSON", async () => {
+    const { events, outcome } = await run(["event: recipe\ndata: {oops\n\n", sse("done", {})]);
+    expect(events).toEqual([]);
+    expect(outcome).toEqual({ status: "done" });
   });
 });

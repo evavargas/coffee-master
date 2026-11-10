@@ -2,14 +2,16 @@ import { act, waitFor } from "@testing-library/react";
 import { AxiosError, type AxiosResponse } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { clearSession } from "@/lib/session";
 import { renderHookWithIntl } from "@/test/renderHookWithIntl";
 import { useChat } from "@/hooks/useChat";
-import { ChatStreamIncompleteError, fetchLatestConversation, streamChatMessage, type ChatStreamEvent } from "@/lib/api/chat";
+import { ChatStreamIncompleteError, fetchConversation, fetchLatestConversation, streamChatMessage, type ChatStreamEvent } from "@/lib/api/chat";
 import esMessages from "@/messages/es.json";
 
 vi.mock("@/lib/api/chat", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/api/chat")>()),
   fetchLatestConversation: vi.fn(),
+  fetchConversation: vi.fn(),
   streamChatMessage: vi.fn(),
 }));
 
@@ -83,7 +85,7 @@ describe("useChat", () => {
     });
 
     expect(sendResult).toEqual({ ok: true });
-    expect(streamChatMessage).toHaveBeenCalledWith({ conversationId: null, message: "¿Cómo estás?" }, expect.any(Function));
+    expect(streamChatMessage).toHaveBeenCalledWith({ conversationId: null, message: "¿Cómo estás?" }, expect.any(Function), expect.any(AbortSignal));
     expect(result.current.messages).toEqual([
       { role: "user", content: "¿Cómo estás?" },
       { role: "assistant", content: "Hola" },
@@ -95,7 +97,7 @@ describe("useChat", () => {
     await act(async () => {
       await result.current.send("y vos?");
     });
-    expect(streamChatMessage).toHaveBeenLastCalledWith({ conversationId: 9, message: "y vos?" }, expect.any(Function));
+    expect(streamChatMessage).toHaveBeenLastCalledWith({ conversationId: 9, message: "y vos?" }, expect.any(Function), expect.any(AbortSignal));
   });
 
   it("replaces the whole assistant bubble on a replace event", async () => {
@@ -183,49 +185,118 @@ describe("useChat", () => {
     expect(streamChatMessage).not.toHaveBeenCalled();
     expect(result.current.messages).toEqual([]);
   });
+});
 
-  it("newConversation clears messages and the conversation id", async () => {
-    vi.mocked(fetchLatestConversation).mockResolvedValue({
-      conversation_id: 5,
-      messages: [{ role: "user", content: "hola" }],
-    });
-    const { result } = await renderLoaded();
-
-    act(() => {
-      result.current.newConversation();
-    });
-
-    expect(result.current.messages).toEqual([]);
-    expect(result.current.conversationId).toBeNull();
+describe("useChat recipe proposals", () => {
+  beforeEach(() => {
+    vi.mocked(fetchLatestConversation).mockReset().mockResolvedValue({ conversation_id: null, messages: [] });
+    vi.mocked(streamChatMessage).mockReset();
   });
 
-  it("newConversation does nothing while a message is being sent", async () => {
-    let finish: () => void = () => {};
+  it("attaches a streamed recipe event to the assistant message and keeps it through replace", async () => {
+    const recipeEvent: ChatStreamEvent = { event: "recipe", data: { proposal_id: 6, recipe: { name: "R", method: "v60" } } };
+    mockStream([start(1), delta("hola"), recipeEvent, replace("hola!")], { status: "done" });
+    const { result } = await renderLoaded();
+    await act(async () => {
+      await result.current.send("receta");
+    });
+    expect(result.current.messages.at(-1)).toMatchObject({ content: "hola!", proposal: { proposal_id: 6, saved_recipe_id: null } });
+  });
+});
+
+let search = "";
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search) }));
+
+describe("useChat conversation switching and edge cases", () => {
+  beforeEach(() => {
+    search = "";
+    vi.mocked(fetchLatestConversation).mockReset().mockResolvedValue({ conversation_id: null, messages: [] });
+    vi.mocked(fetchConversation).mockReset();
+    vi.mocked(streamChatMessage).mockReset();
+  });
+
+  it("a recipe event before any delta still attaches to the assistant message", async () => {
+    const recipeEvent: ChatStreamEvent = { event: "recipe", data: { proposal_id: 2, recipe: { name: "R", method: "v60" } } };
+    mockStream([start(1), recipeEvent, delta("texto")], { status: "done" });
+    const { result } = await renderLoaded();
+    await act(async () => {
+      await result.current.send("x");
+    });
+    expect(result.current.messages.at(-1)).toMatchObject({ content: "texto", proposal: { proposal_id: 2 } });
+  });
+
+  it("shows conversationNotFound when ?c answers 404 and offers no opening prompt", async () => {
+    search = "c=9&intent=ask";
+    vi.mocked(fetchConversation).mockRejectedValue(new AxiosError("x", "404", undefined, undefined, { status: 404, data: {} } as AxiosResponse));
+    const { result } = await renderLoaded();
+    expect(result.current.error).toBe(esMessages.chat.conversationNotFound);
+    expect(result.current.intent).toBeNull();
+  });
+
+  it.each(["0x10", "1e3", "-1", "1.5", "abc", "0"])("ignores ?c=%s and opens the latest conversation", async (c) => {
+    search = `c=${c}`;
+    vi.mocked(fetchLatestConversation).mockResolvedValue({ conversation_id: 4, messages: [], recipe_ref: null });
+    await renderLoaded();
+    expect(fetchConversation).not.toHaveBeenCalled();
+    expect(fetchLatestConversation).toHaveBeenCalled();
+  });
+
+  it("exposes recipe_ref and intent from a loaded ?c conversation and from /latest", async () => {
+    search = "c=3&intent=ask";
+    vi.mocked(fetchConversation).mockResolvedValue({ id: 3, messages: [], recipe_ref: { kind: "catalog", ref: "a" } });
+    const first = await renderLoaded();
+    expect(first.result.current.recipeRef).toEqual({ kind: "catalog", ref: "a" });
+    expect(first.result.current.intent).toBe("ask");
+
+    search = "";
+    vi.mocked(fetchLatestConversation).mockResolvedValue({ conversation_id: 4, messages: [], recipe_ref: { kind: "user", ref: 7 } });
+    const second = await renderLoaded();
+    expect(second.result.current.recipeRef).toEqual({ kind: "user", ref: 7 });
+  });
+
+  it("switching conversation mid-stream aborts it: nothing from A reaches B and B can send", async () => {
+    search = "c=1";
+    vi.mocked(fetchConversation).mockImplementation(async (id) => ({ id, messages: [], recipe_ref: null }));
+    let emitA: Emit = () => {};
+    let signalA: AbortSignal | undefined;
     vi.mocked(streamChatMessage).mockImplementationOnce(
-      (_input, onEvent: Emit) =>
-        new Promise((resolve) => {
-          onEvent(start(3));
-          finish = () => resolve({ status: "done" });
+      (_input, onEvent: Emit, signal) =>
+        new Promise((_resolve, reject) => {
+          emitA = onEvent;
+          signalA = signal;
+          signal?.addEventListener("abort", () => reject(new Error("aborted")));
         }),
     );
-    const { result } = await renderLoaded();
+    const hook = renderHookWithIntl(() => useChat());
+    await waitFor(() => expect(hook.result.current.isLoadingHistory).toBe(false));
+    act(() => void hook.result.current.send("pregunta A"));
+    await waitFor(() => expect(hook.result.current.isLoading).toBe(true));
 
-    let pending: Promise<unknown> = Promise.resolve();
-    act(() => {
-      pending = result.current.send("hola");
+    search = "c=2";
+    hook.rerender();
+    await waitFor(() => expect(hook.result.current.conversationId).toBe(2));
+    expect(signalA?.aborted).toBe(true);
+    await act(async () => emitA(delta("fuga de A")));
+    expect(hook.result.current.messages).toEqual([]);
+    expect(hook.result.current.isLoading).toBe(false);
+
+    mockStream([delta("B")], { status: "done" });
+    await act(async () => {
+      await hook.result.current.send("pregunta B");
     });
+    expect(hook.result.current.messages.map((m) => m.content)).toEqual(["pregunta B", "B"]);
+  });
+
+  it("a superseded send's finally does not reset isLoading of the newer send", async () => {
+    let rejectA: (e: Error) => void = () => {};
+    vi.mocked(streamChatMessage).mockImplementationOnce(() => new Promise((_r, reject) => (rejectA = reject)));
+    const { result } = await renderLoaded();
+    act(() => void result.current.send("a"));
     await waitFor(() => expect(result.current.isLoading).toBe(true));
 
-    act(() => {
-      result.current.newConversation();
-    });
-    expect(result.current.messages).toHaveLength(2);
-    expect(result.current.conversationId).toBe(3);
-
-    await act(async () => {
-      finish();
-      await pending;
-    });
-    expect(result.current.isLoading).toBe(false);
+    act(() => clearSession()); // session change supersedes the first send
+    await act(async () => rejectA(new Error("late")));
+    // The finally of the superseded send ran but must not have touched the flags.
+    expect(result.current.isLoading).toBe(true);
   });
 });

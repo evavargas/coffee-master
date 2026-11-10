@@ -1,10 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowUp, LoaderCircle, Plus } from "lucide-react";
+import { ArrowUp, LoaderCircle } from "lucide-react";
 
 import { AssistantMessage } from "@/components/chat/AssistantMessage";
+import { CardErrorBoundary } from "@/components/chat/CardErrorBoundary";
+import { ConversationSwitcher } from "@/components/chat/ConversationSwitcher";
+import { RecipeBanner } from "@/components/chat/RecipeBanner";
+import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
 import { Button } from "@/components/ui/button";
 import { useAutoResizeTextarea } from "@/hooks/useAutoResizeTextarea";
 import { useChat } from "@/hooks/useChat";
@@ -16,10 +20,20 @@ import { cn } from "@/lib/utils";
  */
 export function ChatView() {
   const t = useTranslations("chat");
-  const { messages, send, isLoading, isLoadingHistory, error, newConversation } = useChat();
+  const { messages, send, isLoading, isLoadingHistory, error, conversationId, recipeRef, intent, requestedId } = useChat();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useAutoResizeTextarea(input);
+
+  // The opening prompt only fills the input: the user reads it and decides to send it.
+  // A draft typed in one conversation must not leak into another.
+  useEffect(() => {
+    setInput("");
+  }, [requestedId]);
+  const openingPrompt = intent ? t(`intent.${intent}`) : null;
+  useEffect(() => {
+    if (openingPrompt) setInput((current) => current || openingPrompt);
+  }, [openingPrompt]);
 
   const suggestions = [t("suggestion1"), t("suggestion2"), t("suggestion3")];
   const canSend = !isLoading && !isLoadingHistory && input.trim().length > 0;
@@ -66,12 +80,8 @@ export function ChatView() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-      <div className="flex shrink-0 justify-end">
-        <Button type="button" variant="outline" size="sm" onClick={newConversation} disabled={isLoading || isLoadingHistory}>
-          <Plus aria-hidden="true" />
-          {t("newConversation")}
-        </Button>
-      </div>
+      <ConversationSwitcher currentId={conversationId} disabled={isLoading || isLoadingHistory} />
+      {recipeRef && <RecipeBanner recipeRef={recipeRef} />}
       <div ref={scrollRef} aria-live="polite" aria-busy={isLoading} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
         {isLoadingHistory && (
           <p role="status" className="self-start text-sm text-muted-foreground">
@@ -95,8 +105,8 @@ export function ChatView() {
         )}
         {messages.map((message, index) =>
           message.role === "assistant" && message.content === "" ? null : (
+          <Fragment key={index}>
           <div
-            key={index}
             className={cn(
               "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
               message.role === "user"
@@ -114,6 +124,10 @@ export function ChatView() {
               />
             )}
           </div>
+          {message.proposal && <CardErrorBoundary>
+              <RecipeProposalCard proposal={message.proposal} />
+            </CardErrorBoundary>}
+          </Fragment>
           ),
         )}
         {isWaitingForFirstDelta && <p className="self-start text-sm text-muted-foreground">{t("thinking")}</p>}
