@@ -24,7 +24,7 @@ La app móvil no se publica en tiendas por ahora; sirve para desarrollo y prueba
 ## Estructura
 ```
 mobile/
-  App.tsx                      raíz: elige pantalla (login/register/forgotPassword) o chat según la sesión
+  app/                         rutas de Expo Router: (auth), (tabs), _layout.tsx, index.tsx
   context/ThemeContext.tsx     ThemeProvider + useAppTheme()
   i18n/                        instancia de i18next + locales/{es,en}.json
   components/auth/             FormField (compartido), LoginForm, RegisterForm, ForgotPasswordForm
@@ -34,10 +34,22 @@ mobile/
                                 useForgotPasswordForm, useConfirmEmailForm, useVerifyResetCode,
                                 useResetPasswordForm, useResendConfirmation, useChat
   lib/api/client.ts            instancia de axios, token y manejo de 401
-  lib/api/auth.ts, chat.ts     funciones tipadas de la API
+  lib/api/auth.ts, chat.ts, recipes.ts, myRecipes.ts  funciones tipadas de la API (conversaciones en chat.ts)
   lib/schemas/auth.ts          esquemas zod
   lib/session.ts               acceso a SecureStore
 ```
+
+## Navegación (Expo Router)
+- `app/_layout.tsx` raíz; `app/index.tsx` redirige según la sesión. `app/(auth)/`: `login`, `register`, `forgot-password`. `app/(tabs)/`: `chat`, `recipes/` (`index`, `[slug]`) y `my-recipes/` (`index`, `[id]`), cada pila con su `_layout.tsx`.
+- Params del chat (`c`, `intent`) con `useLocalSearchParams`; mismo contrato que la web: `c` abre esa conversación, `intent` (`ask`|`adapt`) solo elige el prompt inicial.
+
+## Caches y stores
+- Los caches de módulo (`lib/recipeStore.ts`, `lib/userRecipeStore.ts`, `lib/chatEpoch.ts`) son por usuario: se limpian con `onSessionChange` de `lib/session.ts` (login, sign-out y 401).
+- Epoch guards para respuestas tardías; lock por ítem con rollback en guardar, favorito y borrar.
+- Toda respuesta de la API pasa por zod `safeParse`, con esquemas tolerantes (`.passthrough()`, `.catch(...)`): un ítem inválido se omite.
+- Confirmaciones destructivas dentro de la pantalla (`components/recipes/ConfirmButton.tsx`), nunca `Alert.alert`.
+- Mismos nombres de hooks y archivos que en la web (`useRecipes`, `useRecipeLibrary`, `useSaveProposal`, ...).
+- i18n: interpolación `{{x}}` (en la web es `{x}`) y plurales con claves `_one`/`_other` (en la web, ICU). `interpolation.escapeValue` está en `false` (`i18n/index.ts`) porque React Native no interpreta HTML; no lo cambies.
 
 ## Reglas
 1. Hooks para toda la lógica; los componentes solo componen hooks y markup.
