@@ -1,3 +1,5 @@
+import pytest
+
 from app.agent.prompt_guard import (
     GENERIC_GREETING_NAME,
     NAME_MAX_LENGTH,
@@ -74,3 +76,31 @@ def test_streaming_guard_stops_forwarding_after_a_block():
     guard.feed("<user_profile>")
     assert guard.blocked
     assert guard.feed("more text") == ""
+
+
+NEW_MARKERS = [
+    "<retrieved_knowledge>",
+    "</retrieved_knowledge>",
+    '<document title="x">',
+    "<recipe_context>",
+    "</recipe_context>",
+    "recetario/10-equipo",
+    "knowledge/cafe/x",
+    "13-moka.md",
+]
+
+
+@pytest.mark.parametrize("marker", NEW_MARKERS)
+def test_streaming_guard_blocks_the_new_markers_even_when_split(marker):
+    text = f"Texto previo de la respuesta. {marker} y más"
+    for size in (1, 2, 5, 100):
+        chunks = [text[i : i + size] for i in range(0, len(text), size)]
+        emitted, guard = stream_through_guard(chunks)
+        assert guard.blocked
+        assert marker.lower()[:6] not in emitted.lower().replace("texto previo", "")
+
+
+def test_streaming_guard_passes_a_normal_spanish_answer_untouched():
+    answer = "Hola Ana, según la guía de V60 usá 15 g de café y 250 g de agua a 92 °C. Probá moler un poco más grueso."
+    emitted, guard = stream_through_guard([answer[i : i + 4] for i in range(0, len(answer), 4)])
+    assert emitted == answer and not guard.blocked

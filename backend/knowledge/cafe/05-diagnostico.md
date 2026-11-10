@@ -1,3 +1,8 @@
+---
+type: guide
+title: Diagnóstico de sabor
+---
+
 # Diagnóstico de sabor
 
 Ajustar **una variable por vez**. El orden sugerido es: molienda → tiempo → dosis → temperatura.

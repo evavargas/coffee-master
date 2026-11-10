@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,8 +20,24 @@ class Settings(BaseSettings):
     chat_daily_message_limit: int = 50
     chat_context_messages: int = 40
 
+    # Embeddings (Amazon Bedrock). Credentials come from boto3's default chain, never from settings.
+    # Not named AWS_REGION: Vercel sets that one to the function's execution region.
+    embedding_model_id: str = "us.cohere.embed-v4:0"  # inference profile: on-demand invocation of the bare id is rejected
+    embedding_dimensions: int = 1024
+    bedrock_region: str = "us-east-2"
+
+    # Off by default: the chat sends the whole knowledge base and never calls the embedding provider.
+    rag_enabled: bool = False
+    rag_fallback_on_empty: bool = True  # empty retrieval -> full knowledge instead of "nothing found"
+
+    # Retrieval (RAG). rag_min_score is NOT calibrated: a conservative starting point to tune with real embeddings.
+    rag_top_k: int = Field(5, ge=1)
+    rag_min_score: float = Field(0.25, ge=0, le=1)
+    rag_context_max_chars: int = Field(6000, ge=1)
+    rag_retrieval_timeout_seconds: float = Field(5.0, gt=0)
+
     # Database
-    database_url: str = "sqlite:///./coffeemaster.db"
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/coffeemaster"
 
     # JWT
     jwt_secret: str
@@ -52,6 +69,7 @@ class Settings(BaseSettings):
     rate_limit_auth_per_minute: int = 10
     rate_limit_chat_per_minute: int = 20
     rate_limit_conversations_per_minute: int = 60
+    rate_limit_recipes_per_minute: int = 60
 
     @property
     def cors_origin_list(self) -> list[str]:

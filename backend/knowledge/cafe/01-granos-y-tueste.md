@@ -1,3 +1,8 @@
+---
+type: guide
+title: Granos, tueste y frescura
+---
+
 # Granos, tueste y frescura
 
 ## Especies
@@ -31,7 +36,7 @@
 
 ## Frescura (días desde el tueste)
 - **Espresso**: ideal entre 7 y 21 días. Muy fresco (menos de 5 días) da mucho CO2 y sabor agresivo; muy viejo (más de 4 semanas) pierde aromas.
-- **Filtro**: ideal entre 7 y 14 días. Necesita reposo para que el gas se libere.
+- **Filtro**: lo más recomendable es entre 7 y 14 días. Hasta unos 20 días sigue bien; a partir de un mes empieza a perder calidad. Necesita reposo para que el gas se libere.
 - **Café molido**: pierde aroma en minutos. Moler justo antes de preparar.
 - Guardar en recipiente hermético, lejos de luz, calor y humedad.
 

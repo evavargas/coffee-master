@@ -12,14 +12,17 @@ class Base(DeclarativeBase):
     pass
 
 
-def _create_engine(database_url: str):
+def pg_connect_args(database_url: str) -> dict:
+    """Driver arguments shared by the app, Alembic and the maintenance scripts."""
     if database_url.startswith("sqlite"):
-        connect_args = {"check_same_thread": False}
-    else:
-        # Supabase's pooler runs in transaction mode, which does not support
-        # server-side prepared statements. Disable them for PostgreSQL.
-        connect_args = {"prepare_threshold": None}
-    return create_engine(database_url, connect_args=connect_args, pool_pre_ping=True)
+        return {"check_same_thread": False}
+    # Supabase's pooler runs in transaction mode, which does not support
+    # server-side prepared statements. Disable them for PostgreSQL.
+    return {"prepare_threshold": None}
+
+
+def _create_engine(database_url: str):
+    return create_engine(database_url, connect_args=pg_connect_args(database_url), pool_pre_ping=True)
 
 
 engine = _create_engine(get_settings().database_url)

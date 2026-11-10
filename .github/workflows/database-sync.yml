@@ -1,0 +1,124 @@
+name: Database sync
+
+# Validates the knowledge base on pull requests; on main, migrates the database and ingests the knowledge.
+# Never commits or pushes anything.
+on:
+  pull_request:
+    paths:
+      - "backend/knowledge/**"
+      - "backend/app/rag/**"
+      - "backend/migrations/**"
+      - "backend/app/schemas/recipe.py"
+      - "backend/scripts/ingest_knowledge.py"
+      - "backend/requirements.txt"
+      - ".github/workflows/database-sync.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/knowledge/**"
+      - "backend/app/rag/**"
+      - "backend/migrations/**"
+      - "backend/app/schemas/recipe.py"
+      - "backend/scripts/ingest_knowledge.py"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Re-embed everything (--force), e.g. after a chunker, RecipeData or embedding model change"
+        type: boolean
+        default: false
+
+# Runs never overlap: two migrations or ingestions against one database must not interleave.
+concurrency:
+  group: database-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14" # same as the backend's local venv
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+      # No secrets, no database, no AWS. The dry run imports no settings, so it needs no env at all
+      # (verified in scripts/ingest_knowledge.py). Fork PRs get no secrets anyway.
+      - name: Validate and chunk the knowledge (dry run)
+        working-directory: backend
+        run: python -m scripts.ingest_knowledge --dry-run
+
+  sync:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # only this job: GitHub OIDC token to assume the AWS role
+    env:
+      # Must be the Supabase SESSION pooler URI (port 5432, host *.pooler.supabase.com), with the scheme
+      # rewritten to postgresql+psycopg://. GitHub runners are IPv4-only and Supabase's direct host
+      # (db.<ref>.supabase.co) is IPv6-only, so the direct host cannot be reached. The session pooler
+      # is IPv4 and keeps one session per connection, which is the documented choice for migrations.
+      # The transaction pooler (6543) is also pooler-safe in this repo (prepared statements disabled)
+      # but is not the documented choice for migrations.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Settings requires JWT_SECRET to load, and alembic and the real ingestion both load Settings.
+      # Neither uses it, so a harmless dummy is enough. Never put the real secret here.
+      JWT_SECRET: ci-placeholder-not-a-secret
+      BEDROCK_REGION: ${{ vars.BEDROCK_REGION || 'us-east-2' }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+      # Migrate FIRST: a migration-only commit must still migrate the database.
+      # Backward-compatibility rule: Vercel deploys the app in parallel with this workflow. Expand-then-contract
+      # (add first, drop or rename in a later release) only protects the OLD code against the NEW schema.
+      # Code that needs a NEW database object must ship in a release AFTER the migration has run.
+      # Migrations never need AWS, so the AWS step comes after them.
+      - name: Apply database migrations
+        working-directory: backend
+        run: alembic upgrade head
+      # RAG_INGEST is a repository variable: until the AWS account and Bedrock are ready it stays unset and
+      # only the catalog is synced (no embeddings, no AWS). Set it to 'true' to run the real ingestion.
+      - name: Sync the recipe catalog only (RAG_INGEST is not 'true')
+        if: vars.RAG_INGEST != 'true'
+        working-directory: backend
+        run: python -m scripts.ingest_knowledge --catalog-only
+      - name: Configure AWS credentials (OIDC)
+        if: vars.RAG_INGEST == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.BEDROCK_REGION || 'us-east-2' }}
+      - name: Ingest the knowledge
+        if: vars.RAG_INGEST == 'true'
+        working-directory: backend
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$FORCE" = "true" ]; then
+            python -m scripts.ingest_knowledge --force
+          else
+            python -m scripts.ingest_knowledge
+          fi
+      - name: Summary
+        run: echo "Database sync finished for ${GITHUB_SHA::7} (force=${{ inputs.force || false }})" >> "$GITHUB_STEP_SUMMARY"

@@ -1,22 +1,27 @@
+---
+type: guide
+title: "Reglas aprendidas en las pruebas"
+---
+
 # Reglas aprendidas en las pruebas
 
 ## 1. Qué método usar según el café
-Checklist para un café nuevo:
+Es una guía, no una regla: depende del gusto de quien prepara y de para quién es. Checklist para un café nuevo:
 1. ¿Qué dice la etiqueta sobre el proceso? Lavado, honey, natural o natural fermentado.
 2. ¿Las notas son de cuerpo pesado (chocolate, nuez, dulce de leche, panela) o brillantes y frutales (cítricos, florales, frutos rojos)?
-3. **Lavado o fermentado frutal** → V60 o Chemex.
+3. **Lavado o fermentado frutal** → V60 o Chemex. Excepción: Mild Honey es lavado pero, por sus notas dulces (caramelo, miel, fresa), también va en prensa.
 4. **Natural de cuerpo pesado** → moka o tipo espresso. En prensa solo si la acidez es baja.
-5. **Honey** → probar primero en moka. Pasar a prensa solo si el dulzor de base es muy robusto (caso Mild Honey).
+5. **Honey** → probar primero en moka. Pasar a prensa solo si el dulzor de base es muy robusto.
+6. **Floral o frutal brillante** (Azahar y Durazno, Fruit Punch, Berry Bloom y perfiles parecidos) → funciona en cualquier método, pero nunca con leche.
 
 ## 2. Frescura de la molienda
 - Pérdidas notables a los 15 minutos, escape de CO2 a la hora, y a 1 o 2 días el perfil queda plano.
-- **Moler 30 a 60 s antes de verter.** Para V60, la molienda no debe reposar. La moka tolera horas o hasta el día siguiente si se guarda hermética.
+- **Moler 30 a 60 s antes de verter.** Para V60, la molienda no debe reposar.
 - Si hay que preparar con anticipación, guardar el grano entero y nunca el molido.
-- Frescura del tueste: 7 a 10 días de reposo es lo ideal para cafés de filtro.
 
 ## 3. Cuándo abandonar el V60
 - Si con molienda fija (café ya molido) el primer o segundo vertido se tapona y el agua no se absorbe, **dejar el V60 para ese café.** El problema es físico (filtro y molienda), no de receta: ajustar temperatura o pulsos no lo resuelve.
-- Alternativas: moka, AeroPress con inmersión corta (15 a 18 g, 85 °C, 1:30 a 2:00 de contacto, prensar en 30 a 40 s), o cold brew (12 a 16 h, frío).
+- Alternativas: moka, AeroPress con inmersión corta (1:30 a 2:00 de contacto), o cold brew (12 a 16 h, frío).
 
 ## 4. Sobreextracción vs. canalización
 - **Canalización:** hueco o cráter en el centro del lecho. Caída rápida al inicio, amargor persistente. Corregir nivelando el lecho.
@@ -30,8 +35,9 @@ Tres causas que se combinan:
 - Dejar siempre los últimos ml del fondo sin servir.
 
 ## 6. Pérdida de líquido en prensa
-- La pérdida real es de 15 a 20% del agua cargada. Si el volumen líquido importa, cargar más agua de la que indica el ratio.
-- El café molido retiene ~2 g de agua por gramo, consistente con los datos de la prensa.
+- En general se pierde ~12 a 15% del agua cargada.
+- Con algunos cafés propios se midió 15 a 20%. Es una observación personal con esos cafés, no un estándar.
+- Si el volumen líquido importa, cargar más agua de la que indica el ratio, sin pasar los ~430 g en una prensa de 500 ml.
 
 ## 7. Temperatura de cata
 - Catar entre 55 y 60 °C, no recién servido. Las notas delicadas (fresa, ésteres volátiles) se pierden con el calor.

@@ -9,10 +9,11 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_anthropic_client, get_current_user, get_session_factory
+from app.api.deps import get_anthropic_client, get_current_user, get_chat_embedding_provider, get_session_factory
 from app.core.rate_limit import chat_rate_limit
 from app.db.session import get_db
 from app.models.user import User
+from app.rag.embeddings import EmbeddingProvider
 from app.schemas.chat import ChatRequest
 from app.services import chat as chat_service
 
@@ -34,6 +35,7 @@ Once the response is 200, each event is `event: <name>` + `data: <json>` + a bla
 - `start` `{"conversation_id": int}`: always first.
 - `delta` `{"text": str}`: zero or more; append to the assistant bubble.
 - `replace` `{"text": str}`: replace the whole assistant bubble with this text (a guard blocked a leak).
+- `recipe` `{"proposal_id": int, "recipe": RecipeData}`: at most one, after the last `delta` and before `done`. Sent only when the model proposed a recipe and it passed validation. Nothing is saved to the user's book: the client saves it with `POST /api/me/recipes {"proposal_id"}`.
 - `done` `{}`: terminal, success.
 - `error` `{"code": "model_busy" | "model_unavailable"}`: terminal, failure. The user message is not kept, so a retry does not duplicate it.
 """
@@ -42,11 +44,13 @@ SSE_EXAMPLE = (
     'event: start\ndata: {"conversation_id": 7}\n\n'
     'event: delta\ndata: {"text": "Hola Ana, "}\n\n'
     'event: delta\ndata: {"text": "para un espresso..."}\n\n'
+    'event: recipe\ndata: {"proposal_id": 3, "recipe": {"name": "V60 más dulce", "method": "v60", "steps": []}}\n\n'
     "event: done\ndata: {}\n\n"
 )
 
 
 def format_sse(event: str, data: dict) -> str:
+    """One SSE frame. `event` is one of start, delta, replace, recipe, done, error."""
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
@@ -78,6 +82,7 @@ async def chat(
     db: Session = Depends(get_db),
     client: AsyncAnthropic = Depends(get_anthropic_client),
     session_factory: chat_service.SessionFactory = Depends(get_session_factory),
+    embedding_provider: EmbeddingProvider | None = Depends(get_chat_embedding_provider),
 ) -> StreamingResponse:
     user_name = current_user.name
     try:
@@ -96,5 +101,7 @@ async def chat(
         # Dependency cleanup runs only after the stream ends, so release the connection now.
         await run_in_threadpool(db.close)
 
-    events = chat_service.stream_turn(client, session_factory, turn, user_name)
+    events = chat_service.stream_turn(
+        client, session_factory, embedding_provider, turn, user_name, body.message
+    )
     return StreamingResponse(_sse_stream(events), media_type="text/event-stream", headers=SSE_HEADERS)

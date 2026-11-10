@@ -1,6 +1,269 @@
 {
   "components": {
     "schemas": {
+      "BookCatalogItem": {
+        "properties": {
+          "kind": {
+            "const": "catalog",
+            "title": "Kind",
+            "type": "string"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/CatalogRecipeOut"
+          }
+        },
+        "required": [
+          "kind",
+          "recipe"
+        ],
+        "title": "BookCatalogItem",
+        "type": "object"
+      },
+      "BookFilter": {
+        "enum": [
+          "all",
+          "favorites",
+          "created",
+          "saved"
+        ],
+        "title": "BookFilter",
+        "type": "string"
+      },
+      "BookListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "catalog": "#/components/schemas/BookCatalogItem",
+                  "user": "#/components/schemas/BookUserItem"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/BookCatalogItem"
+                },
+                {
+                  "$ref": "#/components/schemas/BookUserItem"
+                }
+              ]
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "BookListResponse",
+        "type": "object"
+      },
+      "BookUserItem": {
+        "properties": {
+          "kind": {
+            "const": "user",
+            "title": "Kind",
+            "type": "string"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/UserRecipeOut"
+          }
+        },
+        "required": [
+          "kind",
+          "recipe"
+        ],
+        "title": "BookUserItem",
+        "type": "object"
+      },
+      "CatalogRecipeOut": {
+        "additionalProperties": false,
+        "properties": {
+          "archived": {
+            "default": false,
+            "title": "Archived",
+            "type": "boolean"
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coffee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coffee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "dose_g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeGoal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Grind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_favorite": {
+            "default": false,
+            "title": "Is Favorite",
+            "type": "boolean"
+          },
+          "is_saved": {
+            "default": false,
+            "title": "Is Saved",
+            "type": "boolean"
+          },
+          "method": {
+            "$ref": "#/components/schemas/RecipeMethod"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Grams of water per gram of coffee (espresso: grams of drink per gram, with water_g null).",
+            "title": "Ratio"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/RecipeSource"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RecipeStatus"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "maxItems": 30,
+            "title": "Steps",
+            "type": "array"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "water_g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "yield_ml": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "method",
+          "slug",
+          "status",
+          "source"
+        ],
+        "title": "CatalogRecipeOut",
+        "type": "object"
+      },
       "ChatRequest": {
         "properties": {
           "conversation_id": {
@@ -28,6 +291,73 @@
         "title": "ChatRequest",
         "type": "object"
       },
+      "Coffee": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          },
+          "process": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process"
+          },
+          "roast": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast"
+          },
+          "with_milk": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "False means never with milk.",
+            "title": "With Milk"
+          }
+        },
+        "title": "Coffee",
+        "type": "object"
+      },
       "ConfirmEmailRequest": {
         "properties": {
           "code": {
@@ -51,6 +381,124 @@
         "title": "ConfirmEmailRequest",
         "type": "object"
       },
+      "ConversationCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "recipe_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Catalog slug (string) or the caller's own recipe id (integer) to talk about."
+          }
+        },
+        "title": "ConversationCreate",
+        "type": "object"
+      },
+      "ConversationDetail": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/StoredMessage"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "recipe_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "recipe_ref",
+          "messages"
+        ],
+        "title": "ConversationDetail",
+        "type": "object"
+      },
+      "ConversationListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ConversationListResponse",
+        "type": "object"
+      },
+      "ConversationSummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "recipe_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updated_at": {
+            "description": "Time of the last message, or creation time when empty.",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "recipe_ref",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ConversationSummary",
+        "type": "object"
+      },
       "EmailRequest": {
         "properties": {
           "email": {
@@ -63,6 +511,61 @@
           "email"
         ],
         "title": "EmailRequest",
+        "type": "object"
+      },
+      "FavoriteUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "is_favorite": {
+            "title": "Is Favorite",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "is_favorite"
+        ],
+        "title": "FavoriteUpdate",
+        "type": "object"
+      },
+      "Grind": {
+        "additionalProperties": false,
+        "properties": {
+          "clicks": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "grinder": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder"
+          }
+        },
+        "title": "Grind",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -97,6 +600,16 @@
             },
             "title": "Messages",
             "type": "array"
+          },
+          "recipe_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -104,6 +617,29 @@
           "messages"
         ],
         "title": "LatestConversationResponse",
+        "type": "object"
+      },
+      "LibraryEntryOut": {
+        "properties": {
+          "is_favorite": {
+            "title": "Is Favorite",
+            "type": "boolean"
+          },
+          "is_saved": {
+            "title": "Is Saved",
+            "type": "boolean"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "is_saved",
+          "is_favorite"
+        ],
+        "title": "LibraryEntryOut",
         "type": "object"
       },
       "LoginRequest": {
@@ -139,6 +675,294 @@
         ],
         "title": "MessageResponse",
         "type": "object"
+      },
+      "Range": {
+        "additionalProperties": false,
+        "properties": {
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max"
+          },
+          "min": {
+            "title": "Min",
+            "type": "number"
+          }
+        },
+        "required": [
+          "min"
+        ],
+        "title": "Range",
+        "type": "object"
+      },
+      "RecipeData": {
+        "additionalProperties": false,
+        "properties": {
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coffee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coffee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "dose_g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeGoal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Grind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "method": {
+            "$ref": "#/components/schemas/RecipeMethod"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Grams of water per gram of coffee (espresso: grams of drink per gram, with water_g null).",
+            "title": "Ratio"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "maxItems": 30,
+            "title": "Steps",
+            "type": "array"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "water_g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "yield_ml": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "method"
+        ],
+        "title": "RecipeData",
+        "type": "object"
+      },
+      "RecipeGoal": {
+        "enum": [
+          "sweetness",
+          "balance",
+          "acidity"
+        ],
+        "title": "RecipeGoal",
+        "type": "string"
+      },
+      "RecipeListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogRecipeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "RecipeListResponse",
+        "type": "object"
+      },
+      "RecipeMethod": {
+        "enum": [
+          "v60",
+          "french_press",
+          "moka",
+          "aeropress",
+          "espresso",
+          "cold_brew",
+          "other"
+        ],
+        "title": "RecipeMethod",
+        "type": "string"
+      },
+      "RecipeRef": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "catalog",
+              "user"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "description": "Slug for catalog recipes, integer id for user recipes.",
+            "title": "Ref"
+          }
+        },
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "title": "RecipeRef",
+        "type": "object"
+      },
+      "RecipeSource": {
+        "additionalProperties": false,
+        "properties": {
+          "document": {
+            "description": "Internal relative path of the source file. Clients must not display it, use the recipe name.",
+            "title": "Document",
+            "type": "string"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "required": [
+          "document"
+        ],
+        "title": "RecipeSource",
+        "type": "object"
+      },
+      "RecipeStatus": {
+        "enum": [
+          "validated",
+          "testing",
+          "not_recommended"
+        ],
+        "title": "RecipeStatus",
+        "type": "string"
       },
       "RegisterRequest": {
         "properties": {
@@ -206,11 +1030,60 @@
         "title": "ResetTokenResponse",
         "type": "object"
       },
+      "Step": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "maxLength": 500,
+            "title": "Action",
+            "type": "string"
+          },
+          "at_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At Seconds"
+          },
+          "pour_to_g": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Cumulative water poured, in grams.",
+            "title": "Pour To G"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "Step",
+        "type": "object"
+      },
       "StoredMessage": {
         "properties": {
           "content": {
             "title": "Content",
             "type": "string"
+          },
+          "proposal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StoredProposal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Recipe proposed by this assistant message."
           },
           "role": {
             "enum": [
@@ -226,6 +1099,36 @@
           "content"
         ],
         "title": "StoredMessage",
+        "type": "object"
+      },
+      "StoredProposal": {
+        "properties": {
+          "proposal_id": {
+            "title": "Proposal Id",
+            "type": "integer"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/RecipeData"
+          },
+          "saved_recipe_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The user recipe this proposal was saved as, or null.",
+            "title": "Saved Recipe Id"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "recipe",
+          "saved_recipe_id"
+        ],
+        "title": "StoredProposal",
         "type": "object"
       },
       "TokenResponse": {
@@ -274,6 +1177,237 @@
           "email"
         ],
         "title": "UserPublic",
+        "type": "object"
+      },
+      "UserRecipeCreate": {
+        "additionalProperties": false,
+        "description": "Exactly one of `recipe` (manual) or `proposal_id` (copy of a chat proposal, with optional overrides).",
+        "properties": {
+          "overrides": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "maxProperties": 30,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Partial RecipeData merged over the proposal, validated again.",
+            "title": "Overrides"
+          },
+          "proposal_id": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Id"
+          },
+          "recipe": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "UserRecipeCreate",
+        "type": "object"
+      },
+      "UserRecipeOut": {
+        "additionalProperties": false,
+        "properties": {
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coffee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coffee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "dose_g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeGoal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Grind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "is_favorite": {
+            "default": false,
+            "title": "Is Favorite",
+            "type": "boolean"
+          },
+          "method": {
+            "$ref": "#/components/schemas/RecipeMethod"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Grams of water per gram of coffee (espresso: grams of drink per gram, with water_g null).",
+            "title": "Ratio"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "maxItems": 30,
+            "title": "Steps",
+            "type": "array"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "water_g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "yield_ml": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "method",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserRecipeOut",
         "type": "object"
       },
       "ValidationError": {
@@ -694,7 +1828,7 @@
     },
     "/api/chat": {
       "post": {
-        "description": "Sends one message and streams the agent's reply as Server-Sent Events. The server keeps the\nhistory; the client sends only the new message and, to continue a thread, its `conversation_id`\n(null starts a new conversation). The agent addresses the user by first name. Requires a bearer token.\n\nErrors before the stream starts are normal JSON `{\"detail\": \"<Spanish message>\"}`.\nOnce the response is 200, each event is `event: <name>` + `data: <json>` + a blank line:\n\n- `start` `{\"conversation_id\": int}`: always first.\n- `delta` `{\"text\": str}`: zero or more; append to the assistant bubble.\n- `replace` `{\"text\": str}`: replace the whole assistant bubble with this text (a guard blocked a leak).\n- `done` `{}`: terminal, success.\n- `error` `{\"code\": \"model_busy\" | \"model_unavailable\"}`: terminal, failure. The user message is not kept, so a retry does not duplicate it.",
+        "description": "Sends one message and streams the agent's reply as Server-Sent Events. The server keeps the\nhistory; the client sends only the new message and, to continue a thread, its `conversation_id`\n(null starts a new conversation). The agent addresses the user by first name. Requires a bearer token.\n\nErrors before the stream starts are normal JSON `{\"detail\": \"<Spanish message>\"}`.\nOnce the response is 200, each event is `event: <name>` + `data: <json>` + a blank line:\n\n- `start` `{\"conversation_id\": int}`: always first.\n- `delta` `{\"text\": str}`: zero or more; append to the assistant bubble.\n- `replace` `{\"text\": str}`: replace the whole assistant bubble with this text (a guard blocked a leak).\n- `recipe` `{\"proposal_id\": int, \"recipe\": RecipeData}`: at most one, after the last `delta` and before `done`. Sent only when the model proposed a recipe and it passed validation. Nothing is saved to the user's book: the client saves it with `POST /api/me/recipes {\"proposal_id\"}`.\n- `done` `{}`: terminal, success.\n- `error` `{\"code\": \"model_busy\" | \"model_unavailable\"}`: terminal, failure. The user message is not kept, so a retry does not duplicate it.",
         "operationId": "chat_api_chat_post",
         "requestBody": {
           "content": {
@@ -710,7 +1844,7 @@
           "200": {
             "content": {
               "text/event-stream": {
-                "example": "event: start\ndata: {\"conversation_id\": 7}\n\nevent: delta\ndata: {\"text\": \"Hola Ana, \"}\n\nevent: delta\ndata: {\"text\": \"para un espresso...\"}\n\nevent: done\ndata: {}\n\n",
+                "example": "event: start\ndata: {\"conversation_id\": 7}\n\nevent: delta\ndata: {\"text\": \"Hola Ana, \"}\n\nevent: delta\ndata: {\"text\": \"para un espresso...\"}\n\nevent: recipe\ndata: {\"proposal_id\": 3, \"recipe\": {\"name\": \"V60 más dulce\", \"method\": \"v60\", \"steps\": []}}\n\nevent: done\ndata: {}\n\n",
                 "schema": {
                   "type": "string"
                 }
@@ -742,9 +1876,117 @@
         ]
       }
     },
+    "/api/conversations": {
+      "get": {
+        "description": "Only the caller's conversations, most recent activity first (last message, or creation time when empty; ties broken by newest id). `total` counts all of them. Invalid `limit` or `offset` give 422. Requires a bearer token.",
+        "operationId": "list_conversations_api_conversations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "422": {
+            "description": "Invalid limit or offset"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List the caller's conversations",
+        "tags": [
+          "chat"
+        ]
+      },
+      "post": {
+        "description": "Creates a conversation, optionally about a recipe: `recipe_ref` is `{kind: \"catalog\", ref: slug}` (a validated recipe, or an archived one the caller saved, as in `GET /api/recipes/{slug}`) or `{kind: \"user\", ref: id}` (one of the caller's own recipes). Unknown, unavailable, foreign or mismatched-type refs (for example a number for a catalog ref, or a boolean) all answer the same 404. The new conversation is empty, so `/latest` does not return it: open it by id with `GET /{id}`. Extra body fields give 422. Requires a bearer token.",
+        "operationId": "create_conversation_api_conversations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "The recipe does not exist or is not available to the caller"
+          },
+          "422": {
+            "description": "Invalid body or extra fields"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start an empty conversation",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
     "/api/conversations/latest": {
       "get": {
-        "description": "Returns the conversation holding the user's most recent message, with its messages in chronological order. `conversation_id` is null and `messages` is empty when the user has none. Requires a bearer token.",
+        "description": "Returns the conversation holding the user's most recent message, with its messages in chronological order, plus its `recipe_ref` (same shape as `GET /{id}`, null when none). `conversation_id` and `recipe_ref` are null and `messages` is empty when the user has no conversation. Requires a bearer token.",
         "operationId": "latest_conversation_api_conversations_latest_get",
         "responses": {
           "200": {
@@ -775,6 +2017,63 @@
         ]
       }
     },
+    "/api/conversations/{conversation_id}": {
+      "get": {
+        "description": "The conversation's recipe ref and its messages in chronological order; assistant messages may carry a `proposal`. An unknown id and another user's id give the same 404. Requires a bearer token.",
+        "operationId": "get_conversation_api_conversations__conversation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "The conversation does not exist or belongs to another user"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get one conversation",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "description": "Returns ok when the API is running.",
@@ -798,6 +2097,654 @@
         "summary": "Health check",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/me/library/catalog/{slug}": {
+      "delete": {
+        "description": "Idempotent for an active recipe: removing one that is not in the book is also 204. Works for an archived recipe the caller saved; an archived recipe the caller never saved, or an unknown slug, gives 404. Requires a bearer token.",
+        "operationId": "remove_recipe_api_me_library_catalog__slug__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove a catalog recipe from my book",
+        "tags": [
+          "library"
+        ]
+      },
+      "patch": {
+        "description": "`is_favorite: true` saves the recipe if needed and marks it favorite. `false` keeps a saved recipe saved and is a no-op for one that is not saved (`is_saved: false`). Same 404 rules as saving. Requires a bearer token.",
+        "operationId": "favorite_recipe_api_me_library_catalog__slug__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FavoriteUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryEntryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "description": "Body is not exactly `{is_favorite: bool}`"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Favorite or unfavorite a catalog recipe",
+        "tags": [
+          "library"
+        ]
+      },
+      "put": {
+        "description": "Idempotent: saving an already saved recipe is also 204 and keeps its favorite flag. An unknown slug, a recipe that is not validated, or an archived recipe the caller has not saved gives the same 404. Requires a bearer token.",
+        "operationId": "save_recipe_api_me_library_catalog__slug__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save a catalog recipe to my book",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/me/recipes": {
+      "get": {
+        "description": "The caller's created recipes and saved catalog recipes, most recent activity first. `filter`: `all` (default), `favorites` (both kinds), `created` (own recipes) or `saved` (catalog). Each item is `{kind, recipe}`. `total` counts every match, a page can hold fewer than `limit` items if a stored recipe is unreadable. Order uses `updated_at` for own recipes and `saved_at` for saved ones, so favoriting never reorders the list. Requires a bearer token.",
+        "operationId": "list_book_api_me_recipes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BookFilter",
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "422": {
+            "description": "Invalid recipe or request body"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List my book",
+        "tags": [
+          "library"
+        ]
+      },
+      "post": {
+        "description": "Body is exactly one of `{recipe}` (a private recipe, `parent` null) or `{proposal_id, overrides?}` (copies the chat proposal, merges the partial `overrides` over it (shallow: a top-level key replaces the whole value, nested objects are not merged), validates the result, sets `parent` from the conversation's recipe and `conversation_id`, and marks the proposal saved). Saving the same proposal again answers 200 with the recipe saved the first time and ignores `overrides`. A proposal that is not the caller's, or unknown, is 404. Requires a bearer token.",
+        "operationId": "create_recipe_api_me_recipes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRecipeCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRecipeOut"
+                }
+              }
+            },
+            "description": "The proposal was already saved; the existing recipe"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "description": "Invalid recipe or request body"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create a recipe in my book",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/me/recipes/{recipe_id}": {
+      "delete": {
+        "description": "Not idempotent: deleting a missing or foreign recipe is 404. An unreadable stored recipe can still be deleted (204). Conversations and proposals that pointed at it keep existing without the link. Requires a bearer token.",
+        "operationId": "delete_recipe_api_me_recipes__recipe_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "description": "Invalid recipe or request body"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete one of my recipes",
+        "tags": [
+          "library"
+        ]
+      },
+      "get": {
+        "description": "Another user's recipe, an unknown id and an unreadable stored recipe all give the same 404. Requires a bearer token.",
+        "operationId": "get_recipe_api_me_recipes__recipe_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "description": "Invalid recipe or request body"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read one of my recipes",
+        "tags": [
+          "library"
+        ]
+      },
+      "patch": {
+        "description": "Body is exactly `{is_favorite: bool}`; does not change `updated_at`. Same 404 rules as reading, with no side effect on 404. Requires a bearer token.",
+        "operationId": "favorite_user_recipe_api_me_recipes__recipe_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FavoriteUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "description": "Invalid recipe or request body"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Favorite or unfavorite one of my recipes",
+        "tags": [
+          "library"
+        ]
+      },
+      "put": {
+        "description": "Full replace of the recipe fields; `parent`, `conversation_id` and `is_favorite` are kept. Same 404 rules as reading. Requires a bearer token.",
+        "operationId": "replace_recipe_api_me_recipes__recipe_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recipe_id",
+            "required": true,
+            "schema": {
+              "title": "Recipe Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "description": "Invalid recipe or request body"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replace one of my recipes",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/recipes": {
+      "get": {
+        "description": "Validated, non-archived catalog recipes ordered by name. `q` is a case-insensitive substring search over recipe name, description and coffee name (trimmed, up to 100 characters, empty means no search). A `q` longer than 100 characters is rejected with 422, not truncated. `method` filters by brew method. `is_saved` and `is_favorite` reflect the caller's own library. `total` counts every match, but a page can hold fewer than `limit` items when a stored recipe is unreadable, so advance `offset` by `limit`, never by the number of items returned. Invalid `q`, `method`, `limit` or `offset` give 422. Requires a bearer token.",
+        "operationId": "list_recipes_api_recipes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecipeMethod"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Method"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List catalog recipes",
+        "tags": [
+          "recipes"
+        ]
+      }
+    },
+    "/api/recipes/{slug}": {
+      "get": {
+        "description": "One catalog recipe by slug. An archived recipe is returned (with `archived: true`) only to a user who has it saved; anyone else gets the same 404 as for an unknown slug. Requires a bearer token.",
+        "operationId": "get_recipe_api_recipes__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogRecipeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing, invalid or expired session"
+          },
+          "404": {
+            "description": "Recipe not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get a catalog recipe",
+        "tags": [
+          "recipes"
         ]
       }
     }

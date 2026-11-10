@@ -20,12 +20,31 @@ GENERIC_GREETING_NAME = "usuario"
 _ALLOWED_NAME_CHARS = re.compile(r"[^\w \-']", re.UNICODE)
 
 # Markers that must never appear in a reply: they belong to the internal prompt.
-_INTERNAL_MARKERS = ("<user_profile>", "</user_profile>", "## Document:", "# Coffee knowledge base")
+_INTERNAL_MARKERS = (
+    "<user_profile>",
+    "</user_profile>",
+    "## Document:",
+    "# Coffee knowledge base",
+    "<retrieved_knowledge>",
+    "</retrieved_knowledge>",
+    "<document ",
+    "<recipe_context>",
+    "</recipe_context>",
+    "recetario/",
+    "knowledge/cafe",
+    ".md",
+)
 
 SAFE_LEAK_REPLY = (
     "No puedo compartir mi configuración interna. "
     "Sí puedo ayudarte con recetas, ratios y diagnóstico de café."
 )
+
+
+def contains_internal_marker(text: str) -> bool:
+    """Case-insensitive check for any internal prompt marker."""
+    lowered = text.lower()
+    return any(marker.lower() in lowered for marker in _INTERNAL_MARKERS)
 
 
 def strip_unsafe_characters(text: str) -> str:
@@ -73,8 +92,7 @@ class StreamingOutputGuard:
         if self.blocked:
             return ""
         self._buffer += chunk
-        lowered = self._buffer.lower()
-        if any(marker.lower() in lowered for marker in _INTERNAL_MARKERS):
+        if contains_internal_marker(self._buffer):
             logger.warning("Blocked a model reply that contained internal prompt markers")
             self.blocked = True
             self._buffer = ""

@@ -1,3 +1,8 @@
+---
+type: guide
+title: "Equipo y referencias de molienda"
+---
+
 # Equipo y referencias de molienda
 
 ## Molinos
@@ -8,21 +13,22 @@
 - **Bosch 180W MKM600 (eléctrico)**: molienda más fina, para casos puntuales. Sin referencia de clics documentada.
 
 ## Referencias de clics en el Timemore C2S (orientativas, calibrar con cada café)
-| Método | Clics de partida |
-|---|---|
-| Moka italiana | 12 |
-| V60 base | 23 a 24 |
-| V60 con cafés florales o frutales (Azahar, Berry Bloom) | 24 a 26 |
-| V60 Geisha natural | 26 a 27 |
-| Prensa francesa (Mild Honey, Sweet Hour) | 32 |
-| Prensa francesa (Berry Bloom, Geisha) | 34 a 35 |
+Son rangos de partida: varían con el nivel de tueste y el grano. Con otro molino, guiate por la columna de molienda.
+
+| Método | Molienda | Clics de partida (Timemore C2S) |
+|---|---|---|
+| Moka italiana | Fina a media-fina | 10 a 13 (lo usual 12) |
+| V60 base | Media-fina | 23 a 24 |
+| V60 con cafés florales o frutales (Azahar y Durazno, Berry Bloom) | Media-fina | 24 a 27 |
+| V60 Azahar y Durazno (Geisha), variante (b), 88 a 90 °C | Media-fina, del lado grueso | 26 a 27 |
+| Prensa francesa (Mild Honey, Sweet Hour, Villa Dora) | Gruesa | 30 a 32 |
+| Prensa francesa (Berry Bloom, Geisha) | Gruesa | 34 a 35 |
 
 ## Prensa francesa
 - Capacidad 500 ml. No superar ~430 g de agua total para dejar espacio al émbolo.
-- Pérdida real de líquido en la prensa: ~15 a 20% del agua cargada (más que el 12 a 15% teórico). Si necesitás un volumen líquido preciso, cargá 15 a 20% más agua.
 
 ## Moka
-- Aluminio de 2 tazas (más de 5 años, buen estado) y acero inoxidable de 9 tazas.
+- Aluminio de 2 tazas.
 
 ## Balanza y leche
 - Balanza digital para todo: se trabaja en gramos.
