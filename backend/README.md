@@ -1,6 +1,6 @@
 # Coffee Master backend
 
-FastAPI service: email-confirmed accounts (JWT sessions of 7 days) and the coffee agent.
+FastAPI service: email-confirmed accounts (JWT sessions of 7 days), the coffee agent, the recipe catalog and each user's recipe book.
 Interactive docs with the same information: `http://localhost:8000/docs`.
 
 ## Setup
@@ -38,7 +38,7 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, GMAIL_AD
 | `GMAIL_APP_PASSWORD` | for email | A Google "app password" for `GMAIL_ADDRESS` (myaccount.google.com/apppasswords), not the account's real password. Requires 2-Step Verification on that Google account. |
 | `EMAIL_FROM_NAME` | no | Display name shown in emails. Defaults to `Coffee Master`. The `From` address itself is always `GMAIL_ADDRESS` — Gmail's SMTP relay rejects sending as a different address. |
 | `EMAIL_SEND_IN_BACKGROUND` | no | Defaults to `true`: emails go out after the response. Set to `false` if codes stop arriving in production. |
-| `FRONTEND_URL` | yes | Base URL of the frontend app. Not used to build email links anymore (confirmation and reset now use 6-digit codes), kept for other frontend-facing uses. |
+| `FRONTEND_URL` | yes | Base URL of the frontend app. Not used to build email links (confirmation and reset use 6-digit codes), only for other frontend-facing uses. |
 | `CORS_ORIGINS` | no | Comma-separated allowed origins. |
 | `RATE_LIMIT_AUTH_PER_MINUTE` | no | Requests per minute per IP on `/api/auth/*`. Default 10. |
 | `RATE_LIMIT_CHAT_PER_MINUTE` | no | Requests per minute per IP on `/api/chat`. Default 20. |
@@ -50,7 +50,7 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY, JWT_SECRET, GMAIL_AD
 - The init script runs only on a fresh volume: with an existing volume, run `docker compose down -v` to create the test database.
 
 ## Migrations
-The app no longer creates tables at startup: the schema is managed with Alembic (`alembic.ini`, `migrations/`).
+The app creates no tables at startup: the schema is managed with Alembic (`alembic.ini`, `migrations/`).
 
 **Which database?** Alembic always takes its URL from the app settings, which read `backend/.env`. Without an inline `DATABASE_URL`, it runs against whatever `.env` points at, which may be Supabase. Always write the URL inline.
 
@@ -58,7 +58,7 @@ The app no longer creates tables at startup: the schema is managed with Alembic 
 - New migration: `DATABASE_URL='postgresql+psycopg://postgres:postgres@localhost:5432/coffeemaster' .venv/bin/alembic revision --autogenerate -m "..."`, then review the generated file by hand.
 - The recipe tables arrive with migration `0002_recipes`, so after stamping `0001_baseline` the normal `alembic upgrade head` applies it.
 - The knowledge tables (RAG) arrive with `0003_knowledge`, which runs `CREATE EXTENSION IF NOT EXISTS vector`. On Supabase, either enable `vector` first from Database > Extensions (it then lives in the `extensions` schema and the migration skips it) or let the migration create it in `public` (the Security Advisor then warns about an extension in public: harmless but noisy). Both work because the column type resolves through the search path. The first `upgrade head` that includes `0003` needs a role allowed to create extensions (the `postgres` role in Supabase is). The deploy order rule is unchanged: run `upgrade head` before pushing code that needs the tables. Unverified against Supabase: that the `postgres` role can create extensions and that the unqualified type name resolves through the search path (`"$user", public, extensions`). Pre-check before the first Supabase `upgrade head`: run `SHOW search_path;` in the Supabase SQL editor and confirm it includes `extensions` (or `public` if the migration creates the extension there); if the path lacks the schema where the extension lives, the migration fails with `type "vector" does not exist`.
-- Deploys: Vercel runs no migrations and the app no longer creates tables, so a fresh database (a new Supabase project or a preview environment) serves 500s on its first query. Before promoting a deploy that includes a new migration, run `DATABASE_URL='<the URL the app uses, see "Which Supabase URL" above>' .venv/bin/alembic upgrade head`. The "CI: database sync workflow" section automates this on pushes to `main`.
+- Deploys: Vercel runs no migrations and the app creates no tables, so a fresh database (a new Supabase project or a preview environment) serves 500s on its first query. Before promoting a deploy that includes a new migration, run `DATABASE_URL='<the URL the app uses, see "Which Supabase URL" above>' .venv/bin/alembic upgrade head`. The "CI: database sync workflow" section automates this on pushes to `main`.
 - Never run `alembic downgrade` against Supabase (`downgrade base` drops every table).
 - Which Supabase URL: the one the app already uses in `backend/.env` (the Supabase transaction pooler, port 6543, scheme rewritten to `postgresql+psycopg://`) works for the check script, `alembic stamp` and `alembic upgrade head`: the engines used by Alembic and the script disable prepared statements, and the script sets read-only per transaction. The session pooler on port 5432 is the alternative. If a run fails with an error about prepared statements or about an unsupported startup parameter, switch to the 5432 URL. This was verified locally but not against Supabase's pooler.
 - Supabase URL shape (same URL as the app): `postgresql+psycopg://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres`, where the host is the pooler host shown by Supabase. The Supabase dashboard shows `postgresql://`; rewrite the scheme to `postgresql+psycopg://`, otherwise SQLAlchemy looks for psycopg2. Percent-encode special characters in the password.
@@ -78,14 +78,14 @@ select table_name,column_name,data_type,character_maximum_length,is_nullable fro
 select indexname,indexdef from pg_indexes where schemaname='public';
 ```
 3. Stamp once: `DATABASE_URL='<the URL the app uses, see "Which Supabase URL" above>' .venv/bin/alembic stamp 0001_baseline`.
-4. Confirm: `DATABASE_URL='<the URL the app uses, see "Which Supabase URL" above>' .venv/bin/alembic current` must print `0001_baseline` (without `(head)` since `0005_enable_rls` is now the head).
+4. Confirm: `DATABASE_URL='<the URL the app uses, see "Which Supabase URL" above>' .venv/bin/alembic current` must print `0001_baseline` (without `(head)`: the head is `0005_enable_rls`).
 5. From then on, `DATABASE_URL='<the URL the app uses, see "Which Supabase URL" above>' .venv/bin/alembic upgrade head` is the normal path.
 
 ## Security: Row Level Security
 
 Migration `0005_enable_rls` runs `ENABLE ROW LEVEL SECURITY` (no policies) on every public table: `users`, `verification_codes`, `conversations`, `chat_messages`, `catalog_recipes`, `user_recipes`, `saved_catalog_recipes`, `recipe_proposals`, `knowledge_documents`, `knowledge_chunks` and `alembic_version`. On Supabase this denies the Data API (PostgREST, public anon key). The backend connects as the `postgres` role, which bypasses RLS, so the app is unaffected. The downgrade is a deliberate no-op.
 
-Owner action: on the live Supabase project RLS was already enabled by hand on `users`, `verification_codes`, `conversations` and `chat_messages` (2026-11-10); `0005` is idempotent over that. After running the runbook, rerun the Security Advisor linter and confirm no `rls_disabled_in_public` finding remains. Any new table needs its own `ENABLE ROW LEVEL SECURITY` in its migration.
+Owner action: `0005` is idempotent over tables that already have RLS. After running the runbook, rerun the Security Advisor linter and confirm no `rls_disabled_in_public` finding remains. Any new table needs its own `ENABLE ROW LEVEL SECURITY` in its migration.
 
 ## Authentication
 - Sessions use `Authorization: Bearer <access_token>`.
@@ -153,7 +153,7 @@ The machine-readable contract is `backend/openapi.json`. Regenerate it after cha
 - A token of one purpose is rejected by endpoints that expect another.
 
 ## Embeddings (Amazon Bedrock)
-- Default model: Cohere Embed v4 (`cohere.embed-v4:0`) at 1024 dimensions. It distinguishes documents (`search_document`) from queries (`search_query`), a split designed for matching short queries against long documents. Only the Cohere family is implemented (`cohere.embed-multilingual-v3` as the fallback).
+- Default model: Cohere Embed v4 through the cross-region inference profile `us.cohere.embed-v4:0` at 1024 dimensions. It distinguishes documents (`search_document`) from queries (`search_query`), a split designed for matching short queries against long documents. Only the Cohere family is implemented. `cohere.embed-multilingual-v3` is accepted by the code but is not available in `us-east-2`.
 - One-time enablement: the Cohere models are AWS Marketplace products. The account owner must, once, from an identity with `aws-marketplace:Subscribe` and `aws-marketplace:ViewSubscriptions` and an account with a valid payment method, make one `invoke_model` call to the model in `us-east-2` (console playground or CLI), then check that `aws bedrock get-foundation-model-availability --model-id cohere.embed-v4:0` shows `AVAILABLE`. Until the subscription completes (about 15 minutes) calls fail with `AccessDeniedException`.
 - Runtime IAM policy (add the multilingual v3 ARN only if you use it):
 ```json
@@ -172,7 +172,8 @@ The machine-readable contract is `backend/openapi.json`. Regenerate it after cha
   ]
 }
 ```
-- Credentials come from boto3's default chain; no secrets live in the repo or in settings. Locally: `AWS_PROFILE`. Vercel: for now a dedicated least-privilege IAM user, with its access keys as sensitive environment variables. GitHub Actions: an OIDC role (set up in a later task).
+- Quota: the Embed V4 tokens-per-minute quota (Bedrock > Quotas, row "Embed V4 / Geo cross-region") must be above 0, otherwise calls fail with `ThrottlingException: Too many tokens per day`. The AWS default is 300,000.
+- Credentials come from boto3's default chain (a Bedrock API key in `AWS_BEARER_TOKEN_BEDROCK` also works); no secrets live in the repo or in settings. Locally: `AWS_PROFILE` or the exported API key, never `backend/.env`. Vercel: for now a dedicated least-privilege IAM user, with its access keys as sensitive environment variables. GitHub Actions: an OIDC role (set up in a later task).
 - The client is synchronous; async callers use `retrieve_with_timeout` (it enforces the 8-thread cap and the timeout).
 - Not stated in the AWS docs: vector normalization (retrieval uses cosine distance, which does not need it).
 - Not stated in the AWS docs: Cohere v4's Spanish quality and its price. Confirm retrieval quality later against `backend/evals/casos.json`.
@@ -225,7 +226,7 @@ Known limitation: only the current message is embedded, so very short follow-ups
 - `DATABASE_URL` must be the Supabase session pooler URI (port 5432, `*.pooler.supabase.com`) with the scheme `postgresql+psycopg://`. GitHub runners are IPv4-only and Supabase's direct host is IPv6-only, so the direct host is unreachable. The transaction pooler (6543) also works in this repo (prepared statements are disabled) but the session pooler is the documented choice for migrations. Note the app on Vercel keeps using its own URL.
 - IAM role: trust policy for `token.actions.githubusercontent.com` (OIDC provider, audience `sts.amazonaws.com`) with `StringEquals` on `token.actions.githubusercontent.com:sub` = `repo:<owner>/<repo>:ref:refs/heads/main` (and `:aud` = `sts.amazonaws.com`); permissions: the `bedrock:InvokeModel` policy from "Embeddings (Amazon Bedrock)".
 - Expand-then-contract: Vercel deploys the app in parallel with this workflow, so while a migration runs the live code may be the old or the new one. This protects OLD code against the NEW schema: migrations must only add (tables, nullable columns, indexes) in one release; drops and renames go in a later release, once no live code uses the old shape. The reverse window also exists: code that needs a NEW database object must ship in a release AFTER the migration has run, otherwise the new code can serve before `upgrade head` finishes and answer 500.
-- Owner-only steps, before the first push of the v2 work: run the Supabase runbook (check, stamp `0001_baseline`) and the first real ingestion by hand, then set the secrets and variable above. Never push to `main` before `alembic upgrade head` or the stamp is done: the workflow would run `upgrade head` from scratch on a database that already has tables.
+- The workflow runs `alembic upgrade head`, so a database that already has tables from before Alembic must be stamped `0001_baseline` first (see the runbook); on an unstamped database it would run from scratch.
 - Python is 3.14 in CI, same as the local venv.
 - Known risk: timing-based tests may be flaky on slow runners (the workflow does not run the test suite; keep it that way or loosen those tests first).
 - Known risk: `Settings` requires `JWT_SECRET`, which alembic and the real ingestion load. The sync job sets a dummy placeholder for it (neither uses it); the dry-run job needs none because it imports no settings.

@@ -12,7 +12,9 @@ Orden: base → backend → web → vuelta al backend para cerrar CORS. El orden
    postgresql+psycopg://USER:PASSWORD@HOST:6543/postgres
    ```
    El código ya desactiva los prepared statements para el pooler (`app/db/session.py`).
-4. Las tablas nuevas se crean solas al arrancar el backend, incluidas las de conversaciones. Las tablas que ya existen no se modifican: para cambiar una, primero hay que migrar a Alembic.
+4. **Las tablas las crea Alembic.** En una base nueva: `cd backend && DATABASE_URL='<la URL del paso 3>' .venv/bin/alembic upgrade head`. En una base que ya tenía tablas del código viejo, seguí el "Runbook" de `backend/README.md` (chequeo, `stamp 0001_baseline`, `upgrade head`). Nunca corras `alembic downgrade` contra Supabase.
+5. Cargá el catálogo de recetas: `DATABASE_URL='...' .venv/bin/python -m scripts.ingest_knowledge --catalog-only`.
+6. RLS: las migraciones lo activan en todas las tablas. Revisá el Security Advisor de Supabase.
 
 ## 2. Email (Gmail)
 - Los mails salen de una cuenta de Gmail propia. No hace falta verificar un dominio.
@@ -42,6 +44,8 @@ Ese valor es `JWT_SECRET` en producción.
 | `GMAIL_APP_PASSWORD` | la contraseña de aplicación del paso 2 |
 | `FRONTEND_URL` | URL de la web de producción (paso 5) |
 | `CORS_ORIGINS` | la misma URL de la web, sin barra final |
+| `BEDROCK_REGION` | región de Bedrock, `us-east-2` (opcional: es el valor por defecto) |
+| `AWS_BEARER_TOKEN_BEDROCK` | API key de Bedrock. Solo hace falta si vas a usar RAG |
 
 Opcionales, con valor por defecto:
 
@@ -50,9 +54,16 @@ Opcionales, con valor por defecto:
 | `CHAT_DAILY_MESSAGE_LIMIT` | `50` | Mensajes por usuario al día. Es el tope de gasto en Anthropic. |
 | `CHAT_CONTEXT_MESSAGES` | `40` | Mensajes anteriores que recibe el modelo en cada turno. |
 | `EMAIL_SEND_IN_BACKGROUND` | `true` | Envía los mails después de responder. Ver el paso 7. |
+| `RAG_ENABLED` | `false` | Con `true` el chat busca en la guía con embeddings en vez de cargarla entera. Activalo solo después de la ingesta real y de calibrar `RAG_MIN_SCORE`. Ver `backend/README.md`. |
 
 4. Deploy. Anotá la URL del backend, por ejemplo `https://coffee-api.vercel.app`.
 5. Prueba: `https://TU-BACKEND/api/health` debe responder `{"status":"ok"}`.
+
+### GitHub Actions (sync de la base)
+`.github/workflows/database-sync.yml`: en cada pull request valida el conocimiento; en cada push a `main` corre `alembic upgrade head` y sincroniza el catálogo. Configurá en el repo (Settings → Secrets and variables → Actions):
+- Secret `DATABASE_URL`: la URI del **session pooler** de Supabase (puerto 5432), con `postgresql+psycopg://`. Los runners de GitHub solo tienen IPv4.
+- Variable `RAG_INGEST=true` y secret `AWS_ROLE_ARN`: solo cuando AWS esté listo y quieras la ingesta con embeddings en cada push.
+Vercel despliega en paralelo y no corre migraciones: el código que necesite una tabla nueva tiene que salir en un release posterior a la migración.
 
 ## 5. Web en Vercel
 1. Vercel → **Add New → Project**, mismo repo.
@@ -73,14 +84,14 @@ Volvé al proyecto del backend en Vercel, poné `FRONTEND_URL` y `CORS_ORIGINS` 
 6. **Consola del navegador**: no tiene que haber errores de `Content-Security-Policy`.
 7. Probá el rate limit: más de 10 intentos de login por minuto devuelven 429.
 
-## Al desplegar sobre una versión anterior
-- Todos los usuarios tienen que volver a iniciar sesión una vez. Las sesiones viejas dejan de valer.
-- Web y backend cambian juntos: el chat tiene un contrato nuevo. Desplegá primero el backend y enseguida la web. En el medio, el chat de la web vieja va a fallar.
+## Orden de despliegue
+- Web y backend cambian juntos: si cambia el contrato de la API, desplegá primero el backend y enseguida la web. En el medio, la web vieja puede fallar.
+- Corré las migraciones pendientes **antes** de desplegar el código que las necesita.
 
 ## Límites conocidos (aceptables para el lanzamiento)
 - **Rate limit en memoria**: cada instancia de Vercel tiene sus propios contadores. Con tráfico alto, moverlos a Redis o a Supabase.
 - **Detrás de proxy**: el IP del cliente es el del proxy de Vercel, así que todos los usuarios comparten el límite. Antes de subir el límite, configurar la lectura de `X-Forwarded-For`.
-- **Sin migraciones**: `create_all` al arrancar. Alembic después del lanzamiento.
+- **RAG apagado**: con `RAG_ENABLED=false` el chat carga toda la guía en cada pedido. Prenderlo requiere el cupo de Bedrock aprobado y la ingesta real.
 - **Gasto en Anthropic**: cada usuario tiene un tope diario de mensajes, pero el gasto total crece con la cantidad de usuarios. Revisar la facturación antes de abrirlo al público.
 - **Límites de mails**: se permite un código por minuto y 5 por hora por email. Alguien que pida códigos para un email ajeno puede invalidar el código en uso y agotar ese cupo.
 

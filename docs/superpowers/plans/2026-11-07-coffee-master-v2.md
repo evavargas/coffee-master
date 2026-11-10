@@ -8,7 +8,7 @@
 
 **Tech Stack:** FastAPI, SQLAlchemy 2, Alembic (new), Postgres 16 + pgvector in docker (new), `pgvector` python package (new), Amazon Bedrock embeddings through `boto3`, behind an interface (decision D2), Next.js 16 + next-intl, Expo SDK 58 + react-i18next + Expo Router (decision D1), GitHub Actions (new).
 
-**Spec:** `coffee-master-v2.md` (adapted: it assumes Supabase Auth/RLS, no migrations and a single frontend; this repo has its own JWT auth, no migrations yet, and web + mobile). Decisions from the planning conversation override the document where they differ.
+**Spec:** `docs/superpowers/specs/coffee-master-v2.md` (adapted: it assumes Supabase Auth/RLS, no migrations and a single frontend; this repo has its own JWT auth, no migrations yet, and web + mobile). Decisions from the planning conversation override the document where they differ.
 
 ## Global Constraints
 

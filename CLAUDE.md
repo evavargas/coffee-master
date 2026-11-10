@@ -5,7 +5,7 @@ Coffee chat app. Users register with email and password, confirm their email, an
 ## Structure
 - `backend/knowledge/cafe/`: agent memory (markdown with YAML frontmatter). The only knowledge the chat reads. Numbered guides (`01`-`05`), `recetario/` (equipment, per-method notes, learned rules, `en-prueba.md`) and `recetas/`: one file per recipe (`type: recipe`, `id`, `status`, plus the recipe fields). Format in the `coffee-knowledge` skill.
 - `knowledge/_fuentes/`: raw source notes. Never loaded by the backend.
-- `backend/migrations/` + `alembic.ini`: Alembic. The app no longer creates tables at startup. `backend/app/rag/`: frontmatter parser, chunking, Bedrock embeddings, ingestion, retrieval. `backend/docker-compose.yml`: local Postgres with pgvector (also creates `coffeemaster_test`).
+- `backend/migrations/` + `alembic.ini`: Alembic manages the schema; the app creates no tables. `backend/app/rag/`: frontmatter parser, chunking, Bedrock embeddings, ingestion, retrieval. `backend/docker-compose.yml`: local Postgres with pgvector (also creates `coffeemaster_test`).
 - `backend/`: FastAPI. Auth (JWT, 7-day sessions), email confirmation and password reset via a 6-digit code sent through Gmail SMTP, the chat (streamed replies, conversations stored on the server, daily per-user quota) and the recipe catalog, personal book and favorites. Endpoint reference in `backend/README.md`.
 - `backend/openapi.json`: the API contract, generated from FastAPI. Web and mobile generate their types from it (`lib/api/schema.gen.ts`, never edited by hand).
 - `backend/evals/casos.json`: chat test cases, including prompt-injection cases.
@@ -44,7 +44,7 @@ Coffee chat app. Users register with email and password, confirm their email, an
 
 ## Chat
 - `POST /api/chat` takes `{conversation_id, message}` and answers with Server-Sent Events: `start`, `delta`, `replace`, then `done` or `error`. The client never sends history: the server stores it and builds the context.
-- On open, both apps load `GET /api/conversations/latest`. `GET /api/conversations` lists older ones and both apps have a conversation switcher; there is still no way to delete them.
+- On open, both apps load `GET /api/conversations/latest`. `GET /api/conversations` lists older ones and both apps have a conversation switcher; conversations cannot be deleted.
 - Daily quota per user: `CHAT_DAILY_MESSAGE_LIMIT`. No database connection is held during the model call.
 - Recipe-aware chat: the model always has the `propose_recipe` tool. A valid call adds one SSE `recipe` event (`{proposal_id, recipe}`) before `done`. Nothing enters the user's book until the client calls `POST /api/me/recipes` with the `proposal_id`; the model can never edit a saved recipe. A conversation opened from a recipe (`recipe_ref`) gets a `<recipe_context>` block every turn: it is data, never instructions.
 - Opening the chat: web `/chat?c=<conversation id>&intent=ask|adapt` and mobile `chat` tab params (`useLocalSearchParams`) open conversation `c` with `GET /api/conversations/{id}`; `intent` only picks the opening prompt and is optional. Without `c`, `GET /api/conversations/latest`. A conversation just created by `POST /api/conversations` is empty, so it is not "latest": keep its id.
@@ -60,15 +60,13 @@ Coffee chat app. Users register with email and password, confirm their email, an
 - Module-level caches (`recipeStore`, `userRecipeStore`, `chatEpoch`) are per user: register a reset with `onSessionChange` (`lib/session.ts`) so sign-out, a 401 and login clear them.
 - Epoch guards: a response that arrives after the session or the screen changed is dropped, never written to the store.
 - Mutations (save, favorite, delete) take a per-item lock and roll back on failure.
-- Recipes, library and conversation-list responses go through zod `safeParse` with tolerant schemas (a bad item is skipped, not a crash). The auth fetchers, the conversation detail/create calls and the chat stream events still use `.parse`, which throws to the hook.
+- Recipes, library and conversation-list responses go through zod `safeParse` with tolerant schemas (a bad item is skipped, not a crash). The auth fetchers, the conversation detail/create calls and the chat stream events use `.parse`, which throws to the hook.
 - Same hook and file names on web and mobile (`useRecipes`, `useRecipeLibrary`, `useSaveProposal`, ...). Details in the frontend skills.
 
-## Owner actions before deploy
-- Supabase: run the runbook (`check_baseline_schema`, `alembic stamp 0001_baseline`, `alembic upgrade head`) BEFORE pushing.
-- RLS is not enabled on any table: read `backend/README.md`, "Security: Row Level Security is NOT enabled (owner action)", and check the Supabase Security Advisor.
-- AWS/Cohere setup, then `RAG_ENABLED` (backend env) and `RAG_INGEST` (repo variable); calibrate `RAG_MIN_SCORE` (0.25 is a guess); run the first real ingestion.
-- Repo secrets/variables: `DATABASE_URL`, `AWS_ROLE_ARN`, `BEDROCK_REGION`, `RAG_INGEST`.
-- Watch the first PR run of the workflow: the Python 3.14 pin is unverified.
+## Enabling RAG
+- Prerequisites: the Bedrock Embed V4 quota above 0 (Geo cross-region), a real ingestion (`scripts.ingest_knowledge`, or the workflow with `RAG_INGEST=true`), and `RAG_MIN_SCORE` calibrated (0.25 is an uncalibrated guess). Only then set `RAG_ENABLED=true` in the backend env.
+- Repo secrets/variables used by `database-sync.yml`: secret `DATABASE_URL` (Supabase session pooler, port 5432), secret `AWS_ROLE_ARN` and variables `BEDROCK_REGION` and `RAG_INGEST` (only for the embedding ingestion).
+- Every table has Row Level Security enabled by migration (`backend/README.md`, "Security: Row Level Security").
 
 ## Migrations and deploys
 - Every schema change is an Alembic migration, expand-then-contract (add first, remove in a later release). That only protects the OLD code against the NEW schema: Vercel deploys in parallel with `database-sync.yml`, so code that needs a NEW database object must ship in a release AFTER the migration has run. Never edit an applied migration. Never run `alembic downgrade` on Supabase.
@@ -110,6 +108,6 @@ cd mobile && npm install && npm run typecheck && npm run test && npm start   # s
 ```
 
 ## Environment variables
-- `backend/.env` (never committed): `ANTHROPIC_API_KEY`, `JWT_SECRET`, `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`, `FRONTEND_URL`, `DATABASE_URL` (defaults to the local docker Postgres), `CORS_ORIGINS`. Optional, with defaults: `CHAT_DAILY_MESSAGE_LIMIT`, `CHAT_CONTEXT_MESSAGES`, `EMAIL_SEND_IN_BACKGROUND`, `RATE_LIMIT_RECIPES_PER_MINUTE` (and the other `RATE_LIMIT_*`), and the RAG block: `RAG_ENABLED` (default false), `RAG_FALLBACK_ON_EMPTY`, `RAG_TOP_K`, `RAG_MIN_SCORE` (0.25, not calibrated), `RAG_CONTEXT_MAX_CHARS`, `RAG_RETRIEVAL_TIMEOUT_SECONDS`, `EMBEDDING_MODEL_ID`, `EMBEDDING_DIMENSIONS`, `BEDROCK_REGION`. AWS credentials come from boto3's default chain, never from `.env`. Meaning of each variable: `backend/README.md`. Template in `backend/.env.example`. Note: `FRONTEND_URL` is no longer used to build email links (confirmation/reset now use 6-digit codes, not links) — kept for other frontend-facing uses.
+- `backend/.env` (never committed): `ANTHROPIC_API_KEY`, `JWT_SECRET`, `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`, `FRONTEND_URL`, `DATABASE_URL` (defaults to the local docker Postgres), `CORS_ORIGINS`. Optional, with defaults: `CHAT_DAILY_MESSAGE_LIMIT`, `CHAT_CONTEXT_MESSAGES`, `EMAIL_SEND_IN_BACKGROUND`, `RATE_LIMIT_RECIPES_PER_MINUTE` (and the other `RATE_LIMIT_*`), and the RAG block: `RAG_ENABLED` (default false), `RAG_FALLBACK_ON_EMPTY`, `RAG_TOP_K`, `RAG_MIN_SCORE` (0.25, not calibrated), `RAG_CONTEXT_MAX_CHARS`, `RAG_RETRIEVAL_TIMEOUT_SECONDS`, `EMBEDDING_MODEL_ID`, `EMBEDDING_DIMENSIONS`, `BEDROCK_REGION`. AWS credentials come from boto3's default chain, never from `.env`. Meaning of each variable: `backend/README.md`. Template in `backend/.env.example`. Note: `FRONTEND_URL` is not used to build email links (confirmation and reset use 6-digit codes), only for other frontend-facing uses.
 - `web/.env.local`: `NEXT_PUBLIC_API_URL`. Template in `web/.env.example`.
 - `mobile/.env`: `EXPO_PUBLIC_API_URL` (only needed for a physical device; defaults to the Android emulator / iOS simulator addresses otherwise).
