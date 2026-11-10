@@ -14,7 +14,9 @@ jest.mock("@/context/ThemeContext", () => ({
     colors: new Proxy({}, { get: (_target, name) => `theme-${String(name)}` }),
   }),
 }));
-jest.mock("lucide-react-native", () => ({ ArrowUp: () => null, SquarePen: () => null }));
+jest.mock("lucide-react-native", () => ({ ArrowUp: () => null }));
+jest.mock("@/components/chat/ConversationSwitcher", () => ({ ConversationSwitcher: () => null }));
+jest.mock("expo-router", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock("react-native-markdown-display", () => {
   const { Text } = jest.requireActual<typeof import("react-native")>("react-native");
   return { __esModule: true, default: ({ children }: { children: string }) => <Text>{children}</Text> };
@@ -28,6 +30,8 @@ function chatState(overrides: Partial<ChatState> = {}): ChatState {
   return {
     messages: [],
     conversationId: null,
+    recipeRef: null,
+    requestedId: null,
     input: "",
     setInput: jest.fn(),
     isLoadingHistory: false,
@@ -36,7 +40,6 @@ function chatState(overrides: Partial<ChatState> = {}): ChatState {
     canStartNewConversation: true,
     error: null,
     send: jest.fn<ChatState["send"]>(),
-    newConversation: jest.fn(),
     ...overrides,
   };
 }
@@ -92,24 +95,6 @@ describe("ChatScreen", () => {
     expect(spinners()).toBe(0);
     // The reply is revealed gradually, so wait for it.
     expect(await screen.findByText("Un cortado")).toBeTruthy();
-  });
-
-  it("disables the new conversation control while sending", async () => {
-    const state = chatState({ canStartNewConversation: false, isLoading: true });
-    mockedUseChat.mockReturnValue(state);
-    await render(<ChatScreen />);
-
-    await fireEvent.press(screen.getByText(es.chat.newConversation));
-    expect(state.newConversation).not.toHaveBeenCalled();
-  });
-
-  it("starts a new conversation from the control", async () => {
-    const state = chatState();
-    mockedUseChat.mockReturnValue(state);
-    await render(<ChatScreen />);
-
-    await fireEvent.press(screen.getByText(es.chat.newConversation));
-    expect(state.newConversation).toHaveBeenCalledTimes(1);
   });
 
   it("shows the restored input and the error after a failure", async () => {

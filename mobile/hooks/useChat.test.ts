@@ -6,17 +6,22 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 // real translations instead of echoing the raw key.
 import "@/i18n";
 import { useChat } from "@/hooks/useChat";
-import { getLatestConversation, streamChat, type ChatStreamHandlers } from "@/lib/api/chat";
+import { getConversation, getLatestConversation, streamChat, type ChatStreamHandlers } from "@/lib/api/chat";
 import es from "@/i18n/locales/es.json";
+import { clearSession } from "@/lib/session";
 
+let mockParams: Record<string, string | undefined> = {};
+jest.mock("expo-secure-store", () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn(), deleteItemAsync: jest.fn() }));
+jest.mock("expo-router", () => ({ useLocalSearchParams: () => mockParams }));
 jest.mock("@/lib/api/chat", () => {
   const actual = jest.requireActual<typeof import("@/lib/api/chat")>("@/lib/api/chat");
-  return { ...actual, getLatestConversation: jest.fn(), streamChat: jest.fn() };
+  return { ...actual, getLatestConversation: jest.fn(), getConversation: jest.fn(), streamChat: jest.fn() };
 });
 
 const { ChatStreamError } = jest.requireActual<typeof import("@/lib/api/chat")>("@/lib/api/chat");
 
 const mockedLatest = getLatestConversation as jest.MockedFunction<typeof getLatestConversation>;
+const mockedConversation = getConversation as jest.MockedFunction<typeof getConversation>;
 const mockedStream = streamChat as jest.MockedFunction<typeof streamChat>;
 
 function httpError(status: number, detail: string) {
@@ -58,7 +63,9 @@ const USER_TEXT = "¿Cómo hago un cortado?";
 
 describe("useChat", () => {
   beforeEach(() => {
+    mockParams = {};
     mockedStream.mockReset();
+    mockedConversation.mockReset();
     mockedLatest.mockReset();
     mockedLatest.mockResolvedValue({ conversation_id: null, messages: [] });
   });
@@ -274,42 +281,249 @@ describe("useChat", () => {
       await act(async () => stream.finish());
     });
   });
+  describe("recipe-aware conversations", () => {
+    const ref = { kind: "catalog" as const, ref: "v60-dulce" };
+    const detail = (id: number, recipe_ref: typeof ref | null = ref) => ({ id, messages: [], recipe_ref });
 
-  describe("newConversation", () => {
-    it("clears the messages and the conversation id", async () => {
-      mockedLatest.mockResolvedValue({ conversation_id: 12, messages: [{ role: "user", content: "Hola" }] });
-      mockedStream.mockResolvedValue(undefined);
+    it("opens ?c=<id> by id instead of latest", async () => {
+      mockParams = { c: "15" };
+      mockedConversation.mockResolvedValue({ id: 15, messages: [{ role: "user", content: "Hola" }], recipe_ref: ref });
       const { result } = await renderLoadedChat();
 
-      await act(async () => {
-        result.current.newConversation();
-      });
-      expect(result.current.messages).toEqual([]);
-      expect(result.current.conversationId).toBeNull();
-
-      await act(async () => {
-        await result.current.send(USER_TEXT);
-      });
-      expect(mockedStream.mock.calls[0][0]).toEqual({ conversationId: null, message: USER_TEXT });
+      expect(mockedConversation.mock.calls[0][0]).toBe(15);
+      expect(mockedLatest).not.toHaveBeenCalled();
+      expect(result.current.conversationId).toBe(15);
+      expect(result.current.recipeRef).toEqual(ref);
     });
 
-    it("does nothing while sending", async () => {
-      mockedLatest.mockResolvedValue({ conversation_id: 12, messages: [] });
+    it("exposes the recipe_ref of /latest too", async () => {
+      mockedLatest.mockResolvedValue({ conversation_id: 4, messages: [], recipe_ref: ref });
+      const { result } = await renderLoadedChat();
+      expect(result.current.recipeRef).toEqual(ref);
+    });
+
+    it.each(["abc", "0", "-3", "1.5"])("falls back to latest for an invalid c (%s)", async (c) => {
+      mockParams = { c };
+      await renderLoadedChat();
+      expect(mockedLatest).toHaveBeenCalled();
+      expect(mockedConversation).not.toHaveBeenCalled();
+    });
+
+    it("shows its own message on a 404", async () => {
+      mockParams = { c: "99" };
+      mockedConversation.mockRejectedValue(httpError(404, "no"));
+      const { result } = await renderLoadedChat();
+      expect(result.current.error).toBe(es.chat.conversationNotFound);
+    });
+
+    it("prefills the opening prompt without sending it, only with a recipe_ref", async () => {
+      mockParams = { c: "15", intent: "adapt" };
+      mockedConversation.mockResolvedValue(detail(15));
+      const { result } = await renderLoadedChat();
+      await waitFor(() => expect(result.current.input).toBe(es.chat.intent.adapt));
+      expect(mockedStream).not.toHaveBeenCalled();
+    });
+
+    it("does not prefill when the conversation has no recipe_ref or the intent is unknown", async () => {
+      mockParams = { c: "15", intent: "ask" };
+      mockedConversation.mockResolvedValue(detail(15, null));
+      const first = await renderLoadedChat();
+      expect(first.result.current.input).toBe("");
+
+      mockParams = { c: "16", intent: "bogus" };
+      mockedConversation.mockResolvedValue(detail(16));
+      const second = await renderLoadedChat();
+      expect(second.result.current.input).toBe("");
+    });
+
+    it("keeps what the user already typed instead of overwriting it with the prompt", async () => {
+      mockParams = { c: "15", intent: "ask" };
+      mockedConversation.mockResolvedValue(detail(15));
+      const { result } = await renderLoadedChat();
+      await waitFor(() => expect(result.current.input).toBe(es.chat.intent.ask));
+      await act(async () => result.current.setInput("mi pregunta"));
+      expect(result.current.input).toBe("mi pregunta");
+    });
+
+    it("clears the input when the requested conversation changes", async () => {
+      mockParams = { c: "1" };
+      mockedConversation.mockResolvedValue(detail(1, null));
+      const view = await renderLoadedChat();
+      await act(async () => view.result.current.setInput("borrador"));
+
+      mockParams = { c: "2" };
+      mockedConversation.mockResolvedValue(detail(2, null));
+      await view.rerender({});
+      await waitFor(() => expect(view.result.current.conversationId).toBe(2));
+      expect(view.result.current.input).toBe("");
+    });
+
+    it("stores a recipe event on the assistant message", async () => {
       const stream = controlledStream();
       const { result } = await renderLoadedChat();
       await act(async () => {
         void result.current.send(USER_TEXT);
       });
-      expect(result.current.canStartNewConversation).toBe(false);
+      await act(async () => stream.handlers().onDelta("Probá esto"));
+      await act(async () =>
+        stream.handlers().onRecipe?.({ proposal_id: 8, recipe: { name: "V60", method: "v60" } as never }),
+      );
+      await act(async () => stream.finish());
+
+      expect(result.current.messages[1]).toMatchObject({
+        content: "Probá esto",
+        proposal: { proposal_id: 8, saved_recipe_id: null },
+      });
+    });
+
+    it("switching conversation mid-stream aborts it, leaks nothing into B, and B can send", async () => {
+      mockParams = { c: "1" };
+      mockedConversation.mockResolvedValue(detail(1, null));
+      const stream = controlledStream();
+      const view = await renderLoadedChat();
+      await act(async () => {
+        void view.result.current.send(USER_TEXT);
+      });
+      const signal = mockedStream.mock.calls[0][2] as AbortSignal;
+      expect(signal.aborted).toBe(false);
+      const handlersOfA = stream.handlers();
+
+      mockParams = { c: "2" };
+      const storedB = [
+        { role: "user" as const, content: "B" },
+        { role: "assistant" as const, content: "respuesta B" },
+      ];
+      mockedConversation.mockResolvedValue({ id: 2, messages: storedB, recipe_ref: null });
+      await view.rerender({});
+      expect(signal.aborted).toBe(true);
+      await waitFor(() => expect(view.result.current.conversationId).toBe(2));
+
+      // Late events and the late rejection of A must not touch B.
+      await act(async () => {
+        handlersOfA.onStart(1);
+        handlersOfA.onDelta("de A");
+        handlersOfA.onRecipe?.({ proposal_id: 1, recipe: { name: "A", method: "v60" } as never });
+        stream.fail(new ChatStreamError("model_busy"));
+      });
+      expect(view.result.current.messages).toEqual(storedB);
+      expect(view.result.current.conversationId).toBe(2);
+      expect(view.result.current.error).toBeNull();
+      expect(view.result.current.isLoading).toBe(false);
+
+      mockedStream.mockResolvedValue(undefined);
+      await act(async () => {
+        await view.result.current.send(USER_TEXT);
+      });
+      expect(mockedStream.mock.calls[1][0]).toEqual({ conversationId: 2, message: USER_TEXT });
+    });
+
+    it("aborts the stream on unmount", async () => {
+      controlledStream();
+      const view = await renderLoadedChat();
+      await act(async () => {
+        void view.result.current.send(USER_TEXT);
+      });
+      const signal = mockedStream.mock.calls[0][2] as AbortSignal;
+      await view.unmount();
+      expect(signal.aborted).toBe(true);
+    });
+
+    it("ignores a history response that arrives after the conversation changed", async () => {
+      let resolveA!: (v: Awaited<ReturnType<typeof getConversation>>) => void;
+      mockParams = { c: "1" };
+      mockedConversation.mockReturnValueOnce(new Promise((r) => (resolveA = r)));
+      const view = await renderHook(() => useChat());
+
+      mockParams = { c: "2" };
+      mockedConversation.mockResolvedValueOnce({ id: 2, messages: [{ role: "user", content: "B" }], recipe_ref: null });
+      await view.rerender({});
+      await waitFor(() => expect(view.result.current.conversationId).toBe(2));
+
+      await act(async () => resolveA({ id: 1, messages: [{ role: "user", content: "A" }], recipe_ref: ref }));
+      expect(view.result.current.conversationId).toBe(2);
+      expect(view.result.current.messages).toEqual([{ role: "user", content: "B" }]);
+      expect(view.result.current.recipeRef).toBeNull();
+    });
+
+    it("ignores a history response that arrives after a session change", async () => {
+      let resolveLate!: (v: Awaited<ReturnType<typeof getLatestConversation>>) => void;
+      mockedLatest.mockReturnValue(new Promise((r) => (resolveLate = r)));
+      const { result } = await renderHook(() => useChat());
+
+      await act(async () => clearSession());
+      await act(async () => resolveLate({ conversation_id: 77, messages: [{ role: "user", content: "otro usuario" }] }));
+      expect(result.current.messages).toEqual([]);
+      expect(result.current.conversationId).toBeNull();
+    });
+
+    it("a stream event after a session change never writes", async () => {
+      const stream = controlledStream();
+      const { result } = await renderLoadedChat();
+      await act(async () => {
+        void result.current.send(USER_TEXT);
+      });
+      await act(async () => clearSession());
+      await act(async () => {
+        stream.handlers().onDelta("fantasma");
+        stream.finish();
+      });
+      expect(result.current.messages[1].content).toBe("");
+    });
+    it("a late finally of A while B is sending does not unlock B (no double send)", async () => {
+      mockParams = { c: "1" };
+      mockedConversation.mockResolvedValue(detail(1, null));
+      const streamA = controlledStream();
+      const view = await renderLoadedChat();
+      await act(async () => {
+        void view.result.current.send(USER_TEXT);
+      });
+
+      mockParams = { c: "2" };
+      mockedConversation.mockResolvedValue(detail(2, null));
+      await view.rerender({});
+      await waitFor(() => expect(view.result.current.conversationId).toBe(2));
+
+      const streamB = controlledStream();
+      await act(async () => {
+        void view.result.current.send("pregunta B");
+      });
+      expect(view.result.current.isLoading).toBe(true);
+
+      await act(async () => streamA.fail(new ChatStreamError("model_busy")));
+      expect(view.result.current.isLoading).toBe(true);
 
       await act(async () => {
-        result.current.newConversation();
+        void view.result.current.send("otra");
       });
-      expect(result.current.messages).toHaveLength(2);
-      expect(result.current.conversationId).toBe(12);
+      expect(mockedStream).toHaveBeenCalledTimes(2);
+      await act(async () => streamB.finish());
+      expect(view.result.current.isLoading).toBe(false);
+    });
 
+    it("a session change aborts the stream and unlocks the composer", async () => {
+      controlledStream();
+      const { result } = await renderLoadedChat();
+      await act(async () => {
+        void result.current.send(USER_TEXT);
+      });
+      const signal = mockedStream.mock.calls[0][2] as AbortSignal;
+      await act(async () => clearSession());
+      expect(signal.aborted).toBe(true);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it("keeps an assistant bubble that holds only a proposal", async () => {
+      const stream = controlledStream();
+      const { result } = await renderLoadedChat();
+      await act(async () => {
+        void result.current.send(USER_TEXT);
+      });
+      await act(async () =>
+        stream.handlers().onRecipe?.({ proposal_id: 8, recipe: { name: "V60", method: "v60" } as never }),
+      );
       await act(async () => stream.finish());
-      expect(result.current.canStartNewConversation).toBe(true);
+      expect(result.current.messages).toHaveLength(2);
+      expect(result.current.messages[1].proposal?.proposal_id).toBe(8);
     });
   });
 });

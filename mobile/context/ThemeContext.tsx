@@ -15,6 +15,8 @@ export interface ThemeColors {
   mutedForeground: string;
   border: string;
   destructive: string;
+  /** Scrim behind modal panels. */
+  overlay: string;
 }
 
 // Light palette mirrors the hex values already used across the app's screens.
@@ -28,6 +30,7 @@ export const lightColors: ThemeColors = {
   mutedForeground: "#7a6558",
   border: "#e5d9cc",
   destructive: "#b3261e",
+  overlay: "rgba(43, 29, 20, 0.4)",
 };
 
 // Dark coffee palette: dark roast background, cream foreground, lightened
@@ -42,6 +45,7 @@ export const darkColors: ThemeColors = {
   mutedForeground: "#b9a58f",
   border: "#46382c",
   destructive: "#ff6b60",
+  overlay: "rgba(0, 0, 0, 0.6)",
 };
 
 const THEME_STORAGE_KEY = "coffeemaster.theme";

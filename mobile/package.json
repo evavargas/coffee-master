@@ -2,7 +2,7 @@
   "name": "coffee-master-mobile",
   "version": "0.2.0",
   "private": true,
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -16,6 +16,9 @@
     "@react-native-async-storage/async-storage": "^2.1.0",
     "axios": "^1.12.0",
     "expo": "^58.0.23",
+    "expo-constants": "~58.0.15",
+    "expo-linking": "~58.0.16",
+    "expo-router": "~58.0.30",
     "expo-secure-store": "~58.0.2",
     "expo-splash-screen": "~58.0.13",
     "expo-status-bar": "~58.0.4",
@@ -27,6 +30,7 @@
     "react-native": "0.88.1",
     "react-native-markdown-display": "^7.0.2",
     "react-native-safe-area-context": "^5.11.1",
+    "react-native-screens": "~4.30.1",
     "react-native-svg": "15.16.0",
     "zod": "^4.0.0"
   },

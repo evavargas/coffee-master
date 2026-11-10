@@ -255,4 +255,115 @@ describe("streamChat over the real React Native XHR", () => {
     expect(handlers.onStart).not.toHaveBeenCalled();
     expect(onUnauthorized).toHaveBeenCalledTimes(status === 401 ? 1 : 0);
   });
+  describe("recipe event", () => {
+    const recipe = { name: "V60 dulce", method: "v60", steps: [{ action: "Verter" }] };
+
+    it("delivers a valid proposal between the last delta and done", async () => {
+      const onRecipe = jest.fn();
+      const promise = chat.streamChat({ conversationId: 7, message: "Hola" }, { onStart: jest.fn(), onDelta: jest.fn(), onReplace: jest.fn(), onRecipe });
+      await waitForRequest();
+      receiveHeaders(200, "text/event-stream");
+      receiveChunk(
+        sseEvent("delta", { text: "Hola" }) + sseEvent("recipe", { proposal_id: 5, recipe }) + sseEvent("done", {}),
+      );
+      complete();
+      await promise;
+
+      expect(onRecipe).toHaveBeenCalledTimes(1);
+      expect(onRecipe.mock.calls[0][0]).toMatchObject({ proposal_id: 5, recipe: { name: "V60 dulce" } });
+    });
+
+    it("degrades wrong-typed optional fields instead of dropping the proposal", async () => {
+      const onRecipe = jest.fn();
+      const promise = chat.streamChat({ conversationId: 7, message: "Hola" }, { onStart: jest.fn(), onDelta: jest.fn(), onReplace: jest.fn(), onRecipe });
+      await waitForRequest();
+      receiveHeaders(200, "text/event-stream");
+      receiveChunk(
+        sseEvent("recipe", {
+          proposal_id: 5,
+          recipe: { ...recipe, steps: "nope", coffee: 3, dose_g: "x", ratio: "y" },
+        }) + sseEvent("done", {}),
+      );
+      complete();
+      await promise;
+
+      const received = onRecipe.mock.calls[0][0] as { recipe: Record<string, unknown> };
+      expect(received.recipe).toMatchObject({ steps: [], coffee: null, dose_g: null, ratio: null });
+    });
+
+    it.each([
+      ["a payload that is not JSON", "event: recipe\ndata: {oops\n\n"],
+      ["a proposal without an id", sseEvent("recipe", { recipe })],
+      ["a null recipe", sseEvent("recipe", { proposal_id: 5, recipe: null })],
+    ])("ignores %s and keeps streaming", async (_name, bad) => {
+      const handlers = { onStart: jest.fn(), onDelta: jest.fn(), onReplace: jest.fn(), onRecipe: jest.fn() };
+      const promise = chat.streamChat({ conversationId: 7, message: "Hola" }, handlers);
+      await waitForRequest();
+      receiveHeaders(200, "text/event-stream");
+      receiveChunk(bad + sseEvent("delta", { text: "ok" }) + sseEvent("done", {}));
+      complete();
+
+      await expect(promise).resolves.toBeUndefined();
+      expect(handlers.onRecipe).not.toHaveBeenCalled();
+      expect(handlers.onDelta.mock.calls).toEqual([["ok"]]);
+    });
+
+    it("works when the caller passes no onRecipe", async () => {
+      const { promise } = startStream();
+      await waitForRequest();
+      receiveHeaders(200, "text/event-stream");
+      receiveChunk(sseEvent("recipe", { proposal_id: 5, recipe }) + sseEvent("done", {}));
+      complete();
+      await expect(promise).resolves.toBeUndefined();
+    });
+  });
+
+  describe("abort signal", () => {
+    it("aborts the native request and rejects with a cancel error", async () => {
+      const controller = new AbortController();
+      const promise = chat.streamChat(
+        { conversationId: 7, message: "Hola" },
+        { onStart: jest.fn(), onDelta: jest.fn(), onReplace: jest.fn() },
+        controller.signal,
+      );
+      await waitForRequest();
+      receiveHeaders(200, "text/event-stream");
+      controller.abort();
+
+      const error = await promise.catch((e: unknown) => e);
+      expect(require("axios").isCancel(error)).toBe(true);
+      expect(mockNetworking.abortRequest).toHaveBeenCalled();
+    });
+
+    it("does not deliver a delta that arrives after the abort", async () => {
+      const controller = new AbortController();
+      const handlers = { onStart: jest.fn(), onDelta: jest.fn(), onReplace: jest.fn() };
+      const promise = chat.streamChat({ conversationId: 7, message: "Hola" }, handlers, controller.signal);
+      const settled = promise.catch(() => undefined);
+      await waitForRequest();
+      receiveHeaders(200, "text/event-stream");
+      receiveChunk(sseEvent("delta", { text: "antes" }));
+      await wait(PROGRESS_THROTTLE_MS);
+      expect(handlers.onDelta.mock.calls).toEqual([["antes"]]);
+
+      controller.abort();
+      receiveChunk(sseEvent("delta", { text: "despues" }));
+      await wait(PROGRESS_THROTTLE_MS);
+      await settled;
+
+      expect(handlers.onDelta.mock.calls).toEqual([["antes"]]);
+    });
+
+    it("never sends a request when the signal is already aborted", async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const promise = chat.streamChat(
+        { conversationId: 7, message: "Hola" },
+        { onStart: jest.fn(), onDelta: jest.fn(), onReplace: jest.fn() },
+        controller.signal,
+      );
+      await expect(promise).rejects.toBeDefined();
+      expect(mockNetworking.requests.length).toBe(0);
+    });
+  });
 });

@@ -20,7 +20,9 @@
         {
           "backgroundColor": "#faf6f1"
         }
-      ]
-    ]
+      ],
+      "expo-router"
+    ],
+    "scheme": "coffeemaster"
   }
 }

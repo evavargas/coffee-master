@@ -11,10 +11,14 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { ArrowUp, SquarePen } from "lucide-react-native";
+import { ArrowUp } from "lucide-react-native";
 
 import { useAppTheme } from "@/context/ThemeContext";
 import { AssistantMessage } from "@/components/chat/AssistantMessage";
+import { CardErrorBoundary } from "@/components/chat/CardErrorBoundary";
+import { ConversationSwitcher } from "@/components/chat/ConversationSwitcher";
+import { RecipeBanner } from "@/components/chat/RecipeBanner";
+import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
 import { useChat } from "@/hooks/useChat";
 import { chatMessageMaxLength } from "@/lib/api/chat";
 
@@ -25,6 +29,8 @@ import { chatMessageMaxLength } from "@/lib/api/chat";
 export function ChatScreen() {
   const {
     messages,
+    conversationId,
+    recipeRef,
     input,
     setInput,
     isLoadingHistory,
@@ -33,7 +39,6 @@ export function ChatScreen() {
     canStartNewConversation,
     error,
     send,
-    newConversation,
   } = useChat();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
@@ -49,22 +54,8 @@ export function ChatScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={styles.toolbar}>
-        <Pressable
-          style={[
-            styles.newConversation,
-            { borderColor: colors.border },
-            !canStartNewConversation && styles.disabled,
-          ]}
-          disabled={!canStartNewConversation}
-          onPress={newConversation}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: !canStartNewConversation }}
-        >
-          <SquarePen size={14} color={colors.foreground} />
-          <Text style={[styles.newConversationText, { color: colors.foreground }]}>{t("chat.newConversation")}</Text>
-        </Pressable>
-      </View>
+      <ConversationSwitcher currentId={conversationId} disabled={!canStartNewConversation} />
+      {recipeRef && <RecipeBanner recipeRef={recipeRef} />}
 
       {isLoadingHistory ? (
         <View style={styles.historyLoader}>
@@ -95,18 +86,25 @@ export function ChatScreen() {
           // so it never ends up out of sight. Not animated: scroll animations this frequent fight each other.
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
           renderItem={({ item, index }) => (
-            <View
-              style={[
-                styles.bubble,
-                item.role === "user" ? { backgroundColor: colors.primary } : { backgroundColor: colors.muted },
-              ]}
-            >
-              {item.role === "user" ? (
-                <Text style={[styles.bubbleText, { color: colors.primaryForeground }]}>{item.content}</Text>
-              ) : item.content === "" ? (
-                <ActivityIndicator color={colors.primary} accessibilityLabel={t("common.loading")} />
-              ) : (
-                <AssistantMessage content={item.content} isStreaming={isLoading && index === messages.length - 1} />
+            <View style={styles.entry}>
+              <View
+                style={[
+                  styles.bubble,
+                  item.role === "user" ? { backgroundColor: colors.primary } : { backgroundColor: colors.muted },
+                ]}
+              >
+                {item.role === "user" ? (
+                  <Text style={[styles.bubbleText, { color: colors.primaryForeground }]}>{item.content}</Text>
+                ) : item.content === "" ? (
+                  <ActivityIndicator color={colors.primary} accessibilityLabel={t("common.loading")} />
+                ) : (
+                  <AssistantMessage content={item.content} isStreaming={isLoading && index === messages.length - 1} />
+                )}
+              </View>
+              {item.proposal && (
+                <CardErrorBoundary key={item.proposal.proposal_id}>
+                  <RecipeProposalCard proposal={item.proposal} />
+                </CardErrorBoundary>
               )}
             </View>
           )}
@@ -147,22 +145,12 @@ export function ChatScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  toolbar: { flexDirection: "row", justifyContent: "flex-end", marginBottom: 8 },
-  newConversation: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderRadius: 14,
-  },
-  newConversationText: { fontSize: 13, fontWeight: "600" },
   historyLoader: { flex: 1, alignItems: "center", justifyContent: "center" },
   suggestions: { gap: 8 },
   suggestion: { padding: 12, borderRadius: 10, borderWidth: 1 },
   list: { flex: 1, minHeight: 0 },
   listContent: { gap: 10, paddingBottom: 8 },
+  entry: { gap: 8 },
   bubble: { maxWidth: "85%", padding: 10, borderRadius: 14 },
   bubbleText: { lineHeight: 20 },
   error: { marginVertical: 4 },

@@ -13,6 +13,8 @@ interface FormFieldProps<TFieldValues extends FieldValues> {
   autoComplete?: TextInputProps["autoComplete"];
   secureTextEntry?: boolean;
   accessibilityLabel?: string;
+  multiline?: boolean;
+  maxLength?: number;
 }
 
 /**
@@ -29,6 +31,8 @@ export function FormField<TFieldValues extends FieldValues>({
   autoComplete,
   secureTextEntry,
   accessibilityLabel,
+  multiline,
+  maxLength,
 }: FormFieldProps<TFieldValues>) {
   const { colors } = useAppTheme();
 
@@ -42,6 +46,7 @@ export function FormField<TFieldValues extends FieldValues>({
           <TextInput
             style={[
               styles.input,
+              multiline && styles.multiline,
               { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground },
             ]}
             value={typeof value === "string" ? value : ""}
@@ -52,6 +57,8 @@ export function FormField<TFieldValues extends FieldValues>({
             autoComplete={autoComplete}
             secureTextEntry={secureTextEntry}
             accessibilityLabel={accessibilityLabel ?? label}
+            multiline={multiline}
+            maxLength={maxLength}
           />
           {error && <Text style={[styles.error, { color: colors.destructive }]}>{error.message}</Text>}
         </View>
@@ -69,5 +76,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
+  multiline: { minHeight: 96, textAlignVertical: "top" },
   error: { fontSize: 13 },
 });
