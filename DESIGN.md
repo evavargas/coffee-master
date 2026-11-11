@@ -69,6 +69,9 @@ Los tamaños de letra de cada pantalla no dependen de la fuente: se definen en c
 ## Componentes
 
 - **Selectores:** siempre el `Select` de shadcn (`web/components/ui/select.tsx`, `OptionSelect` para listas de `{ value, label }`), nunca el `<select>` nativo. La flecha va dentro del campo, la lista usa `popover` y la opción resaltada usa `accent`. En mobile los selectores son chips del tema (`RecipeFilters`, `RecipeFormFields`).
+- **Pantalla de carga (mobile):** la sticker de la marca, con fondo marfil en claro y marrón en oscuro (`mobile/assets/splash-light.png` y `splash-dark.png`), centrada sobre el fondo del tema. Es el splash nativo de un build (`app.json`) y la pantalla de carga de la app (`SplashView`).
+- **Chat:** los mensajes del usuario van al borde derecho; los del asistente ocupan todo el ancho. La lista se desvanece hacia el color de fondo arriba y abajo para indicar que hay más contenido (`FadeEdge` en mobile, máscara en web).
+- **Vínculos de formularios de acceso:** uno debajo del otro, centrados y con zona de toque de 44 pt.
 - **Tarjetas clicables:** `Card interactive` en web (enlace extendido sobre toda la tarjeta, puntero, fondo `card-hover` y borde `accent` al pasar el mouse, contorno al enfocar). En mobile la tarjeta usa `cardHover` y borde `accent` mientras se presiona.
 
 - **Barras de desplazamiento (web):** finas (4 px visibles), redondeadas, sin fondo y con el color `scrollbar-thumb`; Firefox usa `scrollbar-width: thin`. En mobile las dibuja el sistema operativo y no se personalizan.

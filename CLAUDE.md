@@ -10,7 +10,7 @@ Coffee chat app. Users register with email and password, confirm their email, an
 - `backend/openapi.json`: the API contract, generated from FastAPI. Web and mobile generate their types from it (`lib/api/schema.gen.ts`, never edited by hand).
 - `backend/evals/casos.json`: chat test cases, including prompt-injection cases.
 - `web/`: Next.js App Router, React, TypeScript. This is the deployed app. Routes behind login live in the `app/(app)` route group (`chat`, `recipes`, `my-recipes`), framed by `AppShell` (sidebar with navigation, new conversation, history and account controls). Full auth (login, register, forgot/reset password, email confirmation), i18n (next-intl, ES default + EN) and theming (next-themes, system/light/dark).
-- `mobile/`: Expo SDK 58 + React Native. Same functionality as web (login, register, forgot/reset password, email confirmation, chat, recipes), navigation with Expo Router (`app/(auth)` and `app/(tabs)`: `chat`, `recipes`, `my-recipes`), i18n (react-i18next, ES default + EN) and theming (custom context, system/light/dark). Not deployed to stores; Expo Go only.
+- `mobile/`: Expo SDK 58 + React Native. Same functionality as web (login, register, forgot/reset password, email confirmation, chat, recipes), navigation with Expo Router (`app/(auth)` and `app/(tabs)`: `chat`, `recipes`, `my-recipes`), i18n (react-i18next, ES default + EN) and theming (custom context, system/light/dark). Not in the stores: Expo Go for development and an installable APK built with EAS (`mobile/eas.json`, `DEPLOY.md`).
 - `.claude/agents/`: `backend-dev`, `web-dev`, `coffee-expert`, `reviewer`. No dedicated mobile agent — the orchestrator handles `mobile/` directly, or dispatches a `general-purpose` agent that loads the `react-native-app` skill first.
 - `.claude/skills/`:
   - `coding-standards`: applies to all code.
@@ -105,6 +105,7 @@ cd web && npm install && npm run typecheck && npm run build && npm run test && n
 
 # Mobile
 cd mobile && npm install && npm run typecheck && npm run test && npm start   # scan QR with Expo Go
+cd mobile && npm run build:apk   # installable Android APK with EAS (needs an Expo account, see DEPLOY.md)
 ```
 
 ## Environment variables

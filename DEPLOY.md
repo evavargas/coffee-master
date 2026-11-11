@@ -84,6 +84,16 @@ Volvé al proyecto del backend en Vercel, poné `FRONTEND_URL` y `CORS_ORIGINS` 
 6. **Consola del navegador**: no tiene que haber errores de `Content-Security-Policy`.
 7. Probá el rate limit: más de 10 intentos de login por minuto devuelven 429.
 
+## App Android (APK con EAS)
+La app móvil se distribuye como APK instalable, sin tiendas. El build corre en los servidores de Expo (EAS) y se configura en `mobile/eas.json`: el perfil `preview` genera un APK interno y `production` un AAB para la Play Store.
+
+Una sola vez, desde `mobile/`:
+1. `npx eas-cli login` con tu cuenta de Expo.
+2. `npx eas-cli init`: crea el proyecto en Expo y agrega `extra.eas.projectId` a `app.json`.
+3. Cargá la URL del backend (HTTPS, Android bloquea HTTP en un APK instalado): `npx eas-cli env:create --name EXPO_PUBLIC_API_URL --value https://TU-BACKEND --environment preview --visibility plaintext`.
+
+Para cada APK: `npm run build:apk`. Al terminar, EAS da un enlace y un QR para descargarlo e instalarlo en el celular (Android pide permitir instalar apps de ese origen). El splash con la sticker, el ícono y los colores del tema claro y oscuro solo se ven en un build como este, no en Expo Go.
+
 ## Orden de despliegue
 - Web y backend cambian juntos: si cambia el contrato de la API, desplegá primero el backend y enseguida la web. En el medio, la web vieja puede fallar.
 - Corré las migraciones pendientes **antes** de desplegar el código que las necesita.
