@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Phone, Moon, Sun, type LucideIcon } from "lucide-react-native";
+import { Moon, Sun, SunMoon, type LucideIcon } from "lucide-react-native";
 
 import { useAppTheme } from "@/context/ThemeContext";
 
 const ICON_BY_PREFERENCE: Record<"system" | "light" | "dark", LucideIcon> = {
-  system: Phone,
+  system: SunMoon,
   light: Sun,
   dark: Moon,
 };

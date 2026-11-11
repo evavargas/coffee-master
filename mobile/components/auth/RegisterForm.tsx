@@ -77,7 +77,7 @@ export function RegisterForm({ onConfirmed, onBackToLogin }: RegisterFormProps) 
         </Text>
       </Pressable>
 
-      <Pressable onPress={onBackToLogin} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={onBackToLogin} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>{t("auth.register.backToLogin")}</Text>
       </Pressable>
     </View>
@@ -113,7 +113,7 @@ function ConfirmEmailStep({ email, registerMessage, onConfirmed, onBackToLogin }
         <Text style={[styles.status, { color: colors.foreground }]} accessibilityLiveRegion="polite">
           {successMessage}
         </Text>
-        <Pressable onPress={onConfirmed} accessibilityRole="button">
+        <Pressable style={styles.linkButton} onPress={onConfirmed} accessibilityRole="button">
           <Text style={[styles.link, { color: colors.primary }]}>{t("auth.confirmEmail.backToLogin")}</Text>
         </Pressable>
       </View>
@@ -158,7 +158,7 @@ function ConfirmEmailStep({ email, registerMessage, onConfirmed, onBackToLogin }
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => void handleResend()} disabled={resend.isSending} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={() => void handleResend()} disabled={resend.isSending} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>
           {resend.isSending ? t("auth.code.resending") : t("auth.code.resendCode")}
         </Text>
@@ -167,7 +167,7 @@ function ConfirmEmailStep({ email, registerMessage, onConfirmed, onBackToLogin }
       {resend.message && <Text style={[styles.status, { color: colors.foreground }]}>{resend.message}</Text>}
       {resend.error && <Text style={[styles.error, { color: colors.destructive }]}>{resend.error}</Text>}
 
-      <Pressable onPress={onBackToLogin} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={onBackToLogin} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>{t("auth.register.backToLogin")}</Text>
       </Pressable>
     </View>
@@ -182,5 +182,7 @@ const styles = StyleSheet.create({
   button: { borderRadius: 999, paddingVertical: 12, alignItems: "center" },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { fontWeight: "600" },
-  link: { fontSize: 13, fontWeight: "600" },
+  link: { fontSize: 13, fontWeight: "600", textAlign: "center" },
+  // Links sit one under the other, centered, each with a full-size tap area apart from the button above.
+  linkButton: { alignSelf: "center", minHeight: 44, justifyContent: "center", paddingHorizontal: 12 },
 });

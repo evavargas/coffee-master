@@ -8,6 +8,7 @@ import { ArrowUp } from "lucide-react-native";
 import { useAppTheme } from "@/context/ThemeContext";
 import { AssistantMessage } from "@/components/chat/AssistantMessage";
 import { CardErrorBoundary } from "@/components/chat/CardErrorBoundary";
+import { FadeEdge } from "@/components/chat/FadeEdge";
 import { RecipeBanner } from "@/components/chat/RecipeBanner";
 import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
 import { useChat } from "@/hooks/useChat";
@@ -60,9 +61,10 @@ export function ChatScreen() {
       ) : messages.length === 0 ? (
         <View style={styles.list} />
       ) : (
+        <View style={styles.list}>
         <FlatList
           ref={listRef}
-          style={styles.list}
+          style={styles.flex}
           data={messages}
           keyExtractor={(_, index) => String(index)}
           keyboardShouldPersistTaps="handled"
@@ -75,6 +77,7 @@ export function ChatScreen() {
               <View
                 style={[
                   styles.bubble,
+                  item.role === "user" ? styles.userBubble : styles.assistantBubble,
                   item.role === "user" ? { backgroundColor: colors.primary } : { backgroundColor: colors.muted },
                 ]}
               >
@@ -94,6 +97,9 @@ export function ChatScreen() {
             </View>
           )}
         />
+        <FadeEdge edge="top" />
+        <FadeEdge edge="bottom" />
+        </View>
       )}
 
       {error && <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>}
@@ -156,9 +162,14 @@ const styles = StyleSheet.create({
   chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, minHeight: 36, justifyContent: "center" },
   chipText: { fontSize: 14 },
   list: { flex: 1, minHeight: 0 },
-  listContent: { gap: 10, paddingBottom: 8 },
+  flex: { flex: 1 },
+  // Room for the fade at both ends, so the first and last message are not under it.
+  listContent: { gap: 10, paddingTop: 20, paddingBottom: 28 },
   entry: { gap: 8 },
-  bubble: { maxWidth: "85%", padding: 10, borderRadius: 14 },
+  bubble: { padding: 10, borderRadius: 14 },
+  // The user's messages sit on the right edge; the assistant's use the full width, like the composer.
+  userBubble: { alignSelf: "flex-end", maxWidth: "85%" },
+  assistantBubble: { alignSelf: "stretch" },
   bubbleText: { lineHeight: 20 },
   error: { marginVertical: 4 },
   composer: {

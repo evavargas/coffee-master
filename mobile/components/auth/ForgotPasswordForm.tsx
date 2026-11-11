@@ -97,7 +97,7 @@ export function ForgotPasswordForm({ onDone, onBackToLogin }: ForgotPasswordForm
           </Text>
         </Pressable>
 
-        <Pressable onPress={() => void handleResend()} disabled={requestForm.isSubmitting} accessibilityRole="button">
+        <Pressable style={styles.linkButton} onPress={() => void handleResend()} disabled={requestForm.isSubmitting} accessibilityRole="button">
           <Text style={[styles.link, { color: colors.primary }]}>
             {requestForm.isSubmitting ? t("auth.code.resending") : t("auth.code.resendCode")}
           </Text>
@@ -107,7 +107,7 @@ export function ForgotPasswordForm({ onDone, onBackToLogin }: ForgotPasswordForm
           <Text style={[styles.error, { color: colors.destructive }]}>{requestForm.serverError}</Text>
         )}
 
-        <Pressable onPress={onBackToLogin} accessibilityRole="button">
+        <Pressable style={styles.linkButton} onPress={onBackToLogin} accessibilityRole="button">
           <Text style={[styles.link, { color: colors.primary }]}>{t("auth.forgotPassword.backToLogin")}</Text>
         </Pressable>
       </View>
@@ -146,7 +146,7 @@ export function ForgotPasswordForm({ onDone, onBackToLogin }: ForgotPasswordForm
         </Text>
       </Pressable>
 
-      <Pressable onPress={onBackToLogin} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={onBackToLogin} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>{t("auth.forgotPassword.backToLogin")}</Text>
       </Pressable>
     </View>
@@ -172,7 +172,7 @@ function ResetPasswordStep({ resetToken, onDone, onBackToLogin }: ResetPasswordS
         <Text style={[styles.status, { color: colors.foreground }]} accessibilityLiveRegion="polite">
           {successMessage}
         </Text>
-        <Pressable onPress={onDone} accessibilityRole="button">
+        <Pressable style={styles.linkButton} onPress={onDone} accessibilityRole="button">
           <Text style={[styles.link, { color: colors.primary }]}>{t("auth.resetPassword.backToLogin")}</Text>
         </Pressable>
       </View>
@@ -211,7 +211,7 @@ function ResetPasswordStep({ resetToken, onDone, onBackToLogin }: ResetPasswordS
         </Text>
       </Pressable>
 
-      <Pressable onPress={onBackToLogin} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={onBackToLogin} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>{t("auth.resetPassword.backToLogin")}</Text>
       </Pressable>
     </View>
@@ -226,5 +226,7 @@ const styles = StyleSheet.create({
   button: { borderRadius: 999, paddingVertical: 12, alignItems: "center" },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { fontWeight: "600" },
-  link: { fontSize: 13, fontWeight: "600" },
+  link: { fontSize: 13, fontWeight: "600", textAlign: "center" },
+  // Links sit one under the other, centered, each with a full-size tap area apart from the button above.
+  linkButton: { alignSelf: "center", minHeight: 44, justifyContent: "center", paddingHorizontal: 12 },
 });

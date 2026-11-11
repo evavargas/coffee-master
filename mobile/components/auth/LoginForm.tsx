@@ -56,10 +56,10 @@ export function LoginForm({ onAuthenticated, onRequestRegister, onRequestForgotP
         </Text>
       </Pressable>
 
-      <Pressable onPress={onRequestRegister} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={onRequestRegister} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>{t("auth.login.createAccount")}</Text>
       </Pressable>
-      <Pressable onPress={onRequestForgotPassword} accessibilityRole="button">
+      <Pressable style={styles.linkButton} onPress={onRequestForgotPassword} accessibilityRole="button">
         <Text style={[styles.link, { color: colors.primary }]}>{t("auth.login.forgotPassword")}</Text>
       </Pressable>
     </View>
@@ -72,5 +72,7 @@ const styles = StyleSheet.create({
   button: { borderRadius: 999, paddingVertical: 12, alignItems: "center" },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { fontWeight: "600" },
-  link: { fontSize: 13, fontWeight: "600" },
+  link: { fontSize: 13, fontWeight: "600", textAlign: "center" },
+  // Links sit one under the other, centered, each with a full-size tap area apart from the button above.
+  linkButton: { alignSelf: "center", minHeight: 44, justifyContent: "center", paddingHorizontal: 12 },
 });

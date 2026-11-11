@@ -80,7 +80,7 @@ export function RecipeProposalCard({ proposal }: { proposal: NonNullable<ChatMes
 }
 
 const styles = StyleSheet.create({
-  card: { maxWidth: "85%", alignSelf: "flex-start", gap: 6, padding: 12, borderWidth: 1, borderRadius: 14 },
+  card: { alignSelf: "stretch", gap: 6, padding: 12, borderWidth: 1, borderRadius: 14 },
   small: { fontSize: 12 },
   name: { fontSize: 16, fontWeight: "700" },
   actions: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
