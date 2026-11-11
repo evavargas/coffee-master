@@ -42,6 +42,27 @@ Cada usuario tiene un límite de mensajes por día. Si olvidás tu contraseña, 
 | Publicación | Vercel |
 | Envío de mails | Gmail |
 
+## Cómo funciona por dentro
+
+- **Respuestas en streaming.** El chat usa Server-Sent Events: el texto aparece a medida que Claude lo escribe, igual en web y en el celular.
+- **El servidor guarda el historial.** El cliente solo manda el mensaje nuevo; el servidor arma el contexto con los últimos mensajes guardados. Así el costo por mensaje no crece sin control.
+- **Costo controlado.** Usa un modelo económico con esfuerzo de razonamiento bajo, un tope de mensajes de contexto y un límite diario por usuario (que se cuenta aunque el cliente se desconecte).
+- **Recetas que no se guardan solas.** Claude puede *proponer* una receta, pero nada entra al recetario hasta que la persona la confirma, y el modelo nunca edita una receta ya guardada.
+- **Texto del usuario = datos, no instrucciones.** Hay reglas contra prompt injection y casos de prueba para evaluar las respuestas (`backend/evals/casos.json`).
+- **Conocimiento propio.** Las respuestas se basan en una guía de café en markdown dentro del repo; la búsqueda semántica (RAG con pgvector) es opcional.
+- **Un solo contrato de API.** El backend genera `openapi.json` y web y móvil generan sus tipos desde ahí.
+- **Cuentas seguras.** Código de 6 dígitos por mail, vencimiento e intentos limitados, y la misma respuesta exista o no el email, para no revelar quién está registrado.
+
+## Cómo lo construí con IA
+
+Coffee Master se desarrolló con desarrollo asistido por IA (Claude Code). El trabajo se apoya en documentos dentro del repo en lugar de en prompts sueltos:
+
+- [CLAUDE.md](CLAUDE.md) define la estructura, las reglas no negociables (i18n, temas, capas del backend) y qué no hacer.
+- [docs/superpowers](docs/superpowers) guarda la especificación y el plan de cada etapa.
+- Los casos de `backend/evals/casos.json` sirven para verificar el chat después de cada cambio.
+
+La idea: yo decido producto, diseño y límites; la IA acelera la implementación, y las reglas escritas y las pruebas son las que mantienen el resultado consistente.
+
 ## Para quienes desarrollan
 
 - Instrucciones del proyecto: [CLAUDE.md](CLAUDE.md)
