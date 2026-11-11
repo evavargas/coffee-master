@@ -34,6 +34,17 @@
       "expo-router"
     ],
     "scheme": "coffeemaster",
-    "icon": "./assets/icon.png"
+    "icon": "./assets/icon.png",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "1b857468-fd62-40a4-9092-216daf61297b"
+      }
+    },
+    "owner": "evavargas"
   }
 }
