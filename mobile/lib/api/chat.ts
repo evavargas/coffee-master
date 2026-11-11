@@ -68,8 +68,16 @@ const conversationSummarySchema = z.object({
   // A date that does not parse would throw in Intl formatting, so such a row is dropped.
   created_at: validDate,
   updated_at: validDate,
+  preview: z.string().nullish().catch(null),
 });
-export type ConversationSummary = { id: number; recipe_ref: RecipeRef | null; created_at: string; updated_at: string };
+export type ConversationSummary = {
+  id: number;
+  recipe_ref: RecipeRef | null;
+  created_at: string;
+  updated_at: string;
+  /** First user message, shortened by the server. Plain text. */
+  preview: string | null;
+};
 
 export interface ConversationPage {
   items: ConversationSummary[];
@@ -126,7 +134,7 @@ export async function listConversations(
     .parse(data);
   const items = page.items.flatMap((raw) => {
     const r = conversationSummarySchema.safeParse(raw);
-    return r.success ? [{ ...r.data, recipe_ref: r.data.recipe_ref ?? null }] : [];
+    return r.success ? [{ ...r.data, recipe_ref: r.data.recipe_ref ?? null, preview: r.data.preview ?? null }] : [];
   });
   return { ...page, items };
 }

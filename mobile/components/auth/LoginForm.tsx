@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { FormField } from "@/components/auth/FormField";
 import { useAppTheme } from "@/context/ThemeContext";
@@ -26,7 +27,9 @@ export function LoginForm({ onAuthenticated, onRequestRegister, onRequestForgotP
         label={t("auth.login.emailLabel")}
         keyboardType="email-address"
         autoCapitalize="none"
-        autoComplete="email"
+        autoComplete="username"
+        textContentType="username"
+        autoCorrect={false}
         error={formState.errors.email}
       />
       <FormField
@@ -34,7 +37,9 @@ export function LoginForm({ onAuthenticated, onRequestRegister, onRequestForgotP
         name="password"
         label={t("auth.login.passwordLabel")}
         secureTextEntry
-        autoComplete="password"
+        revealable
+        autoComplete="current-password"
+        textContentType="password"
         error={formState.errors.password}
       />
 
@@ -64,7 +69,7 @@ export function LoginForm({ onAuthenticated, onRequestRegister, onRequestForgotP
 const styles = StyleSheet.create({
   container: { gap: 14 },
   error: { fontSize: 13 },
-  button: { borderRadius: 10, paddingVertical: 12, alignItems: "center" },
+  button: { borderRadius: 999, paddingVertical: 12, alignItems: "center" },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { fontWeight: "600" },
   link: { fontSize: 13, fontWeight: "600" },

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { Screen } from "@/components/layout/Screen";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
@@ -63,5 +64,5 @@ const styles = StyleSheet.create({
   header: { gap: 12 },
   title: { fontSize: 18, fontWeight: "600" },
   errorBox: { gap: 8 },
-  button: { borderWidth: 1, borderRadius: 10, minHeight: 44, paddingHorizontal: 14, justifyContent: "center", alignItems: "center", alignSelf: "flex-start" },
+  button: { borderWidth: 1, borderRadius: 999, minHeight: 44, paddingHorizontal: 14, justifyContent: "center", alignItems: "center", alignSelf: "flex-start" },
 });

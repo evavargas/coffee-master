@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { Screen } from "@/components/layout/Screen";
 import { useAppTheme } from "@/context/ThemeContext";

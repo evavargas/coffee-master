@@ -2,7 +2,9 @@ import { Tabs } from "expo-router";
 import { BookOpen, Heart, MessageCircle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { AppHeader } from "@/components/layout/AppHeader";
+import { ConversationPanel } from "@/components/layout/ConversationPanel";
+import { TabsHeader } from "@/components/layout/AppHeader";
+import { ConversationPanelProvider } from "@/context/ConversationPanelContext";
 import { useAppTheme } from "@/context/ThemeContext";
 
 export default function TabsLayout() {
@@ -10,9 +12,10 @@ export default function TabsLayout() {
   const { colors } = useAppTheme();
 
   return (
+    <ConversationPanelProvider>
     <Tabs
       screenOptions={{
-        header: () => <AppHeader showSignOut />,
+        header: () => <TabsHeader />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
@@ -31,5 +34,7 @@ export default function TabsLayout() {
         options={{ title: t("nav.myRecipes"), tabBarIcon: ({ color, size }) => <Heart color={color} size={size} /> }}
       />
     </Tabs>
+    <ConversationPanel />
+    </ConversationPanelProvider>
   );
 }

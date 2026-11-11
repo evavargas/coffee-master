@@ -7,7 +7,9 @@
     "switchTheme": "Cambiar tema",
     "themeSystem": "Sistema",
     "themeLight": "Claro",
-    "themeDark": "Oscuro"
+    "themeDark": "Oscuro",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "auth": {
     "login": {
@@ -108,8 +110,9 @@
       "createError": "No pudimos crear la conversación. Probá de nuevo.",
       "retry": "Reintentar",
       "loadMore": "Ver más",
-      "untitled": "Conversación del {{date}}"
-    }
+      "untitled": "Conversación {{date}}"
+    },
+    "suggestionsLabel": "Podés preguntar, por ejemplo:"
   },
   "validation": {
     "emailRequired": "Ingresá tu email",
@@ -128,7 +131,9 @@
     "chat": "Chat",
     "recipes": "Recetas",
     "myRecipes": "Mis recetas",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "menu": "Menú",
+    "recents": "Recientes"
   },
   "recipes": {
     "title": "Recetas sugeridas por Coffee Master",

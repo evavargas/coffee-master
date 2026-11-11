@@ -6,13 +6,15 @@ import { useTranslation } from "react-i18next";
 import { createConversation, listConversations, type ConversationSummary } from "@/lib/api/chat";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { chatEpoch } from "@/lib/chatEpoch";
+import { notifyConversationsChanged, useConversationsVersion } from "@/lib/conversationsStore";
 
 export const conversationsPageSize = 20;
 
-/** Conversation list for the switcher (newest first, paged) plus open/start-new. Loads only while `enabled`. */
+/** Conversation list for the side panel (newest first, paged) plus open/start-new. Loads only while `enabled` and again when a turn ends. */
 export function useConversations(enabled: boolean) {
   const { t } = useTranslation();
   const router = useRouter();
+  const version = useConversationsVersion();
   const [items, setItems] = useState<ConversationSummary[]>([]);
   // Next offset comes from the server page (raw count, malformed rows included), not from items.length.
   const [nextOffset, setNextOffset] = useState(0);
@@ -53,26 +55,32 @@ export function useConversations(enabled: boolean) {
     if (!enabled) return;
     void load(0);
     return () => controller.current?.abort();
-  }, [enabled, load]);
+  }, [enabled, load, version]);
 
-  // Clearing `intent` keeps the opening prompt of a previous recipe from following the user into another conversation.
-  const open = (id: number) => router.setParams({ c: String(id), intent: undefined });
+  // Works from any tab. Leaving `intent` out of the URL keeps the opening prompt of a previous recipe from following the user.
+  const open = (id: number) => router.navigate(`/(tabs)/chat?c=${id}`);
 
-  async function startNew() {
-    if (creating.current) return;
+  /** Creates and opens a new conversation. Resolves true when it was created (the caller may close its menu). */
+  async function startNew(): Promise<boolean> {
+    if (creating.current) return false;
     creating.current = true;
     const epoch = chatEpoch();
     setIsCreating(true);
     setCreateError(null);
     try {
       const id = await createConversation();
-      if (chatEpoch() === epoch) open(id);
+      if (chatEpoch() === epoch) {
+        notifyConversationsChanged();
+        open(id);
+        return true;
+      }
     } catch (e) {
       if (chatEpoch() === epoch) setCreateError(getApiErrorMessage(e, t("chat.switcher.createError")));
     } finally {
       creating.current = false;
       setIsCreating(false);
     }
+    return false;
   }
 
   return {

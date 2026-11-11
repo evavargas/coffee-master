@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { FormField } from "@/components/auth/FormField";
 import { useAppTheme } from "@/context/ThemeContext";
@@ -37,7 +38,9 @@ export function RegisterForm({ onConfirmed, onBackToLogin }: RegisterFormProps) 
         control={control}
         name="name"
         label={t("auth.register.nameLabel")}
-        autoComplete="name"
+        autoComplete="given-name"
+        textContentType="givenName"
+        autoCapitalize="words"
         error={formState.errors.name}
       />
       <FormField
@@ -47,6 +50,8 @@ export function RegisterForm({ onConfirmed, onBackToLogin }: RegisterFormProps) 
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete="email"
+        textContentType="emailAddress"
+        autoCorrect={false}
         error={formState.errors.email}
       />
       <FormField
@@ -55,6 +60,7 @@ export function RegisterForm({ onConfirmed, onBackToLogin }: RegisterFormProps) 
         label={t("auth.register.passwordLabel")}
         secureTextEntry
         autoComplete="new-password"
+        textContentType="newPassword"
         error={formState.errors.password}
       />
 
@@ -173,7 +179,7 @@ const styles = StyleSheet.create({
   error: { fontSize: 13 },
   status: { fontSize: 14 },
   hint: { fontSize: 13 },
-  button: { borderRadius: 10, paddingVertical: 12, alignItems: "center" },
+  button: { borderRadius: 999, paddingVertical: 12, alignItems: "center" },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { fontWeight: "600" },
   link: { fontSize: 13, fontWeight: "600" },

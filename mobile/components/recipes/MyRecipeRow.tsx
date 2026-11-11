@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { ActionButton } from "@/components/recipes/ActionButton";
 import { ConfirmButton } from "@/components/recipes/ConfirmButton";
@@ -31,14 +32,16 @@ function Row({ s }: { s: Shape }) {
   const router = useRouter();
   return (
     <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <Pressable accessibilityRole="button" accessibilityLabel={s.name} onPress={() => router.push(s.href)} style={styles.open}>
+      <Pressable accessibilityRole="button" accessibilityLabel={s.name} onPress={() => router.push(s.href)} style={({ pressed }) => [styles.open, pressed && { backgroundColor: colors.cardHover }]}>
         <View style={styles.meta}>
           <RecipeBadge kind={s.kind} />
           <Text style={[styles.small, { color: colors.mutedForeground }]}>{t(`recipes.methods.${safeMethod(s.method)}`)}</Text>
-          {s.isFavorite && <Text style={[styles.small, { color: colors.mutedForeground }]}>{t("recipes.isFavorite")}</Text>}
+          {s.isFavorite && (
+          <Text style={[styles.small, styles.favorite, { color: colors.highlightForeground, backgroundColor: colors.highlight }]}>{t("recipes.isFavorite")}</Text>
+        )}
         </View>
         <Text style={[styles.title, { color: colors.foreground }]}>{s.name}</Text>
-        {s.description ? <Text style={{ color: colors.foreground }}>{s.description}</Text> : null}
+        {s.description ? <Text numberOfLines={2} style={{ color: colors.foreground }}>{s.description}</Text> : null}
       </Pressable>
       <View style={styles.actions}>
         <ActionButton
@@ -103,8 +106,9 @@ export function MyRecipeRow({ item, onError }: { item: MyRecipeItem; onError: (m
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: 12, padding: 16, gap: 10 },
-  open: { gap: 6, minHeight: 44 },
+  favorite: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, overflow: "hidden", fontWeight: "600" },
+  card: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 8 },
+  open: { gap: 4, minHeight: 44, borderRadius: 8 },
   meta: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 },
   title: { fontSize: 18, fontWeight: "600" },
   small: { fontSize: 12 },

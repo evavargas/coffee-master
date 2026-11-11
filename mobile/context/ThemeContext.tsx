@@ -9,42 +9,59 @@ export interface ThemeColors {
   background: string;
   foreground: string;
   card: string;
+  /** Card surface while it is pressed (the card tinted with the lavender accent). */
+  cardHover: string;
   primary: string;
   primaryForeground: string;
   muted: string;
   mutedForeground: string;
   border: string;
   destructive: string;
+  /** Lavender: catalog badge, decoration. Brown text on top (`accentForeground`), never as text on the background. */
+  accent: string;
+  accentForeground: string;
+  /** Peach: favorites and the user's own recipes. Brown text on top (`highlightForeground`). */
+  highlight: string;
+  highlightForeground: string;
   /** Scrim behind modal panels. */
   overlay: string;
 }
 
-// Light palette mirrors the hex values already used across the app's screens.
+// Brand palette (DESIGN.md): ivory background, brown text; lavender and peach as accents.
 export const lightColors: ThemeColors = {
-  background: "#faf6f1",
-  foreground: "#2b1d14",
+  background: "#fffff0",
+  foreground: "#3d2825",
   card: "#ffffff",
-  primary: "#6f4e37",
-  primaryForeground: "#ffffff",
-  muted: "#f1e9df",
-  mutedForeground: "#7a6558",
-  border: "#e5d9cc",
+  cardHover: "#f5f2f9",
+  primary: "#3d2825",
+  primaryForeground: "#fffff0",
+  muted: "#f3efdf",
+  mutedForeground: "#6b534f",
+  border: "#9b8782",
   destructive: "#b3261e",
-  overlay: "rgba(43, 29, 20, 0.4)",
+  accent: "#b9a5d6",
+  accentForeground: "#3d2825",
+  highlight: "#f0ae86",
+  highlightForeground: "#3d2825",
+  overlay: "rgba(61, 40, 37, 0.4)",
 };
 
-// Dark coffee palette: dark roast background, cream foreground, lightened
-// primary/destructive so they keep enough contrast on a dark surface.
+// Dark: deep brown surfaces, ivory text, lavender as the action color.
 export const darkColors: ThemeColors = {
-  background: "#1b140f",
-  foreground: "#f1e9df",
-  card: "#2b2018",
-  primary: "#c9a373",
-  primaryForeground: "#2b1d14",
-  muted: "#2f251c",
-  mutedForeground: "#b9a58f",
-  border: "#46382c",
-  destructive: "#ff6b60",
+  background: "#2a1a18",
+  foreground: "#fffff0",
+  card: "#3d2825",
+  cardHover: "#4e3a3e",
+  primary: "#b9a5d6",
+  primaryForeground: "#3d2825",
+  muted: "#4a332f",
+  mutedForeground: "#d9c9c0",
+  border: "#8f7772",
+  destructive: "#ff8a80",
+  accent: "#b9a5d6",
+  accentForeground: "#3d2825",
+  highlight: "#f0ae86",
+  highlightForeground: "#3d2825",
   overlay: "rgba(0, 0, 0, 0.6)",
 };
 

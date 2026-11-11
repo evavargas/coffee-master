@@ -8,14 +8,14 @@ import { createConversation, listConversations, type ConversationPage } from "@/
 import { clearSession } from "@/lib/session";
 
 jest.mock("expo-secure-store", () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn(), deleteItemAsync: jest.fn() }));
-const mockSetParams = jest.fn();
-jest.mock("expo-router", () => ({ useRouter: () => ({ setParams: mockSetParams }) }));
+const mockNavigate = jest.fn();
+jest.mock("expo-router", () => ({ useRouter: () => ({ navigate: mockNavigate }) }));
 jest.mock("@/lib/api/chat", () => ({ listConversations: jest.fn(), createConversation: jest.fn() }));
 
 const mList = listConversations as jest.MockedFunction<typeof listConversations>;
 const mCreate = createConversation as jest.MockedFunction<typeof createConversation>;
 
-const item = (id: number) => ({ id, recipe_ref: null, created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-02T00:00:00Z" });
+const item = (id: number) => ({ id, recipe_ref: null, created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-02T00:00:00Z", preview: null });
 const page = (ids: number[], offset: number, total: number): ConversationPage => ({
   items: ids.map(item),
   total,
@@ -25,7 +25,7 @@ const page = (ids: number[], offset: number, total: number): ConversationPage =>
 
 describe("useConversations", () => {
   beforeEach(() => {
-    mockSetParams.mockReset();
+    mockNavigate.mockReset();
     mList.mockReset();
     mCreate.mockReset();
   });
@@ -74,7 +74,7 @@ describe("useConversations", () => {
     mList.mockResolvedValue(page([], 0, 0));
     const { result } = await renderHook(() => useConversations(false));
     await act(async () => result.current.open(7));
-    expect(mockSetParams).toHaveBeenCalledWith({ c: "7", intent: undefined });
+    expect(mockNavigate).toHaveBeenCalledWith("/(tabs)/chat?c=7");
   });
 
   it("creates a conversation once and opens it by id (it is not 'latest' yet)", async () => {
@@ -88,7 +88,7 @@ describe("useConversations", () => {
     expect(result.current.isCreating).toBe(true);
     await act(async () => resolve(44));
     expect(mCreate).toHaveBeenCalledTimes(1);
-    expect(mockSetParams).toHaveBeenCalledWith({ c: "44", intent: undefined });
+    expect(mockNavigate).toHaveBeenCalledWith("/(tabs)/chat?c=44");
     expect(result.current.isCreating).toBe(false);
   });
 
@@ -105,6 +105,6 @@ describe("useConversations", () => {
     });
     await act(async () => clearSession());
     await act(async () => resolve(5));
-    expect(mockSetParams).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

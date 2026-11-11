@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { useAppTheme } from "@/context/ThemeContext";
 
@@ -26,14 +27,18 @@ export function ActionButton({
       onPress={onPress}
       style={[
         styles.button,
-        { borderColor: colors.border, backgroundColor: primary ? colors.primary : colors.card, opacity: disabled ? 0.5 : 1 },
+        {
+          borderColor: selected ? "transparent" : colors.border,
+          backgroundColor: selected ? colors.highlight : primary ? colors.primary : colors.card,
+          opacity: disabled ? 0.5 : 1,
+        },
       ]}
     >
-      <Text style={{ color: primary ? colors.primaryForeground : colors.foreground, fontWeight: "600" }}>{label}</Text>
+      <Text style={{ color: selected ? colors.highlightForeground : primary ? colors.primaryForeground : colors.foreground, fontWeight: "600" }}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, minHeight: 44, justifyContent: "center" },
+  button: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 14, minHeight: 44, justifyContent: "center" },
 });

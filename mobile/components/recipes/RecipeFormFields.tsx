@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Controller, get, type Control, type FieldErrors, type Path } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
+import { TextInput } from "@/components/ui/TextInput";
 
 import { useAppTheme } from "@/context/ThemeContext";
 import type { RecipeFormValues } from "@/lib/schemas/recipeForm";

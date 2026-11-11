@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { FormField } from "@/components/auth/FormField";
 import { ActionButton } from "@/components/recipes/ActionButton";

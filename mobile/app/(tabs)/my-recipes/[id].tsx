@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { Screen } from "@/components/layout/Screen";
 import { ActionButton } from "@/components/recipes/ActionButton";

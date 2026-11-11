@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AccessibilityInfo, findNodeHandle, Pressable, StyleSheet, Text, View, type HostInstance } from "react-native";
+import { AccessibilityInfo, findNodeHandle, Pressable, StyleSheet, View, type HostInstance } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { ActionButton } from "@/components/recipes/ActionButton";
 import { useAppTheme } from "@/context/ThemeContext";

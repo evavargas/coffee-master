@@ -15,7 +15,7 @@ describe("locales", () => {
   });
   it("defines the nav labels in both locales", () => {
     for (const nav of [es.nav, en.nav]) {
-      expect(Object.keys(nav).sort()).toEqual(["chat", "myRecipes", "recipes", "signOut"]);
+      expect(Object.keys(nav).sort()).toEqual(["chat", "menu", "myRecipes", "recents", "recipes", "signOut"]);
     }
     expect(es.nav.signOut).toBe("Cerrar sesión");
   });

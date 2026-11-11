@@ -1,26 +1,18 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ActivityIndicator,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
+import { TextInput } from "@/components/ui/TextInput";
 import { ArrowUp } from "lucide-react-native";
 
 import { useAppTheme } from "@/context/ThemeContext";
 import { AssistantMessage } from "@/components/chat/AssistantMessage";
 import { CardErrorBoundary } from "@/components/chat/CardErrorBoundary";
-import { ConversationSwitcher } from "@/components/chat/ConversationSwitcher";
 import { RecipeBanner } from "@/components/chat/RecipeBanner";
 import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
 import { useChat } from "@/hooks/useChat";
 import { chatMessageMaxLength } from "@/lib/api/chat";
+import { setCurrentConversation } from "@/lib/conversationsStore";
 
 /**
  * Chat conversation for the logged-in user. The message list takes the free space
@@ -36,13 +28,18 @@ export function ChatScreen() {
     isLoadingHistory,
     isLoading,
     isAwaitingFirstDelta,
-    canStartNewConversation,
     error,
     send,
   } = useChat();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const listRef = useRef<FlatList>(null);
+
+  // The side panel marks the open conversation.
+  useEffect(() => {
+    setCurrentConversation(conversationId);
+    return () => setCurrentConversation(null);
+  }, [conversationId]);
 
   const suggestions = [
     t("chat.suggestions.ratio"),
@@ -54,7 +51,6 @@ export function ChatScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ConversationSwitcher currentId={conversationId} disabled={!canStartNewConversation} />
       {recipeRef && <RecipeBanner recipeRef={recipeRef} />}
 
       {isLoadingHistory ? (
@@ -62,18 +58,7 @@ export function ChatScreen() {
           <ActivityIndicator color={colors.primary} accessibilityLabel={t("common.loading")} />
         </View>
       ) : messages.length === 0 ? (
-        <View style={styles.suggestions}>
-          {suggestions.map((suggestion) => (
-            <Pressable
-              key={suggestion}
-              style={[styles.suggestion, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => void send(suggestion)}
-              accessibilityRole="button"
-            >
-              <Text style={{ color: colors.foreground }}>{suggestion}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <View style={styles.list} />
       ) : (
         <FlatList
           ref={listRef}
@@ -113,6 +98,25 @@ export function ChatScreen() {
 
       {error && <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>}
 
+      {!isLoadingHistory && messages.length === 0 && (
+        <View style={styles.suggestions}>
+          <Text style={[styles.suggestionsLabel, { color: colors.mutedForeground }]}>{t("chat.suggestionsLabel")}</Text>
+          <View style={styles.chips}>
+            {suggestions.map((suggestion) => (
+              <Pressable
+                key={suggestion}
+                style={[styles.chip, { backgroundColor: colors.muted, borderColor: colors.border }, isLoading && styles.disabled]}
+                onPress={() => void send(suggestion)}
+                disabled={isLoading}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.chipText, { color: colors.mutedForeground }]}>{suggestion}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      )}
+
       <View style={[styles.composer, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <TextInput
           style={[styles.input, { color: colors.foreground }]}
@@ -146,8 +150,11 @@ export function ChatScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   historyLoader: { flex: 1, alignItems: "center", justifyContent: "center" },
-  suggestions: { gap: 8 },
-  suggestion: { padding: 12, borderRadius: 10, borderWidth: 1 },
+  suggestions: { gap: 6, marginTop: 8 },
+  suggestionsLabel: { fontSize: 12 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, minHeight: 36, justifyContent: "center" },
+  chipText: { fontSize: 14 },
   list: { flex: 1, minHeight: 0 },
   listContent: { gap: 10, paddingBottom: 8 },
   entry: { gap: 8 },

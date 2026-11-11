@@ -1,16 +1,17 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
+import { Text } from "@/components/ui/Text";
 import { useTranslation } from "react-i18next";
 
 import { useAppTheme } from "@/context/ThemeContext";
 import { useLocale } from "@/hooks/useLocale";
 
-/** Shows the language the user would switch to, and switches on press. */
+/** Shows the current language (like the theme button shows the current theme) and switches on press. */
 export function LanguageSwitcher() {
   const { t } = useTranslation();
   const { locale, setLocale } = useLocale();
   const { colors } = useAppTheme();
   const nextLocale = locale === "es" ? "en" : "es";
-  const label = locale === "es" ? "EN" : "ES";
+  const label = locale.toUpperCase();
 
   return (
     <Pressable

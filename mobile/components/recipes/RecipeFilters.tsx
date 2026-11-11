@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
+import { TextInput } from "@/components/ui/TextInput";
 
 import { useAppTheme } from "@/context/ThemeContext";
 import { recipeMethods, type RecipeMethod } from "@/lib/api/recipes";

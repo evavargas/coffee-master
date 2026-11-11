@@ -9,6 +9,7 @@ import es from "@/i18n/locales/es.json";
 import { makeUserRecipe } from "@/test/recipeFixtures";
 
 jest.mock("expo-secure-store", () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn(), deleteItemAsync: jest.fn() }));
+jest.mock("lucide-react-native", () => ({ Eye: () => null, EyeOff: () => null }));
 jest.mock("@/context/ThemeContext", () => ({
   useAppTheme: () => ({ colors: new Proxy({}, { get: (_t, name) => `theme-${String(name)}` }) }),
 }));

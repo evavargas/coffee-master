@@ -14,6 +14,7 @@ import {
   type RecipeRef,
 } from "@/lib/api/chat";
 import { chatEpoch } from "@/lib/chatEpoch";
+import { notifyConversationsChanged } from "@/lib/conversationsStore";
 import { onSessionChange } from "@/lib/session";
 
 const STREAM_ERROR_KEYS: Record<ChatStreamErrorCode, string> = {
@@ -160,6 +161,8 @@ export function useChat() {
           : getApiErrorMessage(err, t("chat.errors.connection")),
       );
     } finally {
+      // The conversation list (order, preview) changed whether or not the reply succeeded.
+      notifyConversationsChanged();
       // A superseded send must not clear the flags of whatever conversation is open now.
       if (isCurrent()) {
         isSendingRef.current = false;

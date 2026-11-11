@@ -1,11 +1,10 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { Keyboard, Text } from "react-native";
+import { Text } from "react-native";
 
 import "@/i18n";
 import { CardErrorBoundary } from "@/components/chat/CardErrorBoundary";
 import { ChatScreen } from "@/components/chat/ChatScreen";
-import { ConversationSwitcher } from "@/components/chat/ConversationSwitcher";
 import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
 import es from "@/i18n/locales/es.json";
 import {
@@ -227,85 +226,5 @@ describe("ChatScreen with the real hook", () => {
     await render(<ChatScreen />);
     await waitFor(() => expect(screen.queryAllByLabelText(es.common.loading)).toHaveLength(0));
     expect(screen.queryByText(es.chat.talkingAboutGeneric)).toBeNull();
-  });
-});
-
-describe("ConversationSwitcher", () => {
-  const summary = (id: number, extra: object = {}) => ({
-    id,
-    recipe_ref: null,
-    created_at: "2026-03-01T10:00:00Z",
-    updated_at: "2026-03-02T10:00:00Z",
-    ...extra,
-  });
-  const page = (items: ReturnType<typeof summary>[]) => ({ items, total: items.length, limit: 20, offset: 0 });
-
-  it("lists on open, titles by recipe name or by date, and switches by id", async () => {
-    mList.mockResolvedValue(page([summary(3, { recipe_ref: { kind: "catalog", ref: "v60" } }), summary(2)]));
-    mFetchRecipe.mockResolvedValue(makeRecipe("v60", { name: "V60 clásico" }));
-    await render(<ConversationSwitcher currentId={2} />);
-    expect(mList).not.toHaveBeenCalled();
-
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.toggle));
-    expect(await screen.findByText("V60 clásico")).toBeTruthy();
-    expect(screen.getByText(/^Conversación del /)).toBeTruthy();
-
-    await fireEvent.press(screen.getByText("V60 clásico"));
-    expect(mockSetParams).toHaveBeenCalledWith({ c: "3", intent: undefined });
-    expect(screen.queryByText("V60 clásico")).toBeNull();
-  });
-
-  it("shows the empty and error states, and retries", async () => {
-    mList.mockRejectedValueOnce(new Error("x")).mockResolvedValueOnce(page([]));
-    await render(<ConversationSwitcher currentId={null} />);
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.toggle));
-    expect(await screen.findByText(es.chat.switcher.loadError)).toBeTruthy();
-    await fireEvent.press(screen.getByText(es.chat.switcher.retry));
-    expect(await screen.findByText(es.chat.switcher.empty)).toBeTruthy();
-  });
-
-  it("dismisses the keyboard before opening the panel", async () => {
-    mList.mockResolvedValue(page([]));
-    const dismiss = jest.spyOn(Keyboard, "dismiss").mockImplementation(() => undefined);
-    await render(<ConversationSwitcher currentId={null} />);
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.toggle));
-    expect(dismiss).toHaveBeenCalledTimes(1);
-    dismiss.mockRestore();
-  });
-
-  it("falls back to the raw date when Intl throws", async () => {
-    mList.mockResolvedValue(page([summary(2)]));
-    const original = Intl.DateTimeFormat;
-    jest.spyOn(Intl, "DateTimeFormat").mockImplementation(() => {
-      throw new RangeError("bad locale");
-    });
-    await render(<ConversationSwitcher currentId={null} />);
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.toggle));
-    expect(await screen.findByText("Conversación del 2026-03-02T10:00:00Z")).toBeTruthy();
-    jest.spyOn(Intl, "DateTimeFormat").mockRestore();
-    expect(Intl.DateTimeFormat).toBe(original);
-  });
-
-  it("closes from the overlay and the close button", async () => {
-    mList.mockResolvedValue(page([summary(2)]));
-    await render(<ConversationSwitcher currentId={null} />);
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.toggle));
-    expect(await screen.findByText(/^Conversación del /)).toBeTruthy();
-    await fireEvent.press(screen.getAllByLabelText(es.chat.switcher.close)[0]);
-    expect(screen.queryByText(/^Conversación del /)).toBeNull();
-  });
-
-  it("creates a new conversation with no recipe and opens it by id", async () => {
-    mCreate.mockResolvedValue(44);
-    await render(<ConversationSwitcher currentId={null} />);
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.new));
-    await waitFor(() => expect(mockSetParams).toHaveBeenCalledWith({ c: "44", intent: undefined }));
-    expect(mCreate).toHaveBeenCalledTimes(1);
-  });
-
-  it("disables 'new' while the chat is busy", async () => {
-    await render(<ConversationSwitcher currentId={null} disabled />);
-    await fireEvent.press(screen.getByLabelText(es.chat.switcher.new));
-    expect(mCreate).not.toHaveBeenCalled();
   });
 });

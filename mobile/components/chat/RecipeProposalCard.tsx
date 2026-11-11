@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 import { ActionButton } from "@/components/recipes/ActionButton";
 import { formatRange } from "@/components/recipes/RecipeDetail";

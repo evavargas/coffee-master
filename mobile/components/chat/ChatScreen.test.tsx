@@ -15,7 +15,6 @@ jest.mock("@/context/ThemeContext", () => ({
   }),
 }));
 jest.mock("lucide-react-native", () => ({ ArrowUp: () => null }));
-jest.mock("@/components/chat/ConversationSwitcher", () => ({ ConversationSwitcher: () => null }));
 jest.mock("expo-router", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock("react-native-markdown-display", () => {
   const { Text } = jest.requireActual<typeof import("react-native")>("react-native");
