@@ -1,250 +1,85 @@
----
-name: Artisanal Barista Companion
-colors:
-  surface: '#fff8f5'
-  surface-dim: '#efd5c6'
-  surface-bright: '#fff8f5'
-  surface-container-lowest: '#ffffff'
-  surface-container-low: '#fff1ea'
-  surface-container: '#ffeade'
-  surface-container-high: '#fee3d4'
-  surface-container-highest: '#f8ddcf'
-  on-surface: '#261910'
-  on-surface-variant: '#50453e'
-  inverse-surface: '#3d2d23'
-  inverse-on-surface: '#ffede4'
-  outline: '#82746d'
-  outline-variant: '#d4c3ba'
-  surface-tint: '#79573f'
-  primary: '#553722'
-  on-primary: '#ffffff'
-  primary-container: '#6f4e37'
-  on-primary-container: '#eec1a4'
-  inverse-primary: '#eabda0'
-  secondary: '#635e56'
-  on-secondary: '#ffffff'
-  secondary-container: '#e9e1d7'
-  on-secondary-container: '#69645c'
-  tertiary: '#7c1401'
-  on-tertiary: '#ffffff'
-  tertiary-container: '#9d2d16'
-  on-tertiary-container: '#ffbaab'
-  error: '#ba1a1a'
-  on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#ffdcc6'
-  primary-fixed-dim: '#eabda0'
-  on-primary-fixed: '#2d1604'
-  on-primary-fixed-variant: '#5f402a'
-  secondary-fixed: '#e9e1d7'
-  secondary-fixed-dim: '#cdc5bc'
-  on-secondary-fixed: '#1e1b15'
-  on-secondary-fixed-variant: '#4a463f'
-  tertiary-fixed: '#ffdad3'
-  tertiary-fixed-dim: '#ffb4a4'
-  on-tertiary-fixed: '#3e0500'
-  on-tertiary-fixed-variant: '#891e07'
-  background: '#fff8f5'
-  on-background: '#261910'
-  surface-variant: '#f8ddcf'
-typography:
-  display-lg:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 40px
-    fontWeight: '600'
-    lineHeight: 48px
-    letterSpacing: -0.02em
-  display-lg-mobile:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 30px
-    fontWeight: '600'
-    lineHeight: 38px
-    letterSpacing: -0.015em
-  headline-lg:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 28px
-    fontWeight: '600'
-    lineHeight: 36px
-    letterSpacing: -0.01em
-  headline-md:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 22px
-    fontWeight: '600'
-    lineHeight: 30px
-    letterSpacing: -0.01em
-  headline-sm:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 18px
-    fontWeight: '600'
-    lineHeight: 26px
-  body-lg:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 16px
-    fontWeight: '400'
-    lineHeight: 24px
-  body-md:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 15px
-    fontWeight: '400'
-    lineHeight: 22.5px
-  body-sm:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 13px
-    fontWeight: '400'
-    lineHeight: 19.5px
-  label-lg:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 14px
-    fontWeight: '600'
-    lineHeight: 20px
-  label-md:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 12px
-    fontWeight: '600'
-    lineHeight: 16px
-    letterSpacing: 0.02em
-  label-sm:
-    fontFamily: Plus Jakarta Sans
-    fontSize: 11px
-    fontWeight: '500'
-    lineHeight: 14px
-    letterSpacing: 0.04em
-rounded:
-  sm: 0.25rem
-  DEFAULT: 0.5rem
-  md: 0.75rem
-  lg: 1rem
-  xl: 1.5rem
-  full: 9999px
-spacing:
-  gutter: 1rem
-  gutter-desktop: 1.5rem
-  margin: 1rem
-  margin-tablet: 1.5rem
-  margin-desktop: 2.5rem
-  space-xs: 0.25rem
-  space-sm: 0.5rem
-  space-md: 1rem
-  space-lg: 1.5rem
-  space-xl: 2.5rem
----
+# Coffee Master — sistema de diseño
 
-## Brand & Style
+Paleta marfil, marrón, lavanda y durazno, con botones tipo píldora y tipografías de marca. Web y mobile usan los mismos valores, en modo claro y oscuro.
 
-The design system establishes a warm, tactile, and specialty-coffee-inspired environment tailored for a virtual barista companion. The experience mirrors walking into a quiet, third-wave espresso bar: grounded, sensory, and meticulously crafted. It balances artisanal warmth with conversational clarity.
+## Colores
 
-### Target Audience & Voice
-Designed for coffee enthusiasts, home brewers, and curious drinkers seeking brewing advice, bean recommendations, and recipe diagnostics. 
-The conversational tone uses Spanish Rioplatense with natural voseo (*"Mirá, para este filtrado te conviene una molienda media-fina..."*). The voice is welcoming, experienced, unpretentious, and precise.
+| Nombre | Hex | Rol |
+|---|---|---|
+| Marrón | `#3D2825` | Texto principal, botón primario (claro), tarjetas (oscuro) |
+| Marrón profundo | `#2A1A18` | Fondo en modo oscuro |
+| Marfil | `#FFFFF0` | Fondo en modo claro; texto en modo oscuro |
+| Arena | `#F3EFDF` | Tinte suave: superficies `muted` en claro |
+| Lavanda | `#B9A5D6` | Acento: insignia del catálogo, botón primario (oscuro), foco (oscuro) |
+| Durazno | `#F0AE86` | Acento: favoritos e insignia de recetas propias |
 
-### Aesthetic Movement
-A synthesis of **Warm Minimalism** and **Tactile Specialty Editorial**:
-- Calibrated, earthy tonal layers rather than stark stark contrast.
-- Generous breathing room replicating clean marble counters, natural wood, and ceramic textures.
-- Friendly, organic geometry that feels approachable and human.
+Los acentos se alternan y no compiten en el mismo elemento. Lavanda y durazno llevan siempre texto marrón encima.
 
-## Colors
+## Tokens semánticos
 
-The palette reproduces the sensory qualities of roast profiles, steamed oat milk, and ceramic ware across both lighting conditions.
+Web: variables CSS en `web/app/globals.css` (`:root` y `.dark`), usadas con clases de Tailwind. Mobile: `lightColors` y `darkColors` en `mobile/context/ThemeContext.tsx`, usadas con `useAppTheme()`. Ningún componente escribe colores a mano.
 
-### Light Mode (Default)
-- **Canvas Base (`#faf6f1`):** Warm raw cream paper.
-- **Primary Text (`#2b1d14`):** Dark roasted espresso, high-legibility without harsh synthetic black.
-- **Primary Accent & CTAs (`#6f4e37`):** Rich coffee brown paired with pure white or soft latte text.
-- **Surfaces & Barista Chat Bubbles (`#f1e9df`):** Soft steamed milk / ceramic tint.
-- **Borders & Dividers (`#e5d9cc`):** Oat flour, low contrast to preserve soft structure.
-- **Muted Text & Captions (`#7c685b`):** Roasted hazelnut, warm intermediate contrast.
-- **Destructive & Alerts (`#c84b31`):** Baked terracotta, organic and warm warning tint.
+| Token | Claro | Oscuro |
+|---|---|---|
+| `background` | `#FFFFF0` | `#2A1A18` |
+| `foreground` | `#3D2825` | `#FFFFF0` |
+| `card` | `#FFFFFF` | `#3D2825` |
+| `primary` | `#3D2825` | `#B9A5D6` |
+| `primary-foreground` | `#FFFFF0` | `#3D2825` |
+| `muted` | `#F3EFDF` | `#4A332F` |
+| `muted-foreground` | `#6B534F` | `#D9C9C0` |
+| `border` (web) | `#DDD5BE` | `#5A423D` |
+| `input` (web) / `border` (mobile) | `#9B8782` | `#8F7772` |
+| `ring` (web) | `#3D2825` | `#B9A5D6` |
+| `destructive` | `#B3261E` | `#FF8A80` |
+| `accent` / `accent-foreground` | `#B9A5D6` / `#3D2825` | igual |
+| `highlight` / `highlight-foreground` | `#F0AE86` / `#3D2825` | igual |
+| `popover` / `popover-foreground` (web) | igual a `card` | igual a `card` |
+| `scrollbar-thumb` / `scrollbar-thumb-hover` (web) | lavanda 75 % + `foreground` 25 % (3.3:1 sobre marfil) / lavanda 50 % + `foreground` | lavanda al 65 % / lavanda |
+| `card-hover` (web) / `cardHover` (mobile) | `card` teñida 14 % con lavanda (`#F5F2F9`) | `card` teñida 14 % con lavanda (`#4E3A3E`) |
 
-### Dark Mode
-- **Canvas Base (`#1a120c`):** Deep espresso roast.
-- **Primary Surfaces (`#261b13`):** Dense espresso crema.
-- **Secondary Surfaces & Chat Bubbles (`#34261c`):** Warm toasted crust.
-- **Primary Text (`#f5ede6`):** Froth white with amber undertones.
-- **Accent & Interactive (`#9e7252`):** Warm caramel extraction.
-- **Borders & Rules (`#3d2e23`):** Subtle roasted boundary line.
+## Contraste (WCAG, calculado)
 
-## Typography
+| Combinación | Ratio |
+|---|---|
+| Marrón sobre marfil | 13.6 |
+| Marrón sobre arena | 11.9 |
+| Marrón sobre lavanda | 6.2 |
+| Marrón sobre durazno | 7.3 |
+| `muted-foreground` sobre fondo / `muted` (claro) | 7.0 / 6.1 |
+| Marfil sobre marrón profundo | 16.5 |
+| Lavanda sobre marrón profundo | 7.5 |
+| `muted-foreground` sobre fondo / `muted` (oscuro) | 10.4 / 7.2 |
+| `destructive` sobre fondo (claro / oscuro) | 6.5 / 7.3 |
+| Lavanda sobre marfil | 2.2 (solo decoración) |
+| Durazno sobre marfil | 1.9 (solo decoración) |
 
-The type stack leverages clean, contemporary geometric grotesque architecture with humanist roundings (`Plus Jakarta Sans`), seamlessly integrating with system-native fallback environments.
+Reglas: sobre marfil o arena el texto es siempre marrón; lavanda y durazno no se usan como texto sobre esos fondos, solo como bloques, insignias o ilustración. El anillo de foco en claro es marrón (lavanda no llega a 3:1).
 
-- **Headlines:** Set firmly at `font-weight: 600` with subtle negative tracking on large scales, giving brew titles, origin headers, and barista greetings a stable presence.
-- **Body Text:** Standard conversational bubbles and informational guides range from 14px to 16px with a strict 1.5 line-height ratio (`line-height: 1.5`), ensuring extended coffee brewing instructions remain relaxed and readable.
-- **Labels & Microcopy:** Feature slightly elevated tracking (`0.02em` - `0.04em`) for extraction ratios (e.g., *1:16*), bean varieties, water temperature markers, and brew step timers.
+## Tipografía
 
-## Layout & Spacing
+| Uso | Fuente |
+|---|---|
+| Nombre de la app (encabezado) | Bagel Fat One |
+| Líneas de apoyo bajo el nombre | Gochi Hand |
+| Todo el resto del texto | Roboto Mono |
 
-The layout is built on a conversation-first fluid grid with dedicated reading constraints:
+Los tamaños de letra de cada pantalla no dependen de la fuente: se definen en cada componente. Web carga las fuentes con `next/font/google` (`web/app/layout.tsx`). Mobile las carga desde `mobile/assets/fonts` con `useFonts` (`mobile/app/_layout.tsx`); en React Native cada peso es un archivo, y `mobile/components/ui/Text.tsx` elige el archivo según `fontWeight`.
 
-### Layout Rhythm
-- **Chat Feed Constraints:** The central chat container never stretches beyond a maximum readable width of `720px` to maintain optimal conversational flow.
-- **Companion / Recipe Cards Panel:** On desktop, a 12-column layout expands the workspace: an 8-column primary interaction area paired with a 4-column reference sidebar for brewing parameters, tasting notes, and grind setting dials.
-- **Mobile Experience:** Fully responsive edge-to-edge layout with a bottom-anchored, tactile messaging toolbar and contextual recipe drawers.
+## Componentes
 
-### Spacing Scale
-- `space-xs` (4px): Inline token chips, tag padding, micro icon spacing.
-- `space-sm` (8px): Message bubble vertical clustering, input inner horizontal spacing.
-- `space-md` (16px): Card internal padding, separation between distinct message actors.
-- `space-lg` (24px): Card stack gaps, section demarcations, modal gutters.
-- `space-xl` (40px): Major stage transitions, empty state canvas breathing room.
+- **Selectores:** siempre el `Select` de shadcn (`web/components/ui/select.tsx`, `OptionSelect` para listas de `{ value, label }`), nunca el `<select>` nativo. La flecha va dentro del campo, la lista usa `popover` y la opción resaltada usa `accent`. En mobile los selectores son chips del tema (`RecipeFilters`, `RecipeFormFields`).
+- **Tarjetas clicables:** `Card interactive` en web (enlace extendido sobre toda la tarjeta, puntero, fondo `card-hover` y borde `accent` al pasar el mouse, contorno al enfocar). En mobile la tarjeta usa `cardHover` y borde `accent` mientras se presiona.
 
-## Elevation & Depth
+- **Barras de desplazamiento (web):** finas (4 px visibles), redondeadas, sin fondo y con el color `scrollbar-thumb`; Firefox usa `scrollbar-width: thin`. En mobile las dibuja el sistema operativo y no se personalizan.
 
-Visual hierarchy rejects sharp artificial drop shadows in favor of **warm artisanal ambient shadows** and **tonal card layering**. Depth feels physical, like paper recipe cards resting on polished wood.
+## Forma
 
-### Shadow Profiles
-- **Ambient Level 1 (Resting Cards, Bubbles):**  
-  `0 2px 8px -2px rgba(43, 29, 20, 0.04), 0 1px 3px 0 rgba(43, 29, 20, 0.02)`  
-  A gentle grounding shadow carrying an espresso-tinted hue rather than cold charcoal.
-- **Ambient Level 2 (Floating Action Inputs, Dropdowns):**  
-  `0 8px 20px -4px rgba(43, 29, 20, 0.08), 0 3px 6px -2px rgba(43, 29, 20, 0.04)`  
-  Provides distinct elevation for dynamic elements like the prompt composer.
-- **Ambient Level 3 (Brew Timers, Recipe Overlays):**  
-  `0 16px 32px -8px rgba(43, 29, 20, 0.12), 0 4px 12px -2px rgba(43, 29, 20, 0.06)`
+- Botones tipo píldora (`rounded-full` en web, `borderRadius: 999` en mobile); tarjetas con bordes redondeados (`--radius: 1rem`).
+- Insignias: lavanda para el catálogo, durazno para las recetas propias. Favorito: durazno.
 
-### Dark Mode Elevation
-Shadows become imperceptible against deep espresso backgrounds; depth transitions to **surface tiering**:
-- Base layer: `#1a120c`
-- Elevated bubble/card: `#261b13`
-- Active/Hover layer: `#34261c`
-- Structural perimeter: 1px border of `#3d2e23`
+## Marca
 
-## Shapes
-
-The interface adopts a welcoming, soft-organic corner radius profile ranging consistently between `12px` and `16px`.
-
-- **Component Base (`rounded-base` / 8px):** Stepper buttons, metric tags, and fine adjustment controls.
-- **Cards & Chat Bubbles (`rounded-lg` / 16px):** The default radius for barista message bubbles, user bubbles, and informational cards. User bubbles feature an asymmetric radius anchor (`4px` on the bottom-right tail) to convey origin, while Barista responses anchor `4px` on the bottom-left tail.
-- **Floating Controls & Actions (`rounded-xl` / 24px or full pill):** Prompt bar containers, primary pill buttons, and brewing method toggle chips.
-
-## Components
-
-### Chat Message Bubbles
-- **Barista (Assistant):** Background `#f1e9df`, border 1px solid `#e5d9cc`, text `#2b1d14`. Placed on the left margin. Formatted with structured markdown, bold key variables (time, ratio, temperature), and small origin tags.
-- **User:** Background `#6f4e37`, border none, text `#ffffff`. Anchored right.
-- **Radius:** Asymmetric 16px corners with a 4px corner on the speaker side anchor.
-
-### Buttons
-- **Primary:** Background `#6f4e37`, text `#ffffff`, font-weight 600, padding `12px 24px`, border-radius 9999px (pill). Hover state subtle brightness boost with warm shadow (`rgba(111, 78, 55, 0.25)`).
-- **Secondary / Ghost:** Transparent background, border 1px solid `#e5d9cc`, text `#2b1d14`, hover background `#f1e9df`.
-- **Rioplatense Quick Prompts (Suggested Chips):** Background `#faf6f1`, border 1px solid `#e5d9cc`, text `#6f4e37`. Displays prompts such as *"¿Cómo calibro el espresso?"*, *"Tengo granos de Etiopía"*, *"Pasame la receta de V60"*.
-
-### Input Fields & Composer
-- Chat composer rests elevated at the bottom of the viewport with a floating wrapper.
-- Background `#ffffff` (in light mode) or `#261b13` (in dark mode), border 1px solid `#e5d9cc`, border-radius 24px.
-- Send action represented by a warm coffee `#6f4e37` circular icon button with high-contrast icon.
-- Focus state: Outline none, border `#6f4e37` with an ambient warm glow ring `0 0 0 3px rgba(111, 78, 55, 0.15)`.
-
-### Cards & Recipe Walkthroughs
-- Recipe card: Background `#f1e9df`, border 1px solid `#e5d9cc`, corner radius 16px, padding 20px.
-- Step-by-step extraction timer widget: Displays bold numeric counters for water poured (in grams) and elapsed brew time in seconds, separated by thin oat `#e5d9cc` horizontal dividers.
-
-### Chips & Selection Badges
-- Filter selection chips (e.g., Roast Profile: *Claro*, *Medio*, *Oscuro*; Process: *Lavado*, *Natural*):
-  - Inactive: Background transparent, border 1px solid `#e5d9cc`, text `#7c685b`.
-  - Active: Background `#6f4e37`, border 1px solid `#6f4e37`, text `#ffffff`.
-
-### Checkboxes & Toggle Switches
-- Custom circular selection handles reminiscent of espresso portafilter baskets.
-- Active toggle fill `#6f4e37` with white thumb knob. Inactive border `#e5d9cc` over `#f1e9df`.
+- Íconos: taza humeante en lavanda (`cup-lavanda.png`) o durazno (`cup-durazno.png`), con fondo transparente.
+- Archivos originales (stickers 4000 × 4000 px): `design/brand/`. Derivados: `web/public/brand/`, `mobile/assets/brand/`; íconos de la app en `web/app/icon.png`, `web/app/apple-icon.png`, `mobile/assets/icon.png`, `adaptive-icon.png` y `splash-icon.png`.
+- Referencia del sistema de origen: `design/merece-design-system.md`.

@@ -20,6 +20,7 @@ La app móvil no se publica en tiendas por ahora; sirve para desarrollo y prueba
 - **expo-secure-store** para guardar el JWT (Keychain en iOS, Keystore en Android). Nunca usar AsyncStorage para tokens (sí se usa AsyncStorage para preferencias no sensibles: idioma y tema).
 - **react-i18next** para i18n: `i18n/locales/{es,en}.json`, `useTranslation()` en cada componente/hook. Las claves de `es`/`en` siempre tienen que coincidir.
 - Theming propio (`context/ThemeContext.tsx`, `useAppTheme()`): sistema/claro/oscuro. Nunca colores hardcodeados en los estilos; siempre `colors.*` del contexto.
+- Fuentes de marca (`DESIGN.md`): importá `Text` y `TextInput` de `@/components/ui/Text` y `@/components/ui/TextInput`, no de `react-native`. Aplican Roboto Mono y eligen el archivo según `fontWeight`. Los tamaños de letra siguen definidos en cada estilo.
 
 ## Estructura
 ```
