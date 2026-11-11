@@ -4,8 +4,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatView } from "@/components/chat/ChatView";
-import { ConversationSwitcher } from "@/components/chat/ConversationSwitcher";
 import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
+import { UserNameProvider } from "@/components/layout/UserContext";
 import { createConversation, fetchConversation, fetchConversations, fetchLatestConversation, streamChatMessage } from "@/lib/api/chat";
 import { saveProposal } from "@/lib/api/myRecipes";
 import { fetchRecipe } from "@/lib/api/recipes";
@@ -171,59 +171,19 @@ describe("ChatView with ?c and intent", () => {
   });
 });
 
-describe("ConversationSwitcher", () => {
-  const page = (ids: number[]) => ({
-    items: ids.map((id) => ({ id, recipe_ref: id === 1 ? { kind: "catalog" as const, ref: "v60-x" } : null, created_at: "2026-01-02T10:00:00Z", updated_at: "2026-01-02T10:00:00Z" })),
-    total: ids.length,
-    limit: 20,
-    offset: 0,
+describe("ChatView empty state", () => {
+  it("greets the user by name when the shell provides it", async () => {
+    wrap(
+      <UserNameProvider value="Ana">
+        <ChatView />
+      </UserNameProvider>,
+    );
+    expect(await screen.findByText("Hola, Ana. ¿Qué querés preparar hoy?")).toBeInTheDocument();
   });
 
-  it("lists conversations lazily with recipe names or a dated title, and links to each", async () => {
-    vi.mocked(fetchConversations).mockResolvedValue(page([1, 2]));
-    vi.mocked(fetchRecipe).mockResolvedValue(makeRecipe("v60-x", { name: "V60 Brillante" }));
-    wrap(<ConversationSwitcher currentId={2} />);
-    expect(fetchConversations).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Conversaciones" }));
-    expect(await screen.findByRole("link", { name: "V60 Brillante" })).toHaveAttribute("href", "/chat?c=1");
-    const second = screen.getByRole("link", { name: /^Conversación del / });
-    expect(second).toHaveAttribute("href", "/chat?c=2");
-    expect(second).toHaveAttribute("aria-current", "page");
-  });
-
-  it("Escape closes the panel and returns focus to the toggle", async () => {
-    vi.mocked(fetchConversations).mockResolvedValue(page([2]));
-    wrap(<ConversationSwitcher currentId={null} />);
-    const toggle = screen.getByRole("button", { name: "Conversaciones" });
-    fireEvent.click(toggle);
-    const panel = await screen.findByRole("region", { name: "Conversaciones" });
-    await waitFor(() => expect(panel).toHaveFocus());
-    fireEvent.keyDown(panel, { key: "Escape" });
-    await waitFor(() => expect(toggle).toHaveFocus());
-    expect(screen.queryByRole("region")).not.toBeInTheDocument();
-  });
-
-  it("shows the empty and error states", async () => {
-    vi.mocked(fetchConversations).mockResolvedValueOnce(page([]));
-    wrap(<ConversationSwitcher currentId={null} />);
-    fireEvent.click(screen.getByRole("button", { name: "Conversaciones" }));
-    expect(await screen.findByText("Todavía no tenés conversaciones.")).toBeInTheDocument();
-    cleanup();
-
-    vi.mocked(fetchConversations).mockRejectedValueOnce(new Error("boom"));
-    wrap(<ConversationSwitcher currentId={null} />);
-    fireEvent.click(screen.getByRole("button", { name: "Conversaciones" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cargar tus conversaciones.");
-  });
-
-  it("creates a conversation once (double click) and navigates to it", async () => {
-    vi.mocked(createConversation).mockResolvedValue(33);
-    wrap(<ConversationSwitcher currentId={null} />);
-    const button = screen.getByRole("button", { name: "Nueva conversación" });
-    fireEvent.click(button);
-    fireEvent.click(button);
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/chat?c=33"));
-    expect(createConversation).toHaveBeenCalledTimes(1);
+  it("shows no greeting without a name", async () => {
+    wrap(<ChatView />);
+    await screen.findByText(es.chat.suggestion1);
+    expect(screen.queryByText(/^Hola,/)).not.toBeInTheDocument();
   });
 });

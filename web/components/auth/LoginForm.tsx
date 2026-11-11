@@ -18,7 +18,10 @@ export function LoginForm() {
         id="email"
         label={t("emailLabel")}
         type="email"
-        autoComplete="email"
+        autoComplete="username"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         error={formState.errors.email}
         {...register("email")}
       />
@@ -27,6 +30,7 @@ export function LoginForm() {
         label={t("passwordLabel")}
         type="password"
         autoComplete="current-password"
+        revealable
         error={formState.errors.password}
         {...register("password")}
       />

@@ -71,6 +71,7 @@ export function RegisterForm() {
         id="name"
         label={t("nameLabel")}
         autoComplete="given-name"
+        autoCapitalize="words"
         error={formState.errors.name}
         {...register("name")}
       />
@@ -79,6 +80,9 @@ export function RegisterForm() {
         label={t("emailLabel")}
         type="email"
         autoComplete="email"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         error={formState.errors.email}
         {...register("email")}
       />

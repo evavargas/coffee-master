@@ -27,23 +27,23 @@ interface Shape {
 function Row({ s }: { s: Shape }) {
   const t = useTranslations("recipes");
   return (
-    <Card>
-      <CardHeader className="gap-2 p-4">
+    <Card interactive>
+      <CardHeader className="gap-1 p-3 pb-1.5">
         <div className="flex flex-wrap items-center gap-2">
           <RecipeBadge kind={s.kind} />
           <span className="text-xs text-muted-foreground">{t(`methods.${safeMethod(s.method)}`)}</span>
           {s.isFavorite && <span className="text-xs text-muted-foreground">{t("isFavorite")}</span>}
         </div>
         <CardTitle className="break-words text-lg leading-tight">
-          <Link href={s.href} className="rounded focus-visible:outline-2 focus-visible:outline-ring">
+          <Link href={s.href} className="rounded outline-none after:absolute after:inset-0">
             {s.name}
           </Link>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 p-4 pt-0 text-sm">
-        {s.description && <p className="break-words">{s.description}</p>}
-        <div className="flex flex-wrap items-start gap-2">
-          <Button variant="outline" size="sm" aria-pressed={s.isFavorite} onClick={s.toggleFavorite} disabled={s.isPending}>
+      <CardContent className="space-y-1.5 px-3 pb-3 pt-0 text-sm">
+        {s.description && <p className="line-clamp-2 break-words">{s.description}</p>}
+        <div className="relative z-10 flex flex-wrap items-start gap-2">
+          <Button variant="outline" size="sm" className="aria-pressed:border-transparent aria-pressed:bg-highlight aria-pressed:text-highlight-foreground aria-pressed:hover:bg-highlight/90" aria-pressed={s.isFavorite} onClick={s.toggleFavorite} disabled={s.isPending}>
             {s.isFavorite ? t("unfavorite") : t("favorite")}
           </Button>
           <ConfirmButton label={s.deleteLabel} message={s.confirmMessage} onConfirm={s.remove} disabled={s.isPending} />

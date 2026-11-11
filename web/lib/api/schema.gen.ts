@@ -558,6 +558,11 @@ export interface components {
             created_at: string;
             /** Id */
             id: number;
+            /**
+             * Preview
+             * @description The first user message with whitespace collapsed, cut to 80 characters (ending in an ellipsis). Null when the conversation has no messages. Display as plain text.
+             */
+            preview?: string | null;
             recipe_ref: components["schemas"]["RecipeRef"] | null;
             /**
              * Updated At

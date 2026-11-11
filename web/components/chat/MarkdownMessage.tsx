@@ -12,7 +12,7 @@ const components: Components = {
   h3: ({ children }) => <h4 className="mt-3 font-semibold first:mt-0">{children}</h4>,
   p: ({ children }) => <p className="my-2 first:mt-0 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>,
-  ol: ({ children }) => <ol className="my-2 list-decimal space-y-1 pl-5">{children}</ol>,
+  ol: ({ children }) => <ol className="my-2 list-decimal space-y-1 pl-7">{children}</ol>,
   li: ({ children }) => <li className="pl-1">{children}</li>,
   strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
   em: ({ children }) => <em className="italic">{children}</em>,

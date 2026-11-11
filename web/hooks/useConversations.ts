@@ -8,13 +8,15 @@ import { useTranslations } from "next-intl";
 import { chatEpoch } from "@/lib/chatEpoch";
 import { createConversation, fetchConversations, type ConversationSummary } from "@/lib/api/chat";
 import { getApiErrorMessage } from "@/lib/api/client";
+import { notifyConversationsChanged, useConversationsVersion } from "@/lib/conversationsStore";
 
 export const conversationsPageSize = 20;
 
-/** Conversation list for the switcher (newest first, paged) plus "start a new one". Loads only while `enabled`. */
+/** Conversation list for the sidebar (newest first, paged) plus "start a new one". Loads only while `enabled` and again when a turn ends. */
 export function useConversations(enabled: boolean) {
   const t = useTranslations("chat.switcher");
   const router = useRouter();
+  const version = useConversationsVersion();
   const [items, setItems] = useState<ConversationSummary[]>([]);
   // Next offset comes from the server page (raw count, malformed rows included), not from items.length.
   const [nextOffset, setNextOffset] = useState(0);
@@ -53,25 +55,31 @@ export function useConversations(enabled: boolean) {
     if (!enabled) return;
     void load(0);
     return () => controller.current?.abort();
-  }, [enabled, load]);
+  }, [enabled, load, version]);
 
   const loadMore = () => void load(nextOffset);
 
-  async function startNew() {
-    if (creating.current) return;
+  /** Creates and opens a new conversation. Resolves true when it was created (the caller may close its menu). */
+  async function startNew(): Promise<boolean> {
+    if (creating.current) return false;
     creating.current = true;
     const epoch = chatEpoch();
     setIsCreating(true);
     setCreateError(null);
     try {
       const id = await createConversation();
-      if (chatEpoch() === epoch) router.push(`/chat?c=${id}`);
+      if (chatEpoch() === epoch) {
+        notifyConversationsChanged();
+        router.push(`/chat?c=${id}`);
+        return true;
+      }
     } catch (e) {
       if (chatEpoch() === epoch) setCreateError(getApiErrorMessage(e, t("createError")));
     } finally {
       creating.current = false;
       setIsCreating(false);
     }
+    return false;
   }
 
   return { items, isLoading, error, createError, isCreating, hasMore: nextOffset < total, loadMore, retry: () => void load(0), startNew };

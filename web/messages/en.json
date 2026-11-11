@@ -7,14 +7,21 @@
     "switchTheme": "Switch theme",
     "themeSystem": "System",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "ariaLabel": "Main navigation",
     "chat": "Chat",
     "recipes": "Recipes",
     "myRecipes": "My recipes",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "hideSidebar": "Hide sidebar",
+    "showSidebar": "Show sidebar",
+    "recents": "Recent"
   },
   "auth": {
     "login": {
@@ -120,7 +127,6 @@
       "saveError": "We couldn't save the recipe. Try again."
     },
     "switcher": {
-      "toggle": "Conversations",
       "new": "New conversation",
       "loading": "Loading conversations…",
       "empty": "You have no conversations yet.",
@@ -128,8 +134,9 @@
       "createError": "We couldn't create the conversation. Try again.",
       "retry": "Retry",
       "loadMore": "Load more",
-      "untitled": "Conversation from {date}"
-    }
+      "untitled": "Conversation {date}"
+    },
+    "suggestionsLabel": "You could ask, for example:"
   },
   "validation": {
     "emailRequired": "Enter your email",

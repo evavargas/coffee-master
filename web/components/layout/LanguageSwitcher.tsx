@@ -16,7 +16,7 @@ const LOCALE_LABEL: Record<Locale, string> = {
   en: "EN",
 };
 
-/** Toggles the app language by writing the NEXT_LOCALE cookie and refreshing the server render. */
+/** Shows the current language (like the theme button shows the current theme) and toggles it on click via the NEXT_LOCALE cookie. */
 export function LanguageSwitcher() {
   const locale = useLocale() as Locale;
   const t = useTranslations("common");
@@ -30,7 +30,7 @@ export function LanguageSwitcher() {
 
   return (
     <Button variant="ghost" size="sm" onClick={switchLocale} aria-label={t("switchLanguage")}>
-      {LOCALE_LABEL[OTHER_LOCALE[locale]]}
+      {LOCALE_LABEL[locale]}
     </Button>
   );
 }

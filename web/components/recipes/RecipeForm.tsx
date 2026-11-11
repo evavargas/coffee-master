@@ -1,12 +1,13 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { get, type FieldErrors, type Path, type UseFormRegister } from "react-hook-form";
+import { Controller, get, type Control, type FieldErrors, type Path, type UseFormRegister } from "react-hook-form";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { OptionSelect } from "@/components/ui/select";
 import { useRecipeForm } from "@/hooks/useRecipeForm";
 import type { UserRecipe } from "@/lib/api/myRecipes";
 import { recipeMethods } from "@/lib/api/recipes";
@@ -16,6 +17,7 @@ type Name = Path<RecipeFormValues>;
 interface Ctx {
   register: UseFormRegister<RecipeFormValues>;
   errors: FieldErrors<RecipeFormValues>;
+  control: Control<RecipeFormValues>;
 }
 
 const controlClass =
@@ -72,13 +74,18 @@ function SelectField({ name, label, ctx, options }: { name: Name; label: string;
   return (
     <div className="min-w-0 space-y-1">
       <Label htmlFor={idOf(name)}>{label}</Label>
-      <select id={idOf(name)} className={`${controlClass} h-10`} {...ctx.register(name)}>
-        {options.map(([value, text]) => (
-          <option key={value} value={value}>
-            {text}
-          </option>
-        ))}
-      </select>
+      <Controller
+        control={ctx.control}
+        name={name}
+        render={({ field }) => (
+          <OptionSelect
+            id={idOf(name)}
+            value={(field.value as string | undefined) ?? ""}
+            onValueChange={field.onChange}
+            options={options.map(([value, label]) => ({ value, label }))}
+          />
+        )}
+      />
     </div>
   );
 }
@@ -89,7 +96,7 @@ export function RecipeForm({ recipe, onSaved, onCancel }: { recipe: UserRecipe; 
   const tr = useTranslations("recipes");
   const tm = useTranslations("myRecipes");
   const { form, steps, onSubmit, serverError, isSubmitting } = useRecipeForm(recipe, onSaved);
-  const ctx: Ctx = { register: form.register, errors: form.formState.errors };
+  const ctx: Ctx = { register: form.register, errors: form.formState.errors, control: form.control };
 
   return (
     <form onSubmit={onSubmit} noValidate aria-label={t("title")} className="space-y-4 pb-4">

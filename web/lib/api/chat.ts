@@ -75,8 +75,16 @@ const conversationSummarySchema = z.object({
   // A date that does not parse would throw in Intl formatting, so such a row is dropped.
   created_at: z.string().refine((v) => !Number.isNaN(Date.parse(v))),
   updated_at: z.string().refine((v) => !Number.isNaN(Date.parse(v))),
+  preview: z.string().nullish().catch(null),
 });
-export type ConversationSummary = { id: number; recipe_ref: RecipeRef | null; created_at: string; updated_at: string };
+export type ConversationSummary = {
+  id: number;
+  recipe_ref: RecipeRef | null;
+  created_at: string;
+  updated_at: string;
+  /** First user message, shortened by the server. Plain text. */
+  preview: string | null;
+};
 
 export interface ConversationPage {
   items: ConversationSummary[];
@@ -91,7 +99,7 @@ export async function fetchConversations({ limit, offset }: { limit: number; off
   const page = z.object({ items: z.array(z.unknown()), total: z.number(), limit: z.number(), offset: z.number() }).parse(data);
   const items = page.items.flatMap((raw) => {
     const r = conversationSummarySchema.safeParse(raw);
-    return r.success ? [{ ...r.data, recipe_ref: r.data.recipe_ref ?? null }] : [];
+    return r.success ? [{ ...r.data, recipe_ref: r.data.recipe_ref ?? null, preview: r.data.preview ?? null }] : [];
   });
   return { ...page, items };
 }

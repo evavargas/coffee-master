@@ -2,34 +2,52 @@
 
 /* Theme tokens used by the shadcn-style components in components/ui. */
 :root {
-  --background: #faf6f1;
-  --foreground: #2b1d14;
+  /* Brand palette (DESIGN.md). Lavender and peach are accents: never text on ivory or sand. */
+  --background: #fffff0;
+  --foreground: #3d2825;
   --card: #ffffff;
-  --card-foreground: #2b1d14;
-  --primary: #6f4e37;
-  --primary-foreground: #ffffff;
-  --muted: #f1e9df;
-  --muted-foreground: #7a6558;
-  --border: #e5d9cc;
-  --input: #e5d9cc;
-  --ring: #6f4e37;
+  --card-foreground: #3d2825;
+  --primary: #3d2825;
+  --primary-foreground: #fffff0;
+  --muted: #f3efdf;
+  --muted-foreground: #6b534f;
+  --border: #ddd5be;
+  --input: #9b8782;
+  --ring: #3d2825;
   --destructive: #b3261e;
-  --radius: 0.75rem;
+  --accent: #b9a5d6;
+  --accent-foreground: #3d2825;
+  --highlight: #f0ae86;
+  --highlight-foreground: #3d2825;
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+  /* Scrollbar thumb: lavender, a notch darker on hover. */
+  --scrollbar-thumb: color-mix(in oklab, var(--accent) 75%, var(--foreground));
+  --scrollbar-thumb-hover: color-mix(in oklab, var(--accent) 50%, var(--foreground));
+  /* Surface of a clickable card under the pointer: the card tinted with the lavender accent. */
+  --card-hover: color-mix(in oklab, var(--card) 86%, var(--accent));
+  --radius: 1rem;
 }
 
 .dark {
-  --background: #1b140f;
-  --foreground: #f3e8dc;
-  --card: #2a2019;
-  --card-foreground: #f3e8dc;
-  --primary: #c89b6f;
-  --primary-foreground: #1b140f;
-  --muted: #352a21;
-  --muted-foreground: #c6b6a6;
-  --border: #4a3b2e;
-  --input: #4a3b2e;
-  --ring: #c89b6f;
-  --destructive: #e37c73;
+  --background: #2a1a18;
+  --foreground: #fffff0;
+  --card: #3d2825;
+  --card-foreground: #fffff0;
+  --primary: #b9a5d6;
+  --primary-foreground: #3d2825;
+  --muted: #4a332f;
+  --muted-foreground: #d9c9c0;
+  --border: #5a423d;
+  --input: #8f7772;
+  --ring: #b9a5d6;
+  --destructive: #ff8a80;
+  --accent: #b9a5d6;
+  --accent-foreground: #3d2825;
+  --highlight: #f0ae86;
+  --highlight-foreground: #3d2825;
+  --scrollbar-thumb: color-mix(in oklab, var(--accent) 65%, transparent);
+  --scrollbar-thumb-hover: var(--accent);
 }
 
 @theme inline {
@@ -45,11 +63,49 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card-hover: var(--card-hover);
+  --font-sans: var(--font-roboto-mono), ui-monospace, monospace;
+  --font-display: var(--font-bagel), var(--font-roboto-mono), sans-serif;
+  --font-hand: var(--font-gochi), var(--font-roboto-mono), cursive;
   --radius-lg: var(--radius);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Thin, rounded scrollbars in the brand color. Chromium and Safari use the pseudo-elements (a 10px gutter whose
+   thumb shows 4px); Firefox gets the standard properties. */
+@supports selector(::-webkit-scrollbar) {
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
 }

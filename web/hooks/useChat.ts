@@ -15,6 +15,7 @@ import {
   type RecipeRef,
 } from "@/lib/api/chat";
 import { chatEpoch } from "@/lib/chatEpoch";
+import { notifyConversationsChanged } from "@/lib/conversationsStore";
 import { getApiErrorMessage } from "@/lib/api/client";
 
 /** `ok: false` carries the text so the caller can put it back in the input. */
@@ -135,6 +136,8 @@ export function useChat() {
       } catch (err) {
         return fail(err instanceof ChatStreamIncompleteError ? t("errors.connection") : getApiErrorMessage(err, t("errorFallback")));
       } finally {
+        // The conversation list (order, preview) changed whether or not the reply succeeded.
+        notifyConversationsChanged();
         // A superseded send must not clear the flags of whatever conversation is open now.
         if (isCurrent()) {
           sendingRef.current = false;

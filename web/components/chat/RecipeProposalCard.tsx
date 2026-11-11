@@ -34,7 +34,7 @@ export function RecipeProposalCard({ proposal }: { proposal: NonNullable<ChatMes
       <p className="text-muted-foreground">{tr(`methods.${safeMethod(recipe.method)}`)}</p>
       {facts.length > 0 && <p className="break-words">{facts.join(" · ")}</p>}
       {steps.length > 0 && (
-        <ol className="list-decimal space-y-1 pl-5">
+        <ol className="list-decimal space-y-1 pl-7">
           {steps.slice(0, previewSteps).map((s, i) => (
             <li key={i} className="break-words">
               {s.action}

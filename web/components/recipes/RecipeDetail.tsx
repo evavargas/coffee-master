@@ -71,7 +71,7 @@ export function RecipeDetail({ recipe, actions }: { recipe: CatalogRecipe | User
                 {t("save")}
               </Button>
             )}
-            <Button variant="outline" aria-pressed={catalog.is_favorite} onClick={actions.toggleFavorite} disabled={actions.isPending}>
+            <Button variant="outline" className="aria-pressed:border-transparent aria-pressed:bg-highlight aria-pressed:text-highlight-foreground aria-pressed:hover:bg-highlight/90" aria-pressed={catalog.is_favorite} onClick={actions.toggleFavorite} disabled={actions.isPending}>
               {catalog.is_favorite ? t("unfavorite") : t("favorite")}
             </Button>
             <Button variant="outline" onClick={actions.ask} disabled={actions.isPending}>
@@ -110,7 +110,7 @@ export function RecipeDetail({ recipe, actions }: { recipe: CatalogRecipe | User
       {steps.length > 0 && (
         <section className="space-y-2">
           <h3 className="font-semibold">{t("steps")}</h3>
-          <ol className="list-decimal space-y-2 pl-5 text-sm">
+          <ol className="list-decimal space-y-2 pl-7 text-sm">
             {steps.map((s, i) => (
               <li key={i} className="break-words">
                 {s.action}

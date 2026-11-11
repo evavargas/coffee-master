@@ -13,6 +13,9 @@ let auth: { user: { name: string } | null; isLoading: boolean } = { user: null, 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), usePathname: () => pathname }));
 vi.mock("@/hooks/useCurrentUser", () => ({ useCurrentUser: () => auth }));
 vi.mock("@/components/layout/AppControls", () => ({ AppControls: () => null }));
+vi.mock("@/hooks/useConversations", () => ({
+  useConversations: () => ({ items: [], isLoading: false, error: null, createError: null, isCreating: false, hasMore: false, loadMore: vi.fn(), retry: vi.fn(), startNew: vi.fn() }),
+}));
 
 function renderLayout() {
   return render(

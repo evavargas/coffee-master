@@ -6,12 +6,13 @@ import { ArrowUp, LoaderCircle } from "lucide-react";
 
 import { AssistantMessage } from "@/components/chat/AssistantMessage";
 import { CardErrorBoundary } from "@/components/chat/CardErrorBoundary";
-import { ConversationSwitcher } from "@/components/chat/ConversationSwitcher";
 import { RecipeBanner } from "@/components/chat/RecipeBanner";
 import { RecipeProposalCard } from "@/components/chat/RecipeProposalCard";
+import { useUserName } from "@/components/layout/UserContext";
 import { Button } from "@/components/ui/button";
 import { useAutoResizeTextarea } from "@/hooks/useAutoResizeTextarea";
 import { useChat } from "@/hooks/useChat";
+import { setCurrentConversation } from "@/lib/conversationsStore";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 export function ChatView() {
   const t = useTranslations("chat");
   const { messages, send, isLoading, isLoadingHistory, error, conversationId, recipeRef, intent, requestedId } = useChat();
+  const userName = useUserName();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useAutoResizeTextarea(input);
@@ -34,6 +36,12 @@ export function ChatView() {
   useEffect(() => {
     if (openingPrompt) setInput((current) => current || openingPrompt);
   }, [openingPrompt]);
+
+  // The sidebar marks the open conversation.
+  useEffect(() => {
+    setCurrentConversation(conversationId);
+    return () => setCurrentConversation(null);
+  }, [conversationId]);
 
   const suggestions = [t("suggestion1"), t("suggestion2"), t("suggestion3")];
   const canSend = !isLoading && !isLoadingHistory && input.trim().length > 0;
@@ -80,7 +88,6 @@ export function ChatView() {
 
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-      <ConversationSwitcher currentId={conversationId} disabled={isLoading || isLoadingHistory} />
       {recipeRef && <RecipeBanner recipeRef={recipeRef} />}
       <div ref={scrollRef} aria-live="polite" aria-busy={isLoading} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
         {isLoadingHistory && (
@@ -88,21 +95,7 @@ export function ChatView() {
             {t("loadingHistory")}
           </p>
         )}
-        {!isLoadingHistory && messages.length === 0 && (
-          <div className="flex flex-col gap-2">
-            {suggestions.map((suggestion) => (
-              <Button
-                key={suggestion}
-                variant="outline"
-                className="h-auto justify-start whitespace-normal py-3 text-left"
-                onClick={() => void sendAndRestore(suggestion)}
-                disabled={isLoading}
-              >
-                {suggestion}
-              </Button>
-            ))}
-          </div>
-        )}
+        {!isLoadingHistory && messages.length === 0 && userName && <p className="my-auto text-center text-lg font-semibold">{t("greeting", { name: userName })}</p>}
         {messages.map((message, index) =>
           message.role === "assistant" && message.content === "" ? null : (
           <Fragment key={index}>
@@ -137,6 +130,24 @@ export function ChatView() {
           </p>
         )}
       </div>
+
+      {!isLoadingHistory && messages.length === 0 && (
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <p className="w-full text-xs text-muted-foreground">{t("suggestionsLabel")}</p>
+          {suggestions.map((suggestion) => (
+            <Button
+              key={suggestion}
+              variant="outline"
+              size="sm"
+              className="h-auto whitespace-normal rounded-full bg-muted px-3 py-1.5 text-left font-normal text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              onClick={() => void sendAndRestore(suggestion)}
+              disabled={isLoading}
+            >
+              {suggestion}
+            </Button>
+          ))}
+        </div>
+      )}
 
       <form
         onSubmit={onSubmit}

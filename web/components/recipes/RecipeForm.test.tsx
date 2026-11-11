@@ -60,6 +60,14 @@ describe("RecipeForm", () => {
     expect(getCachedUserRecipe(1)?.name).toBe("Nuevo nombre");
   });
 
+  it("changes the method through the themed select", async () => {
+    wrap();
+    fireEvent.keyDown(screen.getByRole("combobox", { name: "Método" }), { key: "Enter" });
+    fireEvent.click(screen.getByRole("option", { name: "Moka" }));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await waitFor(() => expect(updateUserRecipe).toHaveBeenCalledWith(1, expect.objectContaining({ method: "moka" })));
+  });
+
   it("maps a server 422 to the field and a general message", async () => {
     const err = Object.assign(new Error("422"), { isAxiosError: true, response: { status: 422, data: { detail: [{ loc: ["body", "name"], msg: "nombre repetido", type: "x" }] } } });
     vi.mocked(updateUserRecipe).mockRejectedValue(err);

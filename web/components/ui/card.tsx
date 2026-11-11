@@ -3,8 +3,22 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 // Standard shadcn/ui card, split into header, content and footer.
-const Card = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("rounded-xl border border-border bg-card text-card-foreground shadow-sm", className)} {...props} />
+interface CardProps extends React.ComponentProps<"div"> {
+  /** The whole card is a link target (a stretched link inside it): pointer, hover surface and focus outline. */
+  interactive?: boolean;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, interactive = false, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border border-border bg-card text-card-foreground shadow-sm",
+      interactive &&
+        "relative cursor-pointer transition-colors hover:border-accent hover:bg-card-hover has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring",
+      className,
+    )}
+    {...props}
+  />
 ));
 Card.displayName = "Card";
 

@@ -19,7 +19,7 @@ export function AuthShell({ title, description, children, footer }: AuthShellPro
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
       <div className="flex w-full max-w-md flex-col gap-4">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-4">
           <Brand subtitle={t("appSubtitle")} />
           <AppControls />
         </header>
