@@ -58,6 +58,31 @@ def test_list_is_callers_only_newest_first(client, db, email_sender):
     assert body["items"][0]["recipe_ref"] is None and body["items"][0]["updated_at"]
 
 
+def test_list_preview_is_the_first_user_message_shortened(client, db, email_sender):
+    t1, _, ids = two_users(client, email_sender, db)
+    a = ids["a@example.com"]
+    row = Conversation(user_id=a)
+    db.add(row)
+    db.flush()
+    long_text = "  ¿Cómo\nhago   un V60?  " + "x" * 200
+    db.add(ChatMessage(conversation_id=row.id, role="user", content=long_text))
+    db.add(ChatMessage(conversation_id=row.id, role="assistant", content="answer"))
+    db.add(ChatMessage(conversation_id=row.id, role="user", content="second question"))
+    empty = Conversation(user_id=a)
+    db.add(empty)
+    db.commit()
+    previews = {i["id"]: i["preview"] for i in get(client, t1).json()["items"]}
+    assert previews[row.id].startswith("¿Cómo hago un V60? xxx")
+    assert len(previews[row.id]) <= 80 and previews[row.id].endswith("…")
+    assert previews[empty.id] is None
+
+
+def test_list_preview_of_a_short_message_has_no_ellipsis(client, db, email_sender):
+    t1, _, ids = two_users(client, email_sender, db)
+    conv(db, ids["a@example.com"])
+    assert get(client, t1).json()["items"][0]["preview"] == "hi"
+
+
 def test_list_orders_by_last_activity(client, db, email_sender):
     t1, _, ids = two_users(client, email_sender, db)
     old = conv(db, ids["a@example.com"], minutes_ago=10)

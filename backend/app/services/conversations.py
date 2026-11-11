@@ -32,6 +32,29 @@ def _refs(db: Session, rows: Sequence[Conversation]) -> dict[int, RecipeRef]:
     return refs
 
 
+PREVIEW_CHARS = 80
+
+
+def _previews(db: Session, ids: Sequence[int]) -> dict[int, str]:
+    """First user message of each conversation, whitespace collapsed and cut. Only a prefix leaves the database."""
+    if not ids:
+        return {}
+    first = (
+        select(func.min(ChatMessage.id))
+        .where(ChatMessage.conversation_id.in_(ids), ChatMessage.role == "user")
+        .group_by(ChatMessage.conversation_id)
+    )
+    rows = db.execute(
+        select(ChatMessage.conversation_id, func.substr(ChatMessage.content, 1, 4 * PREVIEW_CHARS)).where(ChatMessage.id.in_(first))
+    ).all()
+    out: dict[int, str] = {}
+    for cid, text in rows:
+        text = " ".join(text.split())
+        if text:
+            out[cid] = text if len(text) <= PREVIEW_CHARS else text[: PREVIEW_CHARS - 1].rstrip() + "…"
+    return out
+
+
 def conversation_ref(db: Session, conversation_id: int) -> RecipeRef | None:
     """The recipe ref of one conversation (same rules as the detail endpoint); the caller checked ownership."""
     row = db.get(Conversation, conversation_id)
@@ -60,8 +83,11 @@ def list_conversations(
         .offset(offset)
     ).all()
     refs = _refs(db, [c for c, _ in rows])
+    previews = _previews(db, [c.id for c, _ in rows])
     return [
-        ConversationSummary(id=c.id, recipe_ref=refs.get(c.id), created_at=c.created_at, updated_at=updated)
+        ConversationSummary(
+            id=c.id, recipe_ref=refs.get(c.id), created_at=c.created_at, updated_at=updated, preview=previews.get(c.id)
+        )
         for c, updated in rows
     ], total
 

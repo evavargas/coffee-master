@@ -47,6 +47,10 @@ class ConversationSummary(BaseModel):
     recipe_ref: RecipeRef | None
     created_at: datetime
     updated_at: datetime = Field(description="Time of the last message, or creation time when empty.")
+    preview: str | None = Field(
+        default=None,
+        description="The first user message with whitespace collapsed, cut to 80 characters (ending in an ellipsis). Null when the conversation has no messages. Display as plain text.",
+    )
 
 
 class ConversationListResponse(BaseModel):
