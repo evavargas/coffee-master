@@ -94,6 +94,14 @@ Una sola vez, desde `mobile/`:
 
 Para cada APK: `npm run build:apk`. Al terminar, EAS da un enlace y un QR para descargarlo e instalarlo en el celular (Android pide permitir instalar apps de ese origen). El splash con la sticker, el ícono y los colores del tema claro y oscuro solo se ven en un build como este, no en Expo Go.
 
+### Publicar el APK para los usuarios
+El APK se publica como asset de una release de GitHub, con el nombre fijo `coffee-master.apk`. Así el enlace `https://github.com/evavargas/coffee-master/releases/latest/download/coffee-master.apk` (el del README) siempre baja la última versión. Los APK no se guardan en git (`dist/` y `*.apk` están ignorados).
+
+Para cada versión:
+1. `npm run build:apk` y bajar el APK desde la página del build de EAS.
+2. Guardarlo como `dist/coffee-master.apk`.
+3. `gh release create app-vX.Y.Z dist/coffee-master.apk --title "Coffee Master X.Y.Z (Android)" --notes "..."`, con `X.Y.Z` igual a `version` de `mobile/app.json`.
+
 ## Orden de despliegue
 - Web y backend cambian juntos: si cambia el contrato de la API, desplegá primero el backend y enseguida la web. En el medio, la web vieja puede fallar.
 - Corré las migraciones pendientes **antes** de desplegar el código que las necesita.

@@ -17,7 +17,7 @@ Las respuestas y las recetas se basan en una guía de café armada para este pro
 ## Dónde se usa
 
 - **Web**: desde cualquier navegador, en [coffeemasteruy.vercel.app](https://coffeemasteruy.vercel.app).
-- **Celular**: una app con las mismas funciones que la web. No está en las tiendas de aplicaciones: se prueba con Expo Go o se instala como APK en Android (ver [DEPLOY.md](DEPLOY.md)).
+- **Celular (Android)**: una app con las mismas funciones que la web. **[Descargar el APK](https://github.com/evavargas/coffee-master/releases/latest/download/coffee-master.apk)**. Al abrirlo, Android puede pedirte permiso para instalar apps desde ese origen: aceptalo solo para esta instalación. No está en las tiendas de aplicaciones.
 
 Las dos están disponibles en español e inglés, con modo claro y oscuro.
 

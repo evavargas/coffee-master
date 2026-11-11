@@ -14,3 +14,7 @@ next-env.d.ts
 node_modules/
 .vercel
 .env*
+
+# Built artifacts (APKs go to GitHub Releases, not to git)
+dist/
+*.apk
