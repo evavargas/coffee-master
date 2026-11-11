@@ -29,7 +29,7 @@ export function AuthShell({ title, description, children, footer }: AuthShellPro
             {description && <CardDescription>{description}</CardDescription>}
           </CardHeader>
           <CardContent>{children}</CardContent>
-          {footer && <div className="flex flex-col gap-2 px-6 pb-6 text-sm text-muted-foreground">{footer}</div>}
+          {footer && <div className="flex flex-col items-center gap-1 px-6 pb-6 text-sm text-muted-foreground">{footer}</div>}
         </Card>
       </div>
     </main>

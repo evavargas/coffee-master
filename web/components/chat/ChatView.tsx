@@ -89,7 +89,7 @@ export function ChatView() {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
       {recipeRef && <RecipeBanner recipeRef={recipeRef} />}
-      <div ref={scrollRef} aria-live="polite" aria-busy={isLoading} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+      <div ref={scrollRef} aria-live="polite" aria-busy={isLoading} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-5 pr-1 [mask-image:linear-gradient(to_bottom,transparent,black_20px,black_calc(100%_-_28px),transparent)]">
         {isLoadingHistory && (
           <p role="status" className="self-start text-sm text-muted-foreground">
             {t("loadingHistory")}

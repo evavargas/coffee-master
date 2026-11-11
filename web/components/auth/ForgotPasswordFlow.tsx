@@ -31,7 +31,7 @@ function EmailStep({ onAdvance }: { onAdvance: (email: string) => void }) {
       title={t("title")}
       description={t("description")}
       footer={
-        <Link href="/login" className="underline">
+        <Link href="/login" className="px-3 py-2 underline">
           {t("backToLogin")}
         </Link>
       }
@@ -76,7 +76,7 @@ function CodeStep({ email, onVerified }: { email: string; onVerified: (resetToke
       title={t("verifyTitle")}
       description={t("codeSentTo", { email })}
       footer={
-        <Link href="/login" className="underline">
+        <Link href="/login" className="px-3 py-2 underline">
           {t("goToLogin")}
         </Link>
       }
@@ -130,7 +130,7 @@ function PasswordStep({ resetToken }: { resetToken: string }) {
     <AuthShell
       title={t("title")}
       footer={
-        <Link href="/login" className="underline">
+        <Link href="/login" className="px-3 py-2 underline">
           {t("goToLogin")}
         </Link>
       }

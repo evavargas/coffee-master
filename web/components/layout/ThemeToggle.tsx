@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun, SunMoon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 
@@ -35,7 +35,7 @@ export function ThemeToggle() {
     setTheme(NEXT_MODE[mode]);
   }
 
-  const Icon = mode === "light" ? Sun : mode === "dark" ? Moon : Monitor;
+  const Icon = mode === "light" ? Sun : mode === "dark" ? Moon : SunMoon;
 
   return (
     <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label={`${t("switchTheme")}: ${modeLabel}`}>

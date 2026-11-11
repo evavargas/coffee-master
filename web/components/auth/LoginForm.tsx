@@ -42,12 +42,12 @@ export function LoginForm() {
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? t("submitting") : t("submit")}
       </Button>
-      <div className="flex justify-between text-sm">
-        <Link href="/forgot-password" className="underline">
-          {t("forgotPassword")}
-        </Link>
-        <Link href="/register" className="underline">
+      <div className="flex flex-col items-center gap-1 pt-2 text-sm">
+        <Link href="/register" className="px-3 py-2 underline">
           {t("createAccount")}
+        </Link>
+        <Link href="/forgot-password" className="px-3 py-2 underline">
+          {t("forgotPassword")}
         </Link>
       </div>
     </form>

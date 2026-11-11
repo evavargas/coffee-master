@@ -58,7 +58,7 @@ export function RegisterForm() {
         </Button>
         {resend.message && <p className="text-sm">{resend.message}</p>}
         {resend.error && <p className="text-sm text-destructive">{resend.error}</p>}
-        <Link href="/login" className="text-sm underline">
+        <Link href="/login" className="self-center px-3 py-2 text-sm underline">
           {t("goToLogin")}
         </Link>
       </div>
